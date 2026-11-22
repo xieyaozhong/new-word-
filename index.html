@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <title>掌上魚缸</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0;background:var(--abyss);color:var(--foam);font-family:var(--font);overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;margin:0;background:var(--abyss);color:var(--foam);font-family:var(--font);overflow:hidden;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#hud,#dock,#sheet,#edtools,.modal,.photo,button,a{touch-action:manipulation}
 #tank{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible{outline:2px solid var(--coin);outline-offset:2px}
@@ -4691,6 +4692,12 @@ function start(hot){
   connectCloud();
   try { window.claude?.hot?.snapshot?.(() => ({state: JSON.parse(JSON.stringify(serialize()))})); } catch (_) {}
 }
+/* Standalone browsers: keep the page at 1x so double taps on buttons or pinches never zoom the tank off-screen. */
+for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, e => e.preventDefault(), {passive:false});
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive:false});
+(() => { const vv = window.visualViewport, meta = document.querySelector('meta[name=viewport]'); if (!vv || !meta) return; const base = meta.getAttribute('content'); let t = 0;
+  const fix = () => { if (vv.scale <= 1.01) return; clearTimeout(t); t = setTimeout(() => { meta.setAttribute('content', base.replace('initial-scale=1,', 'initial-scale=1.0001,')); setTimeout(() => { meta.setAttribute('content', base); window.scrollTo(0, 0); }, 80); }, 300); };
+  vv.addEventListener('resize', fix); fix(); })();
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 })();
 </script>
