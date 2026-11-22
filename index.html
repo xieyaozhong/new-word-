@@ -126,6 +126,13 @@ h4.sec{margin:14px 6px 4px;font-size:14px;color:var(--kelp);font-weight:700}
 .chipbtn{border:1px solid var(--rim);background:rgba(255,255,255,.08);color:var(--foam);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
 .item .opick{padding:6px 0 0}
 .item .chipbtn{padding:4px 9px;font-size:12px}
+.rbars{margin:8px 0 4px}
+.rbar{display:grid;grid-template-columns:5.2em 1fr 3.4em;align-items:center;gap:8px;font-size:13px;margin:5px 0}
+.rbar>i{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.rbar>i>i{display:block;height:100%;background:var(--coin)}
+.rbar b{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.mtip{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%);padding:8px 16px;border-radius:999px;background:rgba(6,30,38,.6);color:#fff;font-size:15px;white-space:nowrap;pointer-events:none}
+.mtip.hot{background:#e8402a;font-weight:700}
 .jiao{display:block;width:100%;max-width:300px;height:auto;margin:4px auto 6px}
 .drow{display:flex;gap:10px;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px;line-height:1.5}
 .drow time{flex:none;color:var(--mist);font-variant-numeric:tabular-nums;font-size:12px;padding-top:2px}
@@ -944,6 +951,9 @@ const DECOS = {
   coral:  {name:'珊瑚', price:500, comfort:12, w:84, h:66, wild:true, desc:'海裡帶回來的珊瑚，顏色很鮮豔。'},
   canoe:  {name:'獨木舟', price:520, comfort:14, w:132, h:34, wild:true, desc:'日月潭邊撿到的小獨木舟，魚兒喜歡躲在裡面。'},
   xmas:   {name:'聖誕樹', price:200, comfort:12, w:72, h:104, fest:'xmas', desc:'十二月限定。掛滿彩球的小聖誕樹，晚上會亮。'},
+  shrine:{name:'土地公廟', price:680, comfort:14, w:66, h:72, desc:'迷你的福德正神小廟。擺在魚缸裡，客人參觀留下的小費多 20%，擲到的聖筊保佑也會多 12 小時。'},
+  diver:{name:'潛水員', price:350, comfort:12, w:44, h:74, desc:'戴著銅頭盔的老派潛水員，頭盔會冒出一串串氣泡。'},
+  tower101:{name:'台北 101 模型', price:900, comfort:14, w:40, h:168, desc:'台北地標的迷你模型，晚上會點燈。'},
   lantern:{name:'紅燈籠', price:200, comfort:12, w:44, h:76, fest:'cny', desc:'新春限定。寫著「福」字的紅燈籠，晚上會亮。'},
   trophy: {name:'品評會獎盃', price:0, comfort:15, w:40, h:58, award:true, desc:'在品評會得到金獎的證明。'},
 };
@@ -1279,7 +1289,7 @@ function migrate(s){
       full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : clamp(+f.full || 0, 0, 100), grow:clamp(+f.grow || 0, 0, GROW_MAX), seed,
       sex:f.sex === 'm' || f.sex === 'f' ? f.sex : '', m, rare:RARES[f.rare] ? f.rare : '', gen:Math.max(1, (+f.gen || 1) | 0),
       par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
-      pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0};
+      pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0, ms:f.ms | 0, zz:ZZ[f.zz] ? f.zz : '', friend:typeof f.friend === 'string' ? f.friend : ''};
   };
   s.fish = (Array.isArray(s.fish) ? s.fish : []).filter(f => f && SPECIES[f.sp]).map(cleanFish);
   s.region = storedRegion(s.region);
@@ -1316,6 +1326,7 @@ function migrate(s){
   s.colT = +s.colT || Date.now();
   const mu0 = s.museum && typeof s.museum === 'object' ? s.museum : {}; s.museum = {}; for (const [k, v] of Object.entries(mu0)) if (SPECIES[k] && v) s.museum[k] = {n:String(v.n || ''), m:v.m | 0, r:String(v.r || ''), at:+v.at || Date.now()};
   s.log = (Array.isArray(s.log) ? s.log : []).filter(e => Array.isArray(e) && +e[0] && typeof e[1] === 'string').slice(-150);
+  s.shrimpDay = typeof s.shrimpDay === 'string' ? s.shrimpDay : ''; s.tipDay = typeof s.tipDay === 'string' ? s.tipDay : '';
   s.catFed = clamp(s.catFed | 0, 0, 3); s.catPet = +s.catPet || 0; s.bless = +s.bless || 0; s.tailDay = typeof s.tailDay === 'string' ? s.tailDay : '';
   s.boxAuto = s.boxAuto === 0 ? 0 : 1; s.moonDay = typeof s.moonDay === 'string' ? s.moonDay : ''; s.moonTip = typeof s.moonTip === 'string' ? s.moonTip : '';
   s.food = FOODS[s.food] ? s.food : 'pellet'; s.tset = [20, 23, 26, 28].includes(+s.tset) ? +s.tset : 26; s.waferT = +s.waferT || 0;
@@ -1345,7 +1356,7 @@ const baseLen = d => SPECIES[d.sp].len * (.5 + .5 * growRatio(d)) * ((geneFx(d) 
 function preyFor(pd){
   const h = SPECIES[pd.sp].hunt; if (!h) return null;
   const maxLen = baseLen(pd) * h.ratio;
-  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !d.box && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
+  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
   list.sort((a, b) => (a.sp === 'pestsnail' ? 0 : 1) - (b.sp === 'pestsnail' ? 0 : 1) || (a.rare ? 1 : 0) - (b.rare ? 1 : 0) || baseLen(a) - baseLen(b));
   return list[0] || null;
 }
@@ -1362,7 +1373,7 @@ function currentVisitor(){
 const npcLimit = item => item === 'feeder10' ? 5 : ITEMS[item] ? (ITEMS[item].limit || 1) : (SPECIES[item].npcLimit || 2);
 function npcBought(item){ const v = currentVisitor(); return v && state.npcBuy.key === v.key ? (state.npcBuy.n[item] || 0) : 0; }
 const stageName = d => { if (isInv(d)) return growRatio(d) >= .5 ? '成體' : '幼體'; const g = growRatio(d); return g >= 1 ? '成魚' : g >= .4 ? '亞成魚' : '幼魚'; };
-const coinValue = d => Math.max(1, Math.round(SPECIES[d.sp].value * (.5 + .5 * growRatio(d)) * (d.rare ? (RARES[d.rare].tier === 2 ? 2 : 1.5) : 1) * (1 + .15 * traitsOf(d).length) * (todayEv() === 'harvest' ? 1.2 : 1) * (lightOn() ? LED_K[state.up.led | 0] : 1) * (1 + (d.aff || 0) * .002) * museumK() * (blessed() ? 1.1 : 1)));
+const coinValue = d => Math.max(1, Math.round(SPECIES[d.sp].value * (.5 + .5 * growRatio(d)) * (d.rare ? (RARES[d.rare].tier === 2 ? 2 : 1.5) : 1) * (1 + .15 * traitsOf(d).length) * (todayEv() === 'harvest' ? 1.2 : 1) * (lightOn() ? LED_K[state.up.led | 0] : 1) * (1 + (d.aff || 0) * .002) * museumK() * (blessed() ? 1.1 : 1) * (d.zz === 'coin' ? 1.1 : 1)));
 const fishCount = () => state.fish.filter(f => !isInv(f)).length + state.trips.length;
 const invCount = () => state.fish.filter(isInv).length;
 const pendingBabies = () => state.eggs.reduce((s, e) => s + e.n, 0);
@@ -1374,7 +1385,7 @@ function happinessWith(d, full, dirt){
   const shy = d.pers === 'shy' ? (state.deco.filter(x => DECOS[x.k].plant).length >= 2 ? .06 : -.06) : 0;
   let cs = 1 - dirt / 100 * .85; if (SPECIES[d.sp].picky && dirt > 30) cs *= .55;
   const cm = .4 + comfort() / 100 * .6;
-  return clamp((fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)), 0, 1);
+  return clamp((fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)) * (d.zz === 'plant' ? 1.08 : 1) * (friendOf(d) ? 1.06 : 1), 0, 1);
 }
 const happiness = d => happinessWith(d, d.full, state.dirt);
 function countCache(){ let a = 0, nf = 0, ni = 0; for (const f of state.fish) { a += SPECIES[f.sp].algae || 0; if (isInv(f)) ni++; else nf++; } rt.algaeRate = a; rt.nFish = nf; rt.nInv = ni; rt.hive = state.fish.some(f => f.sp === 'hivemind'); }
@@ -2546,6 +2557,31 @@ function drawDecoShape(c, dc, t){
       for (let i = 0; i < 10; i++) { c.fillStyle = ['#ff4040','#ffd040','#40c0ff','#ff80d0'][i % 4]; dot(c, Math.sin(i * 2.3) * (24 - i * 2), -16 - i * 7, 2.6); }
       c.fillStyle = '#ffd040'; dot(c, 0, -94, 5);
       break;
+    case 'shrine': {
+      c.fillStyle = '#8a8478'; c.fillRect(-30, -8, 60, 8); c.fillStyle = '#a09a8c'; c.fillRect(-26, -12, 52, 4);
+      c.fillStyle = '#c8402a'; c.fillRect(-22, -42, 44, 30); c.fillStyle = '#3a1a10'; c.fillRect(-9, -34, 18, 22);
+      c.fillStyle = '#f2c040'; c.fillRect(-16, -41, 32, 5); c.fillStyle = '#3a1a10'; c.font = '700 5px serif'; c.textAlign = 'center'; c.fillText('福德祠', 0, -37);
+      c.fillStyle = '#e8b040'; dot(c, 0, -24, 3.2); c.fillStyle = '#f6e6b0'; dot(c, 0, -25, 1.4);
+      c.fillStyle = '#d0582a'; c.beginPath(); c.moveTo(-32, -42); c.quadraticCurveTo(-20, -48, 0, -49); c.quadraticCurveTo(20, -48, 32, -42); c.lineTo(28, -54); c.quadraticCurveTo(14, -52, 0, -55); c.quadraticCurveTo(-14, -52, -28, -54); c.closePath(); c.fill();
+      c.strokeStyle = '#e0702a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-30, -55); c.quadraticCurveTo(0, -58, 30, -55); c.moveTo(-30, -55); c.quadraticCurveTo(-36, -60, -38, -67); c.moveTo(30, -55); c.quadraticCurveTo(36, -60, 38, -67); c.stroke();
+      c.fillStyle = '#6a5a4a'; c.fillRect(-4, -16, 8, 4); c.fillStyle = 'rgba(235,240,245,.35)'; for (let i = 0; i < 3; i++) { const k = (t * .35 + i / 3) % 1; dot(c, Math.sin(t * 2 + i) * 3, -18 - k * 34, 1.6 + k * 2.4); }
+      break; }
+    case 'diver': {
+      c.fillStyle = '#5a4a3a'; c.fillRect(-12, -6, 10, 6); c.fillRect(3, -6, 10, 6);
+      c.fillStyle = '#6a7a8a'; c.fillRect(-10, -30, 8, 24); c.fillRect(3, -30, 8, 24); c.beginPath(); c.ellipse(0, -40, 14, 15, 0, 0, TAU); c.fill();
+      c.strokeStyle = '#6a7a8a'; c.lineWidth = 6; c.beginPath(); c.moveTo(-12, -48); c.quadraticCurveTo(-22, -38, -18, -26); c.moveTo(12, -48); c.quadraticCurveTo(22, -40, 20, -30); c.stroke();
+      c.fillStyle = '#b8862a'; c.fillRect(-12, -54, 24, 6); c.fillStyle = lg(c, -14, 0, 14, 0, [[0,'#a8741a'],[.45,'#f0c860'],[1,'#a8741a']]); dot(c, 0, -64, 13);
+      c.fillStyle = '#2a4a5a'; dot(c, 0, -64, 6.5); c.strokeStyle = '#8a5a14'; c.lineWidth = 2; c.beginPath(); c.arc(0, -64, 6.5, 0, TAU); c.stroke(); c.fillStyle = 'rgba(255,255,255,.45)'; dot(c, -2.5, -66.5, 2);
+      c.fillStyle = 'rgba(235,245,250,.55)'; for (let i = 0; i < 4; i++) { const k = (t * .5 + i / 4 + (dc.seed % 7) / 7) % 1; dot(c, 8 + Math.sin(t * 3 + i * 2) * 3, -76 - k * 70, 1.8 + k * 2.2); }
+      break; }
+    case 'tower101': {
+      const night = rt.lightK < .5;
+      c.fillStyle = '#5e7a7e'; c.fillRect(-12, -18, 24, 18);
+      for (let i = 0; i < 8; i++) { const y = -18 - i * 15; c.fillStyle = i % 2 ? '#6e8c90' : '#7a9a9e'; c.beginPath(); c.moveTo(-9, y); c.lineTo(-12, y - 15); c.lineTo(12, y - 15); c.lineTo(9, y); c.closePath(); c.fill();
+        c.fillStyle = night ? 'rgba(255,214,120,.9)' : 'rgba(210,235,240,.5)'; c.fillRect(-7, y - 11, 14, 2); }
+      c.fillStyle = '#6e8c90'; c.fillRect(-6, -146, 12, 8); c.fillRect(-3, -156, 6, 10); c.fillStyle = '#8aa4a8'; c.fillRect(-1, -168, 2, 12);
+      if (night) { c.fillStyle = 'rgba(255,90,70,.9)'; dot(c, 0, -168, 1.8); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(255,200,110,.12)'; c.fillRect(-14, -150, 28, 132); c.restore(); }
+      break; }
     case 'lantern':
       c.strokeStyle = '#3a2a1a'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -20); c.stroke();
       c.fillStyle = '#d82a1a'; c.beginPath(); c.ellipse(0, -44, 20, 24, 0, 0, TAU); c.fill();
@@ -2699,6 +2735,7 @@ function pickTarget(r, sleep){
   else if (sp.zone === 'low') { y = rand(lerp(top, bot, .45), bot - 8 * U); r.wait = rand(3, 8); }
   else { y = rand(lerp(top, bot, .06), bot - 8 * U); r.wait = rand(3, 8); }
   if (sp.kiss && !sleep && Math.random() < .5) { const o = rt.fish.find(q => q !== r && q.sp.kiss); if (o) { x = clamp(o.x + rand(-20, 20) * U, 24 * U, W - 24 * U); y = o.y; } }
+  if (r.d.friend && !sleep && Math.random() < .45) { const o = rt.fish.find(q => q !== r && q.d.id === r.d.friend && !q.d.box); if (o) { x = clamp(o.x + rand(-28, 28) * U, 24 * U, W - 24 * U); if (sp.kind !== 'inv' && sp.zone !== 'bottom') y = clamp((y + o.y) / 2, top, bot - 8 * U); } }
   r.tx = x; r.ty = y;
 }
 const coinR = c => (7 + Math.min(7, Math.log2(Math.max(1, c.v)) * 1.6)) * U;
@@ -2855,7 +2892,7 @@ function update(dt){
   }
   rt.ichT -= dt; if (rt.ichT <= 0) { rt.ichT = 30; ichTick(); }
   if ((rt.alienAcc += dt) >= 1) { rt.alienAcc = 0; alienTick(); }
-  plantTick(dt); autoFeed(dt); catTick(dt); tempTick(dt); moonTick(dt); tailTick(dt); eventTick(dt);
+  plantTick(dt); autoFeed(dt); catTick(dt); tempTick(dt); moonTick(dt); tailTick(dt); eventTick(dt); friendTick(dt);
   if ((rt.lifeT = (rt.lifeT == null ? 5 : rt.lifeT) - dt) <= 0) { rt.lifeT = 60; lifeTick(false); pestTick(); }
   if ((rt.plantT = (rt.plantT || 0) - dt) <= 0) { rt.plantT = 10; plantLife(10 / 3600, rt.lightK, false);
     const o2 = rt.lightK < .35 && (rt.plantMass || 0) > (rt.plantCap || 6) * .8 && !state.deco.some(d => d.k === 'bubbler');
@@ -3135,7 +3172,7 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
@@ -3244,9 +3281,102 @@ function lifeTick(quiet){
   const mins = Math.min(2880, Math.max(0, (now - (state.colT || now)) / 6e4)); state.colT = now;
   if (mins > 0) { invGrow(now); colonyTick(mins, quiet, out); snailEggTick(mins, quiet, out); escapeTick(mins, quiet, out); }
   for (const d of state.fish) if (d.box === 2 && growRatio(d) >= .6) { d.box = 0; const r = rt.fish.find(x => x.d === d); if (r) { r.x = boxRect().x + boxRect().w + 16 * U; pickTarget(r, false); } out.push(d.name + ' 長大了，從隔離盒游出來'); if (!quiet) toast(d.name + ' 長大了，從隔離盒游出來'); }
+  milestoneTick(quiet, out);
   if (!quiet) for (const t of out) logEv(t);
   if (out.length) { bumpCoins(); markDirty(); } return out;
 }
+/* Fish milestones (Taiwanese baby customs) and friendships. */
+const MILES = [[7, '滿一週', 20], [30, '滿月', 100], [100, '百日', 300], [365, '週歲', 800]];
+const ZZ = {coin:{name:'金幣', desc:'以後掉的金幣多 10%'}, plant:{name:'水草', desc:'以後心情一直都比較好'}, book:{name:'書本', desc:'以後好感度漲得比較快'}, boat:{name:'小船', desc:'以後去探險比較安全'}};
+function milestoneTick(quiet, out){ const now = Date.now();
+  for (const d of state.fish) { const S = SPECIES[d.sp]; if (S.pest || d.sp === 'feeder') continue; const age = (now - d.born) / 864e5;
+    MILES.forEach(([days, name, rw], i) => { if (age < days || (d.ms | 0) & (1 << i)) return; d.ms = (d.ms | 0) | (1 << i); markDirty();
+      if (age > days + 2) return;
+      state.coins += rw; let msg;
+      if (i === 0) msg = d.name + ' 來到魚缸滿一週了（+' + rw + ' 金幣）';
+      else if (i === 1) { d.aff = Math.min(100, (d.aff || 0) + 10); msg = '今天是 ' + d.name + ' 的滿月！分送紅蛋和油飯給鄰居，收到 ' + rw + ' 金幣紅包'; }
+      else if (i === 2) { d.aff = Math.min(100, (d.aff || 0) + 15); msg = d.name + ' 百日了！親友送來 ' + rw + ' 金幣的祝福'; }
+      else { d.zz = pickArr(Object.keys(ZZ)); msg = d.name + ' 週歲了！抓周抓到「' + ZZ[d.zz].name + '」：' + ZZ[d.zz].desc + '（+' + rw + ' 金幣）'; }
+      out.push(msg);
+      if (!quiet) { if (i === 0) toast(msg); else celebrate({kind:'fish', d, sp:d.sp, tier:i >= 3 ? 2 : 1, head:name, title:d.name + (i === 3 ? ' 週歲抓周' : ' ' + name), text:msg + '。'}); } }); }
+}
+function ageText(d){ const days = Math.floor((Date.now() - d.born) / 864e5), got = MILES.filter((m, i) => (d.ms | 0) & (1 << i)).map(m => m[1]), nx = MILES.find(m => days < m[0]), fr = friendOf(d);
+  return '來魚缸第 ' + (days + 1) + ' 天' + (got.length ? '・' + got.join('、') : '') + (nx ? '・再 ' + (nx[0] - days) + ' 天就' + nx[1] : '') + (d.zz ? '・抓周抓到' + ZZ[d.zz].name + '（' + ZZ[d.zz].desc + '）' : '') + (fr ? '・好朋友：' + fr.name : ''); }
+function friendOf(d){ return d.friend ? state.fish.find(f => f.id === d.friend) || null : null; }
+function friendTick(dt){ rt.frT = (rt.frT || 0) - dt; if (rt.frT > 0) return; rt.frT = 2; if (!rt.bond) rt.bond = new Map();
+  for (const d of state.fish) if (d.friend && !friendOf(d) && !(state.trips || []).some(t => t.d && t.d.id === d.friend)) { const e = state.fish.find(f => f.id === d.friend); if (!e) { d.friend = ''; markDirty(); } }
+  const rs = rt.fish.filter(r => !isInv(r.d) && !r.d.box && !r.sp.alien && !r.sp.myth && !r.d.friend);
+  for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const a = rs[i], b = rs[j]; if (Math.hypot(a.x - b.x, a.y - b.y) > 70 * U) continue;
+    const k = a.d.id < b.d.id ? a.d.id + '|' + b.d.id : b.d.id + '|' + a.d.id, v = (rt.bond.get(k) || 0) + (a.d.sp === b.d.sp ? 2 : 3);
+    if (v >= 300) { rt.bond.delete(k); a.d.friend = b.d.id; b.d.friend = a.d.id; state.stats.friends = (state.stats.friends | 0) + 1; markDirty();
+      for (const r of [a, b]) rt.emotes.push({type:'heart', x:r.x, y:r.y - fishLen(r) * .4, t:0, life:1.6});
+      const msg = a.d.name + ' 和 ' + b.d.name + ' 成為好朋友了！以後會常常一起游'; toast(msg); logEv(msg); return; }
+    rt.bond.set(k, v); } }
+
+/* Tank popularity: a daily rating from decor, variety, rarity, mood and cleanliness, paid out as visitor tips. */
+function tankRating(){ const fish = state.fish.filter(f => !SPECIES[f.sp].pest), nsp = new Set(fish.map(f => f.sp)).size, rare = fish.filter(f => f.rare).length, gene = fish.filter(f => traitsOf(f).length).length;
+  const hap = fish.length ? fish.reduce((a, f) => a + happiness(f), 0) / fish.length : 0;
+  const parts = [['造景', Math.min(30, comfort() * .3), 30, '多擺一些造景和水草'], ['物種多樣', Math.min(25, nsp * 2.5), 25, '養更多不同種類的生物'], ['稀有度', Math.min(15, rare * 5 + gene * 1.5), 15, '繁殖出稀有色或特殊基因的魚'], ['魚兒心情', hap * 20, 20, '讓魚吃飽、住得舒服、水溫剛好'], ['乾淨程度', Math.max(0, 1 - state.dirt / 100) * 10, 10, '常常清潔魚缸']];
+  const score = Math.round(parts.reduce((a, p) => a + p[1], 0)); return {score, rank:score >= 88 ? 'S' : score >= 72 ? 'A' : score >= 55 ? 'B' : score >= 35 ? 'C' : 'D', parts}; }
+function tipAmount(T){ return Math.round((T.score * 3 + museumN() * 5) * (state.deco.some(dc => dc.k === 'shrine') ? 1.2 : 1)); }
+function claimTips(){ if (state.tipDay === dayKey()) return; const T = tankRating(), tip = tipAmount(T); state.tipDay = dayKey(); state.coins += tip; if (T.rank === 'S') state.stats.rankS = 1; bumpCoins(); markDirty();
+  logEv('客人來參觀魚缸（人氣 ' + T.rank + ' 級），留下 ' + tip + ' 金幣小費'); toast('收下 ' + tip + ' 金幣小費'); renderToday(); }
+
+/* Shrimp-fishing mini-game: tap when the float dips. */
+function startShrimp(){
+  if (mini) return; const free = state.shrimpDay !== dayKey();
+  if (!free) { if (state.coins < 60) { toast('金幣不夠'); return; } state.coins -= 60; bumpCoins(); } else state.shrimpDay = dayKey();
+  markDirty(); closeSheet();
+  const el = document.createElement('div'); el.id = 'mini';
+  el.innerHTML = '<canvas id="miniCv" aria-label="釣蝦"></canvas><div class="mhud"><span>⏱ <b id="mT">45</b></span><span>釣到 <b id="mN">0</b></span><span>分數 <b id="mS">0</b></span><button id="mQ">收竿</button></div><div class="mtip" id="mTip">浮標往下沉的時候，快點一下！</div>';
+  document.body.appendChild(el);
+  const cnv = el.querySelector('canvas');
+  mini = {kind:'shrimp', el, cnv, t:45, n:0, score:0, caught:[], fx:[], end:false, st:'wait', wait:rand(2, 4), nibT:0, biteT:0, reel:null, w:cnv.clientWidth || W, h:cnv.clientHeight || H};
+  cnv.addEventListener('pointerdown', shrimpTap);
+  el.querySelector('#mQ').addEventListener('click', () => endShrimp(''));
+}
+function shrimpTap(){ const M = mini; if (!M || M.kind !== 'shrimp' || M.reel) return; const x = M.w / 2, y = M.h * .36;
+  if (M.st === 'bite') { const big = Math.random(); M.reel = {t:0, L:36 + big * 34, val:Math.round(8 + big * big * 42), P:palette('prawn', (Math.random() * 1e9) | 0, 0)}; M.st = 'reel'; }
+  else if (M.st === 'nib') { M.st = 'wait'; M.wait = rand(2.5, 4.5); M.fx.push({t:0, x, y, s:'太早了！蝦子嚇跑了', c:'#ffc8b8'}); }
+  else M.fx.push({t:0, x, y, s:'還沒咬餌…', c:'#d8e8f0'}); }
+function stepShrimp(dt){
+  const M = mini, cnv = M.cnv, w = cnv.clientWidth, h = cnv.clientHeight; if (!w || !h) return;
+  if (cnv.width !== Math.round(w * DPR) || cnv.height !== Math.round(h * DPR)) { cnv.width = Math.round(w * DPR); cnv.height = Math.round(h * DPR); } M.w = w; M.h = h;
+  const c = cnv.getContext('2d'); c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  M.t -= dt; if (M.t <= 0 && !M.reel) { endShrimp('時間到！'); return; }
+  if (M.st === 'wait') { M.wait -= dt; if (M.wait <= 0) { if (Math.random() < .55) { M.st = 'nib'; M.nibT = rand(.8, 2); } else { M.st = 'bite'; M.biteT = rand(.55, .8); } } }
+  else if (M.st === 'nib') { M.nibT -= dt; if (M.nibT <= 0) { if (Math.random() < .6) { M.st = 'bite'; M.biteT = rand(.5, .75); } else { M.st = 'wait'; M.wait = rand(1, 3); } } }
+  else if (M.st === 'bite') { M.biteT -= dt; if (M.biteT <= 0) { M.st = 'wait'; M.wait = rand(1.5, 3.5); M.fx.push({t:0, x:w / 2, y:h * .36, s:'餌被偷吃了…', c:'#d8e8f0'}); } }
+  else if (M.st === 'reel') { M.reel.t += dt; if (M.reel.t > 1.2) { M.n++; M.score += M.reel.val; M.caught.push(M.reel); M.fx.push({t:0, x:w / 2, y:h * .22, s:'+' + M.reel.val + (M.reel.val >= 35 ? ' 大隻的！' : ''), c:'#ffd866'}); M.reel = null; M.st = 'wait'; M.wait = rand(1.5, 4); } }
+  $('#mT').textContent = Math.max(0, Math.ceil(M.t)); $('#mN').textContent = M.n; $('#mS').textContent = M.score;
+  const tip = $('#mTip'); tip.textContent = M.st === 'bite' ? '就是現在！快點！' : M.st === 'reel' ? '釣到了！' : '浮標往下沉的時候，快點一下！'; tip.classList.toggle('hot', M.st === 'bite');
+  c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#4f7f6a'],[1,'#163a30']]); c.fillRect(0, 0, w, h);
+  c.fillStyle = 'rgba(10,30,24,.35)'; for (let i = 0; i < 5; i++) { const sx = (i * 173 + rt.t * (12 + i * 3)) % (w + 80) - 40, sy = h * (.55 + i * .07); c.beginPath(); c.ellipse(sx, sy, 22, 7, 0, 0, TAU); c.fill(); }
+  c.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 6; i++) { c.beginPath(); c.ellipse((i * 211 + rt.t * 8) % w, (i * 137) % (h * .8) + 40, 70, 5, 0, 0, TAU); c.fill(); }
+  c.fillStyle = '#7a4e2a'; c.fillRect(0, h - 74, w, 74); c.fillStyle = 'rgba(0,0,0,.2)'; for (let x = 0; x < w; x += 46) c.fillRect(x, h - 74, 2, 74); c.fillStyle = '#9a6a3a'; c.fillRect(0, h - 78, w, 6);
+  const bx = w * .5, by = h * .42; let dy = Math.sin(rt.t * 2) * 2;
+  if (M.st === 'nib') dy += Math.sin(rt.t * 32) * 3.2 * (Math.sin(rt.t * 6) > 0 ? 1 : .3);
+  if (M.st === 'bite') dy += 15;
+  if (M.st === 'reel') dy -= Math.min(1, M.reel.t * 2.2) * h * .22;
+  c.lineWidth = 1.6; for (let i = 0; i < 3; i++) { const r = ((rt.t * 16 + i * 22) % 66) + 6; c.strokeStyle = 'rgba(255,255,255,' + (.22 * (1 - r / 72)).toFixed(3) + ')'; c.beginPath(); c.ellipse(bx, by + 8, r * 1.6, r * .42, 0, 0, TAU); c.stroke(); }
+  if (M.st === 'bite') { c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 2.5; c.beginPath(); c.ellipse(bx, by + 8, 30 + Math.sin(rt.t * 20) * 4, 9, 0, 0, TAU); c.stroke(); }
+  const tx = w * .8, ty = h * .14; c.strokeStyle = '#3a2614'; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(w + 10, h - 30); c.lineTo(tx, ty); c.stroke();
+  c.strokeStyle = 'rgba(240,240,230,.7)'; c.lineWidth = 1; c.beginPath(); c.moveTo(tx, ty); c.quadraticCurveTo(bx + 40, ty + 30, bx, by + dy - 18); c.stroke();
+  if (M.reel) { c.beginPath(); c.moveTo(bx, by + dy); c.lineTo(bx, by + dy + 26); c.stroke(); c.save(); c.translate(bx, by + dy + 34); c.rotate(Math.PI / 2 + Math.sin(rt.t * 12) * .35); drawFish(c, 'prawn', M.reel.P, M.reel.L, rt.t * 10, 1, {puffK:0}); c.restore(); }
+  c.fillStyle = '#f4f4ee'; c.beginPath(); c.ellipse(bx, by + dy, 5.5, 9, 0, 0, TAU); c.fill(); c.fillStyle = '#e8402a'; c.beginPath(); c.ellipse(bx, by + dy - 6, 5.5, 6, 0, Math.PI, 0); c.fill(); c.fillRect(bx - 1, by + dy - 18, 2, 7);
+  if (M.st !== 'reel') { c.fillStyle = 'rgba(60,110,95,.7)'; c.fillRect(bx - 12, by + 8, 24, 10); }
+  for (let i = M.fx.length - 1; i >= 0; i--) { const q = M.fx[i]; q.t += dt; if (q.t > 1.1) { M.fx.splice(i, 1); continue; } c.globalAlpha = Math.max(0, 1 - q.t); c.font = '700 20px ' + FONT; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,.45)'; c.strokeText(q.s, q.x, q.y - q.t * 30); c.fillStyle = q.c; c.fillText(q.s, q.x, q.y - q.t * 30); c.globalAlpha = 1; }
+}
+function endShrimp(msg){
+  const M = mini; if (!M || M.end) return; M.end = true; mini = null; M.el.remove();
+  state.stats.shrimpBest = Math.max(state.stats.shrimpBest | 0, M.n); state.coins += M.score; bumpCoins();
+  const best = M.caught.reduce((a, b) => !a || b.val > a.val ? b : a, null); let home = null;
+  if (best && best.val >= 35 && invCount() < capI()) { home = newCreature('prawn', {grow:14}); addCreature(home); }
+  markDirty(); if (M.n) logEv('去釣蝦場釣到 ' + M.n + ' 隻蝦，換到 ' + M.score + ' 金幣' + (home ? '，還帶了一隻大泰國蝦回家' : ''));
+  celebrate({kind:'coins', amount:Math.max(M.score, 1), tier:M.n >= 8 ? 2 : M.n >= 4 ? 1 : 0, head:'釣蝦場', title:M.n ? '釣到 ' + M.n + ' 隻！' : '一隻都沒釣到',
+    text:(msg || '收竿了。') + (M.score ? '換到 ' + M.score + ' 金幣。' : '') + (home ? '最大的那隻泰國蝦帶回家了，取名「' + home.name + '」。' : best && best.val >= 35 ? '小生物太多，大蝦沒辦法帶回家。' : '釣到 35 分以上的大蝦就能帶一隻回家。')});
+}
+
 /* Temple visitor: throw moon blocks for a day of blessing. */
 function blessed(){ return (state.bless || 0) > Date.now(); }
 function drawJiao(cnv, res){ const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height; c.clearRect(0, 0, w, h);
@@ -3265,7 +3395,7 @@ function renderTemple(v){
 function throwJiao(){ const v = currentVisitor(); if (!v || NPCS[v.npc].mode !== 'temple' || blessed() || npcBought('jiao') >= 3 || state.coins < 30) return;
   if (state.npcBuy.key !== v.key) state.npcBuy = {key:v.key, n:{}}; state.npcBuy.n.jiao = (state.npcBuy.n.jiao || 0) + 1; state.coins -= 30; bumpCoins();
   const a = Math.random() < .5, b = Math.random() < .5; rt.jiao = {key:v.key, r:[a, b]};
-  if (a !== b) { state.bless = Date.now() + 864e5; state.stats.bless = (state.stats.bless | 0) + 1; logEv('在阿德伯那裡擲到聖筊，得到媽祖保佑'); toast('聖筊！媽祖保佑：24 小時內金幣 +10%，寶寶比較容易出現稀有色'); }
+  if (a !== b) { state.bless = Date.now() + 864e5 * (state.deco.some(dc => dc.k === 'shrine') ? 1.5 : 1); state.stats.bless = (state.stats.bless | 0) + 1; logEv('在阿德伯那裡擲到聖筊，得到媽祖保佑'); toast('聖筊！媽祖保佑：24 小時內金幣 +10%，寶寶比較容易出現稀有色'); }
   else toast(a ? '笑筊（兩面都朝上）：神明笑而不答，再擲一次看看' : '陰筊（兩面都蓋著）：神明不太同意，再誠心問一次');
   markDirty(); renderShop(); }
 
@@ -3636,6 +3766,7 @@ function tripRisk(d, k){ const S = SITES[k], sp = SPECIES[d.sp], L = baseLen(d),
   if (L < 30) r *= 1.5; else if (L > 70) r *= .7;
   if (sp.hunt) r *= .6;
   if (d.full >= 70 && hap >= .7) r *= .7; else if (d.full < 35) r *= 1.4;
+  if (d.zz === 'boat') r *= .7;
   return clamp(r, .005, .4); }
 function startTrip(d, k){
   const S = SITES[k]; if (!S || state.trips.length >= MAXTRIPS || !state.fish.includes(d) || tripBlock(d)) return;
@@ -4022,7 +4153,7 @@ function updateHud(dt){
   if (rt.tempMsg && !state.hints.temp) { state.hints.temp = 1; markDirty(); toast(rt.tempMsg); }
   renderFoodBtn();
   if ((rt.achT = (rt.achT || 0) - .4) <= 0) { rt.achT = 2; achCheck(); }
-  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady(); if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready);
+  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady() || state.tipDay !== dayKey(); if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready);
   if (sheetKind === 'today' && todayKey() !== rendered.today) renderToday();
   if (sheetKind === 'expo') updateTripRows();
   if (state.evSeen !== dayKey()) { state.evSeen = dayKey(); const ev = todayEv(); if (ev) setTimeout(() => toast('今日事件：' + DAY_EVENTS[ev].name + '・' + DAY_EVENTS[ev].desc), 3200); markDirty(); }
@@ -4097,6 +4228,13 @@ function renderToday(){
   lc.appendChild(days); const lb = mk('button', 'btn', ls.done ? '今天簽到過了' : '簽到領獎勵'); lb.disabled = ls.done; lb.addEventListener('click', claimLogin); lc.appendChild(lb); sheetBody.appendChild(lc);
   const sc = mk('div', 'evcard'), free = state.scoopDay !== dayKey(); sc.append(mk('h3', '', '夜市撈金魚'), mk('p', '', '30 秒內用紙網撈金魚，撈到的魚換成金幣，撈到 3 隻以上還能挑一隻帶回家。紙網泡水太久會破喔！' + (state.stats.scoopBest ? '最佳紀錄：' + state.stats.scoopBest + ' 隻。' : '')));
   const sb = mk('button', 'btn', free ? '免費玩一次' : '再玩一次（50 金幣）'); sb.disabled = !free && state.coins < 50; sb.addEventListener('click', startScoop); sc.appendChild(sb); sheetBody.appendChild(sc);
+  { const fc = mk('div', 'evcard'), free2 = state.shrimpDay !== dayKey(); fc.append(mk('h3', '', '釣蝦場'), mk('p', '', '45 秒內看準浮標往下沉的瞬間點一下，釣到的蝦換成金幣；釣到大隻的泰國蝦還能帶一隻回家。太早點會把蝦嚇跑喔！' + (state.stats.shrimpBest ? '最佳紀錄：' + state.stats.shrimpBest + ' 隻。' : '')));
+    const fb = mk('button', 'btn', free2 ? '免費玩一次' : '再玩一次（60 金幣）'); fb.disabled = !free2 && state.coins < 60; fb.addEventListener('click', startShrimp); fc.appendChild(fb); sheetBody.appendChild(fc); }
+  { const T = tankRating(), tip = tipAmount(T), got = state.tipDay === dayKey(), rc = mk('div', 'evcard');
+    rc.append(mk('h3', '', '魚缸人氣：' + T.rank + ' 級（' + T.score + ' 分）'), mk('p', '', '今天大約有 ' + Math.max(1, Math.round(T.score * 1.6)) + ' 位客人來參觀魚缸。' + (got ? '今天的小費已經收下了。' : '他們留下了 ' + tip + ' 金幣小費' + (state.deco.some(dc => dc.k === 'shrine') ? '（土地公保佑，多 20%）' : '') + '。')));
+    const bars = mk('div', 'rbars'); for (const [n, v, mx] of T.parts) { const row = mk('div', 'rbar'), tr = mk('i'), fl = mk('i'); fl.style.width = Math.round(v / mx * 100) + '%'; tr.appendChild(fl); row.append(mk('span', '', n), tr, mk('b', '', Math.round(v) + '/' + mx)); bars.appendChild(row); }
+    rc.appendChild(bars); const low = T.parts.reduce((a, p) => p[1] / p[2] < a[1] / a[2] ? p : a); rc.appendChild(mk('p', 'sub', '想提高人氣：' + low[3] + '。'));
+    const tb = mk('button', 'btn', got ? '明天再來收' : '收下小費'); tb.disabled = got; tb.addEventListener('click', claimTips); rc.appendChild(tb); sheetBody.appendChild(rc); }
   const ec = mk('div', 'evcard'); ec.append(mk('h3', '', '今日事件：' + (ev ? DAY_EVENTS[ev].name : '風平浪靜')), mk('p', '', ev ? DAY_EVENTS[ev].desc : '今天沒有特別的事。每天午夜會重新抽一次事件。'));
   sheetBody.appendChild(ec);
   if (fe) { const fc = mk('div', 'evcard fest'), got = state.festGot === dayKey(); fc.append(mk('h3', '', fe.name + '活動中'), mk('p', '', '水族店「造景」分頁有限定的「' + DECOS[fe.deco].name + '」，每天還可以領一次節日禮物。'));
@@ -4580,6 +4718,7 @@ function renderFishCard(){
     ls.append(mk('h4', '', '鯉躍龍門'), mk('p', '', '傳說錦鯉跳過龍門就會化身成龍。成年、好感度 100 的錦鯉每天可以挑戰一次，成功率大約 18%，失敗會消耗體力。'));
     const lb = mk('button', 'btn', !adult ? '還沒長大' : aff < 100 ? '好感度還差 ' + (100 - aff) : done ? '今天跳過了，明天再試' : '挑戰躍龍門'); lb.disabled = !adult || aff < 100 || done;
     lb.addEventListener('click', () => koiLeap(d)); ls.append(lb); box.append(ls); }
+  box.append(mk('p', 'fnote', ageText(d)));
   if (d.par) box.append(mk('p', 'fnote', '父母：' + d.par[0] + ' × ' + d.par[1] + '・第 ' + d.gen + ' 代'));
   if (genesFor(d.sp).length) {
     const gs = mk('div', 'breed'), tr = traitsOf(d), ch = mk('div', 'chips'); gs.append(mk('h4', '', '基因'));
@@ -4924,7 +5063,7 @@ function loop(now){
   update(dt); draw(); updateHud(dt); placeEdTools();
   if (sheetKind === 'fish') drawPortrait();
   if (sheetKind === 'expo') drawExpoMap();
-  if (mini) stepMini(dt);
+  if (mini) (mini.kind === 'shrimp' ? stepShrimp : stepMini)(dt);
   if (rt.gift) { rt.gift.t += dt; if (!rt.gift.shown && rt.gift.t > 1.3) revealGift(); drawGift(); }
   state.t = Date.now();
   requestAnimationFrame(loop);
