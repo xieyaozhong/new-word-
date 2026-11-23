@@ -544,6 +544,15 @@ const SPECIES = {
   turtle:  {name:'麝香龜', kind:'inv', turtle:true, eats:true, price:450, len:52, interval:70, value:6, zone:'frog', speed:.4, rests:true, scav:true, tags:['兩棲','要餵食'], morphs:['原生'], desc:'小型水龜，會在沙上散步，時不時游上水面換氣。要吃飼料。'},
   tadpole: {name:'蝌蚪', kind:'inv', tadpole:true, eats:true, price:25, len:22, interval:120, value:1, zone:'bottom', speed:.5, scav:true, tags:['會長大'], morphs:['原生'], desc:'吃飽長大後會長出腳，變成侏儒爪蟾。'},
   horned:  {name:'角螺', kind:'inv', snail:true, price:60, len:20, interval:90, value:1, zone:'glass', speed:.1, rests:true, algae:.35, tags:['貼玻璃','吃藻'], morphs:['角螺'], desc:'殼上長著小角的迷你螺，也很會吃藻。'},
+  upsidecat:{name:'倒吊鼠', kind:'fish', draw:'cory', upside:true, nocturnal:true, price:260, len:56, interval:55, value:4, zone:'low', speed:.55, scav:true, tags:['夜行','倒著游'], traits:['肚子朝上倒著游，專吃水草葉子背面的東西','白天喜歡躲起來，關燈後才出來活動'], morphs:['豹紋'], desc:'非洲剛果河來的小鯰魚，一輩子都習慣肚子朝天游泳。'},
+  sicyo:{name:'日本瓢鰭鰕虎', kind:'fish', draw:'mudskipper', price:240, len:48, interval:55, value:4, zone:'glass', speed:.5, rests:true, algae:.4, tags:['台灣原生','貼玻璃','吃藻'], traits:['腹鰭變成吸盤，可以吸在玻璃上，也能爬上瀑布','會順便啃掉玻璃上的藻'], morphs:['原生'], desc:'台灣溪流裡最會爬瀑布的鰕虎，俗稱「和尚魚」。'},
+  shibin:{name:'台灣石賓', kind:'fish', draw:'redtail', price:200, len:62, interval:50, value:4, zone:'low', speed:1, school:true, tags:['台灣原生','群游','溪流'], traits:['身上有七、八條黑色橫紋，像穿了條紋衫'], morphs:['原生'], desc:'台灣溪流常見的原生魚，俗稱石斑，喜歡乾淨流動的水。'},
+  firemouth:{name:'火口', kind:'fish', draw:'ram', cichlid:true, price:420, len:60, interval:55, value:6, zone:'low', speed:.75, tags:['慈鯛','中下層'], traits:['喉嚨到肚子是火紅色的，生氣時會張開鰓蓋嚇對手'], morphs:['經典'], desc:'中美洲來的慈鯛，下巴到肚子一片火紅，所以叫火口。'},
+  glassfish:{name:'印度玻璃魚', kind:'fish', draw:'tetra', price:90, len:42, interval:55, value:2, zone:'mid', speed:.9, school:true, tags:['群游','透明'], traits:['身體幾乎透明，看得到裡面的脊椎和肋骨'], morphs:['透明'], desc:'透明得像一片玻璃的小魚，燈光下可以看到牠的骨頭。'},
+  congo:{name:'剛果燈', kind:'fish', draw:'tetra', price:240, len:58, interval:55, value:4, zone:'mid', speed:1, school:true, tags:['群游','大型燈魚'], traits:['鱗片會反射出金色和藍色的光','鰭很長，尾鰭中間有白色的長絲'], morphs:['彩虹'], desc:'非洲剛果河的大型燈魚，游起來像一道會動的彩虹。'},
+  vampirecrab:{name:'吸血鬼蟹', kind:'inv', crab:true, escape:true, price:280, len:26, interval:80, value:3, zone:'bottom', speed:.32, rests:true, scav:true, tags:['清底沙','會逃缸'], traits:['紫色的身體配上一對亮黃色的眼睛','名字很嚇人，其實不吸血，個性很害羞','沒有魚缸蓋的話晚上會爬出去'], morphs:['紫晶'], desc:'印尼來的小型陸蟹，長得像吸血鬼才有這個名字。'},
+  ramshorn:{name:'紅扁卷螺', kind:'inv', snail:true, price:60, len:22, interval:90, value:1, zone:'bottom', speed:.14, rests:true, scav:true, algae:.2, tags:['清底沙','吃藻'], morphs:['紅寶石','藍'], desc:'殼捲得像一盤紅色蚊香，會慢慢把缸底的剩飼料吃乾淨。'},
+  goldclam:{name:'台灣蜆', kind:'inv', clam:true, price:150, len:26, interval:120, value:1, zone:'bottom', speed:.02, rests:true, algae:.35, tags:['台灣原生','淨水'], traits:['半埋在沙裡過濾水中的小東西，讓水變乾淨'], morphs:['黃金'], desc:'台灣溪流和河口常見的蜆，就是蜆仔湯裡的那種，殼是漂亮的金黃色。'},
   tigerbarb:{name:'虎皮魚', kind:'fish', draw:'tetra', price:80, len:46, interval:55, value:2, zone:'mid', speed:1.15, school:true, aggro:'nip', tags:['群游','會咬鰭'], traits:['少於 6 隻時會去咬鬥魚、神仙魚這些長鰭魚的鰭','養 6 隻以上就會忙著跟同伴玩，不去惹別人'], morphs:['原生'], desc:'金黃色的身體上有四條黑色直紋，像小老虎一樣活潑。'},
   cherrybarb:{name:'櫻桃燈', kind:'fish', draw:'tetra', price:60, len:40, interval:55, value:2, zone:'mid', speed:.95, school:true, tags:['群游','溫和'], morphs:['櫻桃紅'], desc:'公魚發情時全身變成櫻桃一樣的紅色，個性很溫和。'},
   lampeye:{name:'藍眼燈', kind:'fish', draw:'tetra', price:70, len:34, interval:55, value:2, zone:'top', speed:1.05, school:true, tags:['群游','上層'], traits:['眼睛上半部是亮藍色，關燈後會微微發光'], morphs:['原生'], desc:'非洲來的小型鱂魚，一群在水面下游的時候，像一串藍色小燈。'},
@@ -649,6 +658,8 @@ const GENE_TXT = {
   tigerbarb:'green:墨綠:R:melano, longfin:長鰭:R:longfin, glow:螢光:D:glow', cherrybarb:'longfin:長鰭:R:longfin, gold:金化:R:xanth, pink:粉紅:R:pink',
   lampeye:'longfin:長鰭:R:longfin, gold:金化:R:xanth', clownkilli:'gold:金化:R:xanth, violet:紫焰:R:violet', krib:'red:紅化:R:red, galaxy:星點:D:galaxy, white:白化:R:leuc',
   newt:'black:黑化:R:melano, spots:斑點:D:spots',
+  upsidecat:'spots:密點:D:spots, giant:大型:R:giant', sicyo:'blue:藍化:R:blue, red:紅化:R:red', shibin:'gold:金化:R:xanth, longfin:長鰭:R:longfin',
+  firemouth:'red:紅化:D:red, galaxy:星點:D:galaxy, white:白化:R:leuc', glassfish:'glow:螢光:D:glow, gold:金化:R:xanth', congo:'longfin:長鰭:D:longfin, blue:藍化:R:blue, violet:紫化:R:violet',
 };
 const DOM_LABEL = {D:'顯性', R:'隱性', I:'不完全顯性'};
 const GENES = {};
@@ -734,7 +745,7 @@ const NPC_KEYS = Object.keys(NPCS), ALIEN_NPCS = NPC_KEYS.filter(k => NPCS[k].al
 const GOLDFAM = ['goldfish','ranchu','pearlscale','oranda','bubbleeye'];
 /* Plant lifecycle: each planted deco has growth g (seedling .45 → mature 1 → overgrown 1.6), health hp and a death time. */
 const HERB = {mbuna:1, scat:1.5, pestsnail:.4, goldfish:1.2, ranchu:1, pearlscale:1, oranda:1, bubbleeye:1, koi:2, tilapia:1.5, silverdollar:1.5, apple:.8, crayfish:1, slider:1.5};
-const HARDY = ['fern','moss','maw','glowkelp'], SPREAD = ['vallis','hornwort','ricca','moss','bladder','glowgrass'];
+const HARDY = ['fern','moss','maw','glowkelp','anubias'], SPREAD = ['vallis','hornwort','ricca','moss','bladder','glowgrass','hairgrass'];
 const plantMass = dc => (DECOS[dc.k].w / 60) * Math.pow(dc.g || 1, 1.4) * (DECOS[dc.k].h >= 120 ? 1.25 : .8);
 function plantStats(){ const live = state.deco.filter(dc => DECOS[dc.k].plant && !dc.dead), PM = live.reduce((a, dc) => a + plantMass(dc), 0), cap = 6 + (state.up.tank | 0) * 2;
   return {live, PM, cap, crowd:Math.max(0, (PM - cap) / cap), dead:state.deco.filter(dc => dc.dead).length}; }
@@ -953,10 +964,10 @@ const FESTS = [
 function festival(){ const d = new Date(), md = (d.getMonth() + 1) * 100 + d.getDate(), n = d.getFullYear() * 10000 + md;
   return FESTS.find(F => (F.d && F.d.some(([a, b]) => n >= a && n <= b)) || (F.md && F.md.some(([a, b]) => md >= a && md <= b)) || (F.m && d.getMonth() + 1 === F.m)) || null; }
 const CONDS = {
-  cave:   {text:'缸裡要有陶罐或沉木當洞穴', ok:() => state.deco.some(d => d.k === 'pot' || d.k === 'wood'), pen:.4},
+  cave:   {text:'缸裡要有陶罐、沉木或城堡當洞穴', ok:() => state.deco.some(d => d.k === 'pot' || d.k === 'wood' || d.k === 'castle'), pen:.4},
   dark:   {text:'怕光，燈關著才自在', ok:() => !lightOn(), pen:.65},
   clean:  {text:'水質要保持清澈', ok:() => state.dirt < 25, pen:.4},
-  rocks:  {text:'要有 2 個以上的石頭、陶罐或沉木可以佔地盤', ok:() => state.deco.filter(d => ['rock','pot','wood','wreck','bridge','glowstone','pebbles'].includes(d.k)).length >= 2, pen:.5},
+  rocks:  {text:'要有 2 個以上的石頭、陶罐或沉木可以佔地盤', ok:() => state.deco.filter(d => ['rock','pot','wood','wreck','bridge','glowstone','pebbles','castle','volcano','scooter'].includes(d.k)).length >= 2, pen:.5},
   flow:   {text:'需要過濾器製造水流', ok:() => (state.up.filter | 0) >= 1, pen:.4},
   bubbler:{text:'一定要有氣泡石', ok:() => state.deco.some(d => d.k === 'bubbler'), pen:.35},
   group3: {text:'同種要養 3 隻以上', ok:sp => countSp(sp) >= 3, pen:.4},
@@ -1012,6 +1023,15 @@ const DECOS = {
   coral:  {name:'珊瑚', price:500, comfort:12, w:84, h:66, wild:true, desc:'海裡帶回來的珊瑚，顏色很鮮豔。'},
   canoe:  {name:'獨木舟', price:520, comfort:14, w:132, h:34, wild:true, desc:'日月潭邊撿到的小獨木舟，魚兒喜歡躲在裡面。'},
   xmas:   {name:'聖誕樹', price:200, comfort:12, w:72, h:104, fest:'xmas', desc:'十二月限定。掛滿彩球的小聖誕樹，晚上會亮。'},
+  bubbletea:{name:'珍珠奶茶', price:380, comfort:14, w:60, h:118, desc:'超大杯的珍奶沉在水底，吸管會一直冒出泡泡。'},
+  lighthouse:{name:'燈塔', price:520, comfort:14, w:54, h:150, desc:'紅白相間的小燈塔，關燈後會射出來回掃動的光束。'},
+  castle:{name:'城堡', price:680, comfort:18, w:104, h:124, desc:'有城門和三座塔的老城堡，魚兒可以從城門鑽進鑽出，也能當洞穴。晚上窗戶會亮。'},
+  volcano:{name:'海底火山', price:760, comfort:12, w:112, h:84, desc:'每隔一陣子就會噴發一次，冒出一大串泡泡，有時還會噴出金幣。'},
+  scooter:{name:'沉在水底的機車', price:420, comfort:12, w:112, h:70, desc:'不知道是誰的機車掉進水裡，現在變成魚的遊樂場。'},
+  anubias:{name:'小榕', price:160, comfort:10, w:74, h:64, plant:true, desc:'綁在小石頭上的厚葉水草，非常耐養，魚也不愛啃。偶爾會開出白色的小花。'},
+  sword:{name:'皇冠草', price:220, comfort:14, w:116, h:150, plant:true, desc:'一大叢像寶劍一樣的長葉子，是很多慈鯛最愛的產卵地點。'},
+  hairgrass:{name:'牛毛氈', price:120, comfort:8, w:116, h:44, plant:true, desc:'細細的草一根根冒出來，長滿了就像水底的草原，會慢慢往旁邊蔓延。'},
+  tigerlotus:{name:'虎斑睡蓮', price:280, comfort:14, w:104, h:140, plant:true, desc:'紅色的葉子上有像老虎一樣的斑點，長長的葉柄會把葉子舉得高高的。'},
   consbadge:{name:'溪流守護者木牌', price:0, comfort:10, w:46, h:62, award:true, desc:'溪流守護會頒給好夥伴的木牌。有它在，台灣原生生物的心情比較好。'},
   luckycat:{name:'招財貓', price:0, comfort:10, w:40, h:54, award:true, desc:'珍稀魚商會送的招財貓，會一直招手。所有魚掉的金幣多 5%。'},
   stargate:{name:'迷你星門', price:0, comfort:12, w:56, h:70, award:true, desc:'星際交流團送的小星門，會發出紫色的光。外星生物掉的金幣多 15%。'},
@@ -1212,6 +1232,15 @@ Object.assign(PAL, {
   sawacrab:[{b1:'#b8301a',b2:'#f07a4a',leg:'rgba(190,60,30,.9)'},{b1:'#6a3a8a',b2:'#b088d0',leg:'rgba(110,60,140,.9)'}],
   loong:[{b1:'#c8901a',b2:'#ffe27a',belly:'#fff2c0',fin:'#e8602a',mane:'#ff8a3a',horn:'#f6ead0',whisker:'rgba(255,240,200,.9)',scale:'rgba(140,80,0,.35)',legF:'#a8700e',pearl:'#d8f2ff'}]});
 Object.assign(PAL, {
+  upsidecat:[{b1:'#6a5a42',bm:'#b8a888',b2:'#d8ccb0',fin:'rgba(200,185,150,.7)',spot:'rgba(30,22,14,.7)',barb:'rgba(220,205,170,.9)',pec:'rgba(210,200,175,.55)'}],
+  sicyo:[{b1:'#3a4038',b2:'#aab2a0',fin:'rgba(80,170,190,.75)',dorsal:'rgba(60,150,180,.8)',spot:'rgba(30,40,30,.55)'}],
+  shibin:[{b1:'#6a7058',b2:'#e0dcc4',tail:'rgba(150,140,100,.8)',tip:'rgba(150,140,100,.8)',pec:'rgba(230,170,120,.55)',parr:'rgba(30,30,28,.55)'}],
+  firemouth:[{b1:'#5a7484',b2:'#c8d4d0',head:'#e8482a',spark:'rgba(150,230,255,.85)',fin:'rgba(210,110,80,.72)'}],
+  glassfish:[{b1:'rgba(190,215,215,.42)',b2:'rgba(235,245,240,.3)',fin:'rgba(220,235,230,.22)',bars:'rgba(140,160,155,.32)',lat:'rgba(205,220,210,.55)',H:.44}],
+  congo:[{b1:'#b89a5a',b2:'#b0d0f4',fin:'rgba(232,205,160,.55)',rear:'rgba(110,150,230,.55)',glitter:'rgba(255,235,190,.85)',longfin:1,H:.38}],
+  vampirecrab:[{b1:'#3a2458',b2:'#8a5ac0',leg:'rgba(80,50,120,.9)',eye:'#ffd23a'}],
+  ramshorn:[{sh1:'#8a1e1a',sh2:'#e86a50',band:'rgba(90,10,10,.35)',foot:'#d87060'},{sh1:'#2a4a8a',sh2:'#7aa0e0',band:'rgba(20,30,70,.35)',foot:'#8a9ab8'}],
+  goldclam:[{sh1:'#6a5a1a',sh2:'#d8b848',ring:'rgba(255,235,160,.45)',inner:'#f2e2c2'}],
   tigerbarb:[{b1:'#c8a040',b2:'#fff0c0',fin:'rgba(232,60,40,.78)',tband:'rgba(14,14,14,.86)',H:.46}],
   cherrybarb:[{b1:'#a8302a',b2:'#f4987e',fin:'rgba(232,70,50,.6)',lat:'rgba(70,20,15,.5)',H:.34}],
   lampeye:[{b1:'#8c9a90',b2:'#eef2e6',fin:'rgba(225,235,230,.4)',iris:'#1e9cff',eyeW:'#cdf2ff',eyeTop:'rgba(90,200,255,.9)',eyeGlow:1,H:.28}],
@@ -1263,17 +1292,17 @@ function palette(sp, seed, m){
   const P = Object.assign({iris:'#121212', eyeW:'#f4f1e6', pec:'rgba(255,255,255,.35)', spiral:'rgba(40,25,10,.35)'}, BASE[sp] || {}, list[idx]);
   P._m = idx;
   if (sp === 'guppy') { if (R() < .6) P.spots = Array.from({length:6}, () => [.35 + R() * .55, (R() - .5) * 1.2]); }
-  else if (sp === 'cory') P.spots = Array.from({length:14}, () => [R() * .7 - .3, R() * .7 - .5]);
+  else if (sp === 'cory' || sp === 'upsidecat') P.spots = Array.from({length:sp === 'cory' ? 14 : 22}, () => [R() * .7 - .3, R() * .7 - .5]);
   else if (sp === 'goldfish') { if (P.patch) P.patches = patches; }
   else if (P.patch) P.patches = Array.from({length:4}, () => [R() * .7 - .3, R() * .8 - .5, .12 + R() * .12]);
   if (P.dal) P.dals = Array.from({length:12}, () => [R() * .8 - .4, R() * .8 - .4]);
   if (sp === 'stingray') P.spots = Array.from({length:22}, () => [R() * 1.8 - .9, R() * 1.8 - .9]);
   if (sp === 'frog') P.spots = Array.from({length:10}, () => [R() * 1.6 - .8, R() * 1.4 - .7]);
-  if (['flowerhorn','severum','oscar','tilapia','koi','marbled','mudskipper','goby','sakura','devourer','weather','moorii'].includes(sp)) P.flowers = Array.from({length:34}, () => [R() * .8 - .38, R() * .8 - .4]);
+  if (['flowerhorn','severum','oscar','tilapia','koi','marbled','mudskipper','goby','sicyo','sakura','devourer','weather','moorii'].includes(sp)) P.flowers = Array.from({length:34}, () => [R() * .8 - .38, R() * .8 - .4]);
   else if (sp === 'discus') P.ph = R() * 6;
   else if (sp === 'gourami') P.pearls = Array.from({length:26}, () => [R() * .8 - .38, R() * .9 - .45]);
   else if (sp === 'puffer' || sp === 'figure8') P.spots = Array.from({length:12}, () => [R() * 1.6 - .8, R() * 1.2 - .7]);
-  else if (sp === 'ram') P.sparks = Array.from({length:14}, () => [R() * .6 - .3, R() * .8 - .4]);
+  else if (sp === 'ram' || sp === 'firemouth') P.sparks = Array.from({length:14}, () => [R() * .6 - .3, R() * .8 - .4]);
   P.stars = Array.from({length:7}, () => [R() * 1.2 - .6, R() * .8 - .4, R() * 6]);
   return P;
 }
@@ -1828,6 +1857,7 @@ function drawCrab(c, P, L, ph){
     c.beginPath(); c.moveTo(s2 * L * .12, -L * .05 + i * L * .02); c.lineTo(s2 * L * (.32 + i * .02), -L * (.18 - i * .02) + k * L * .2); c.lineTo(s2 * L * (.42 + i * .03), L * .08); c.stroke(); }
   c.fillStyle = P.b1; for (const s2 of [-1, 1]) { if (P.fiddler && s2 > 0) { c.save(); c.translate(L * .2, -L * .2); c.rotate(-.5 + Math.sin(ph * 1.2) * .35); c.fillStyle = P.claw; c.beginPath(); c.ellipse(L * .1, -L * .02, L * .16, L * .08, 0, 0, TAU); c.fill(); c.fillStyle = 'rgba(0,0,0,.14)'; c.beginPath(); c.moveTo(L * .22, -L * .02); c.lineTo(L * .26, L * .03); c.lineTo(L * .08, L * .03); c.closePath(); c.fill(); c.restore(); c.fillStyle = P.b1; continue; } c.beginPath(); c.ellipse(s2 * L * .2, -L * .2, L * .07, L * .05, s2 * .4, 0, TAU); c.fill(); }
   c.fillStyle = lg(c, 0, -L * .2, 0, 0, [[0,P.b2],[1,P.b1]]); c.beginPath(); c.ellipse(0, -L * .1, L * .17, L * .12, 0, 0, TAU); c.fill();
+  if (P.eye) { c.fillStyle = P.eye; dot(c, -L * .05, -L * .2, L * .04); dot(c, L * .05, -L * .2, L * .04); }
   c.fillStyle = '#111'; dot(c, -L * .05, -L * .2, L * .025); dot(c, L * .05, -L * .2, L * .025);
 }
 function drawLarva(c, P, L, ph){ const n = 10, H = L * .15;
@@ -2544,7 +2574,7 @@ const EXT = {guppy:[1.5,.75,.18], neon:[1.12,.45,.05], zebra:[1.25,.55,.08], pla
   bamboo:[1.5,.75,-.2,.13], assassin:[1.1,.9,-.1,.38], clam:[1.1,.6,0,.12], pestsnail:[1.1,.85,-.1,.38], nymph:[1.3,.6,0,.05],
   cavefish:[1.12,.55,.05], bichir:[1.15,.45,.05], archer:[1.12,.8,.05], tigerfish:[1.12,.95,.05], eel:[1.05,.32,0], piranha:[1.12,.8,.05], prawn:[1.8,.75,-.35,.13], feeder:[1.12,.55,.05],
   ghost:[1.5,.75,-.2,.13], cherry:[1.5,.75,-.2,.13], amano:[1.5,.75,-.2,.13], crystal:[1.5,.75,-.2,.13], apple:[1.1,.85,-.1,.38], nerite:[1.1,.8,-.1,.35], horned:[1.1,.9,-.1,.38], moonjelly:[.75,1.15,0,-.22], paradise:[1.2,1.1,.06,-.1], bitterling:[1.12,.85,.05], sawacrab:[1.3,.7,0,.15], loong:[1.22,.5,.05,-.02]};
-Object.assign(EXT, {tigerbarb:[1.12,.8,.05], cherrybarb:[1.12,.7,.05], lampeye:[1.12,.55,.05], clownkilli:[1.2,.5,.08], krib:EXT.apisto, newt:EXT.axolotl, firefly:[1.1,.45,0,.1], beetle:[1.25,.7,0,.05], softshell:EXT.turtle, garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
+Object.assign(EXT, {upsidecat:EXT.cory, sicyo:EXT.mudskipper, shibin:EXT.redtail, firemouth:EXT.ram, glassfish:[1.12,.75,.05], congo:[1.25,.8,.06], vampirecrab:EXT.microcrab, ramshorn:EXT.nerite, goldclam:EXT.clam, tigerbarb:[1.12,.8,.05], cherrybarb:[1.12,.7,.05], lampeye:[1.12,.55,.05], clownkilli:[1.2,.5,.08], krib:EXT.apisto, newt:EXT.axolotl, firefly:[1.1,.45,0,.1], beetle:[1.25,.7,0,.05], softshell:EXT.turtle, garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
 function drawFishThumb(cnv, sp, P, ph, ex, fit, fx, seed){
   const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height, e = EXT[sp] || [1.3,1,0,0];
   c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
@@ -2570,6 +2600,10 @@ function decoGeo(dc){
   else if (dc.k === 'glowkelp') g.rib = Array.from({length:4}, () => ({dx:(R() - .5) * 36, h:130 + R() * 50, w:6 + R() * 3, ph:R() * 6}));
   else if (dc.k === 'bladder') g.st = Array.from({length:10}, () => ({x:(R() - .5) * 72, cx:(R() - .5) * 26, ex:(R() - .5) * 40, l:28 + R() * 30, ph:R() * 6}));
   else if (dc.k === 'moss') g.fuzz = Array.from({length:80}, () => ({x:(R() - .5) * 108, a:-Math.PI / 2 + (R() - .5) * 1.8, l:2 + R() * 4}));
+  else if (dc.k === 'anubias') { g.leaves = Array.from({length:7}, (_, i) => ({ox:(R() - .5) * 34, a:-1.1 + i * (2.2 / 6) + (R() - .5) * .25, st:8 + R() * 10, l:18 + R() * 12, w:8 + R() * 4, ph:R() * 6, dark:R() < .5})); g.flower = R() < .6; }
+  else if (dc.k === 'sword') g.leaves = Array.from({length:10}, (_, i) => ({a:-1.05 + i * (2.1 / 9) + (R() - .5) * .18, l:70 + R() * 70, w:8 + R() * 6, ph:R() * 6, col:['#3f8a3a','#4f9e44','#357a34','#5aa84a'][(R() * 4) | 0]}));
+  else if (dc.k === 'hairgrass') g.blades = Array.from({length:46}, () => ({x:(R() - .5) * 104, h:14 + R() * 26, lean:(R() - .5) * .5, ph:R() * 6, col:['#58b04a','#6cc25a','#4a9a40'][(R() * 3) | 0]}));
+  else if (dc.k === 'tigerlotus') g.leaves = Array.from({length:6}, (_, i) => ({dx:(R() - .5) * 84, h:30 + i * 17 + R() * 12, r:14 + R() * 7, ph:R() * 6, rot:(R() - .5) * .8, spots:Array.from({length:7}, () => [(R() - .5) * 1.4, (R() - .5) * 1.4, .1 + R() * .12])}));
   rt.geo.set(dc.id, g); return g;
 }
 const WOOD = [[-66,-2,-12,-30,50,-74,11],[-8,-28,-30,-60,-22,-94,6],[18,-46,45,-54,72,-40,5],[-42,-12,-60,-30,-74,-36,4]];
@@ -2706,6 +2740,89 @@ function drawDecoShape(c, dc, t){
       for (let i = 0; i < 10; i++) { c.fillStyle = ['#ff4040','#ffd040','#40c0ff','#ff80d0'][i % 4]; dot(c, Math.sin(i * 2.3) * (24 - i * 2), -16 - i * 7, 2.6); }
       c.fillStyle = '#ffd040'; dot(c, 0, -94, 5);
       break;
+    case 'anubias': {
+      c.fillStyle = '#6a6a62'; c.beginPath(); c.ellipse(0, -6, 26, 9, 0, Math.PI, 0); c.fill(); c.fillStyle = '#4a4a44'; c.fillRect(-26, -6, 52, 6);
+      c.strokeStyle = '#5a7a3a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-20, -10); c.quadraticCurveTo(0, -16, 20, -11); c.stroke();
+      for (const lf of g.leaves) { c.save(); c.translate(lf.ox * .6, -12); c.rotate(lf.a + Math.sin(t * .6 + lf.ph) * .03);
+        c.strokeStyle = '#3a6a2a'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -lf.st); c.stroke();
+        c.fillStyle = lf.dark ? '#1f5a2a' : '#2c6e34'; c.beginPath(); c.ellipse(0, -lf.st - lf.l / 2, lf.w, lf.l / 2, 0, 0, TAU); c.fill();
+        c.strokeStyle = 'rgba(170,220,160,.45)'; c.lineWidth = .9; c.beginPath(); c.moveTo(0, -lf.st); c.lineTo(0, -lf.st - lf.l * .9); c.stroke();
+        c.fillStyle = 'rgba(255,255,255,.14)'; c.beginPath(); c.ellipse(-lf.w * .35, -lf.st - lf.l * .6, lf.w * .3, lf.l * .2, 0, 0, TAU); c.fill(); c.restore(); }
+      if (g.flower && (dc.g || 1) >= 1) { c.strokeStyle = '#4a7a3a'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(4, -14); c.quadraticCurveTo(8, -40, 6, -56); c.stroke(); c.fillStyle = '#f4f2e4'; c.beginPath(); c.ellipse(6, -60, 4, 7, .2, 0, TAU); c.fill(); c.fillStyle = '#f2e08a'; c.beginPath(); c.ellipse(5, -59, 1.6, 4.5, .2, 0, TAU); c.fill(); }
+      break; }
+    case 'sword':
+      for (const lf of g.leaves) { c.save(); c.translate(0, -4); c.rotate(lf.a * .75 + Math.sin(t * .7 + lf.ph) * .05);
+        c.fillStyle = lf.col; c.beginPath(); c.moveTo(-2, 0); c.quadraticCurveTo(-lf.w, -lf.l * .5, lf.a * 10, -lf.l); c.quadraticCurveTo(lf.w, -lf.l * .5, 2, 0); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(190,230,170,.45)'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(0, -lf.l * .5, lf.a * 10, -lf.l * .97); c.stroke(); c.restore(); }
+      c.fillStyle = '#4a3a28'; c.beginPath(); c.ellipse(0, -2, 14, 4, 0, 0, TAU); c.fill();
+      break;
+    case 'hairgrass':
+      c.lineCap = 'round';
+      for (const b of g.blades) { const sw = Math.sin(t * 1.1 + b.ph) * 2.2; c.strokeStyle = b.col; c.lineWidth = 1.3; c.beginPath(); c.moveTo(b.x, 0); c.quadraticCurveTo(b.x + b.lean * b.h * .5, -b.h * .55, b.x + b.lean * b.h + sw, -b.h); c.stroke(); }
+      c.fillStyle = 'rgba(70,110,50,.35)'; c.beginPath(); c.ellipse(0, -1, 54, 3.5, 0, 0, TAU); c.fill();
+      break;
+    case 'tigerlotus': {
+      for (const lf of g.leaves) { const sw = Math.sin(t * .6 + lf.ph) * 4, x = lf.dx + sw, y = -lf.h;
+        c.strokeStyle = '#6a3a2a'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, -6); c.quadraticCurveTo(lf.dx * .4, y * .5, x, y + lf.r * .6); c.stroke();
+        c.save(); c.translate(x, y); c.rotate(lf.rot + Math.sin(t * .5 + lf.ph) * .08);
+        c.fillStyle = '#9a2a2a'; c.beginPath(); c.moveTo(0, lf.r * .2); c.arc(0, 0, lf.r, Math.PI * .58, Math.PI * 2.42); c.closePath(); c.fill();
+        c.fillStyle = 'rgba(40,10,10,.55)'; for (const [sx, sy, sr] of lf.spots) { const px = sx * lf.r * .7, py = sy * lf.r * .7; if (px * px + py * py < lf.r * lf.r * .8) dot(c, px, py, sr * lf.r); }
+        c.strokeStyle = 'rgba(255,170,150,.35)'; c.lineWidth = .8; c.beginPath(); for (let k = 0; k < 5; k++) { const a = Math.PI * (.7 + k * .4); c.moveTo(0, lf.r * .2); c.lineTo(Math.cos(a) * lf.r * .9, Math.sin(a) * lf.r * .9); } c.stroke(); c.restore(); }
+      c.fillStyle = '#5a3a24'; c.beginPath(); c.ellipse(0, -5, 12, 6, 0, 0, TAU); c.fill();
+      break; }
+    case 'bubbletea': {
+      c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(0, 0, 22, 4, 0, 0, TAU); c.fill();
+      c.save(); c.translate(7, -82); c.rotate(.16); c.fillStyle = '#e8588a'; c.fillRect(-3.6, -32, 7.2, 34); c.restore();
+      c.fillStyle = 'rgba(255,255,255,.24)'; c.beginPath(); c.moveTo(-25, -80); c.lineTo(25, -80); c.lineTo(18, 0); c.lineTo(-18, 0); c.closePath(); c.fill();
+      c.fillStyle = lg(c, 0, -68, 0, 0, [[0,'#e6c094'],[1,'#c48c5a']]); c.beginPath(); c.moveTo(-23.4, -67); c.lineTo(23.4, -67); c.lineTo(18, -1); c.lineTo(-18, -1); c.closePath(); c.fill();
+      c.save(); c.globalAlpha = .45; c.translate(7, -82); c.rotate(.16); c.fillStyle = '#e8588a'; c.fillRect(-3.6, 2, 7.2, 74); c.restore();
+      for (let i = 0; i < 20; i++) { const row = (i / 7) | 0, x = -15 + (i % 7) * 5 + (row % 2) * 2.5, y = -5 - row * 5; c.fillStyle = '#2a1810'; dot(c, x, y, 2.9); c.fillStyle = 'rgba(255,255,255,.35)'; dot(c, x - .9, y - .9, .8); }
+      c.strokeStyle = 'rgba(255,255,255,.65)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-25, -80); c.lineTo(-18, 0); c.moveTo(25, -80); c.lineTo(18, 0); c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.45)'; c.beginPath(); c.ellipse(0, -81, 26, 4.5, 0, 0, TAU); c.fill(); c.stroke();
+      c.save(); if (dc.flip) c.scale(-1, 1); c.fillStyle = 'rgba(120,60,30,.85)'; c.font = '700 10px sans-serif'; c.textAlign = 'center'; c.fillText('珍奶', 0, -38); c.restore();
+      c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(-19, -76, 4, 66);
+      break; }
+    case 'lighthouse': {
+      const night = rt.lightK < .5;
+      c.fillStyle = '#5a6066'; c.beginPath(); c.ellipse(0, -5, 27, 8, 0, Math.PI, 0); c.fill(); c.fillRect(-27, -5, 54, 5);
+      for (let i = 0; i < 5; i++) { const y0 = -8 - i * 21, y1 = y0 - 21, w0 = 15 - i * 1.4, w1 = 15 - (i + 1) * 1.4; c.fillStyle = i % 2 ? '#f4f0e8' : '#d0402a'; c.beginPath(); c.moveTo(-w0, y0); c.lineTo(-w1, y1); c.lineTo(w1, y1); c.lineTo(w0, y0); c.closePath(); c.fill(); }
+      c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.moveTo(4, -8); c.lineTo(15, -8); c.lineTo(8, -113); c.lineTo(3, -113); c.closePath(); c.fill();
+      c.fillStyle = '#2a2a2e'; c.fillRect(-13, -117, 26, 4); c.fillStyle = night ? '#fff4b0' : '#cfe4ee'; c.fillRect(-7, -133, 14, 16); c.strokeStyle = '#2a2a2e'; c.lineWidth = 1.2; c.strokeRect(-7, -133, 14, 16); c.beginPath(); c.moveTo(0, -133); c.lineTo(0, -117); c.stroke();
+      c.fillStyle = '#b0301e'; c.beginPath(); c.moveTo(-10, -133); c.lineTo(0, -147); c.lineTo(10, -133); c.closePath(); c.fill();
+      if (night) { const a = Math.sin(t * .9) * 1.15, k = 1 - rt.lightK * 2; c.save(); c.globalCompositeOperation = 'lighter';
+        c.fillStyle = rg(c, 0, -125, 0, 0, -125, 26, [[0,'rgba(255,245,180,' + (.7 * k).toFixed(3) + ')'],[1,'rgba(255,245,180,0)']]); c.fillRect(-26, -151, 52, 52);
+        for (const sd of [1, -1]) { const ang = a + (sd < 0 ? Math.PI : 0), ex = Math.cos(ang) * 170, ey = Math.sin(ang) * 46; c.fillStyle = lg(c, 0, -125, ex, -125 + ey, [[0,'rgba(255,245,190,' + (.42 * k * (sd > 0 ? 1 : .55)).toFixed(3) + ')'],[1,'rgba(255,245,190,0)']]);
+          c.beginPath(); c.moveTo(0, -128); c.lineTo(ex - ey * .25, -125 + ey - 18); c.lineTo(ex + ey * .25, -125 + ey + 18); c.lineTo(0, -122); c.closePath(); c.fill(); } c.restore(); }
+      break; }
+    case 'castle': {
+      const night = rt.lightK < .5, stone = lg(c, 0, -120, 0, 0, [[0,'#cbbb9c'],[1,'#8c7c62']]);
+      c.fillStyle = stone; c.fillRect(-36, -62, 72, 62); c.fillRect(-52, -92, 22, 92); c.fillRect(30, -92, 22, 92); c.fillRect(-13, -112, 26, 52);
+      for (const [x0, y0, w0] of [[-52, -92, 22], [30, -92, 22], [-13, -112, 26], [-36, -62, 72]]) for (let x = x0; x < x0 + w0 - 2; x += 8) c.fillRect(x, y0 - 6, 5, 6);
+      c.fillStyle = '#9a4a32'; for (const [x0, y0, w0] of [[-52, -98, 22], [30, -98, 22]]) { c.beginPath(); c.moveTo(x0 - 2, y0); c.lineTo(x0 + w0 / 2, y0 - 22); c.lineTo(x0 + w0 + 2, y0); c.closePath(); c.fill(); }
+      c.strokeStyle = 'rgba(70,55,40,.35)'; c.lineWidth = .8; c.beginPath(); for (let y = -8; y > -60; y -= 9) { c.moveTo(-36, y); c.lineTo(36, y); } c.stroke();
+      c.fillStyle = '#1e1814'; c.beginPath(); c.moveTo(-11, 0); c.lineTo(-11, -18); c.arc(0, -18, 11, Math.PI, 0); c.lineTo(11, 0); c.closePath(); c.fill();
+      c.fillStyle = night ? 'rgba(255,214,120,.95)' : '#2a221c'; for (const [x, y] of [[-41, -62], [41, -62], [0, -88], [-24, -38], [24, -38]]) { c.beginPath(); c.moveTo(x - 3, y + 5); c.lineTo(x - 3, y); c.arc(x, y, 3, Math.PI, 0); c.lineTo(x + 3, y + 5); c.closePath(); c.fill(); }
+      if (night) { c.save(); c.globalCompositeOperation = 'lighter'; for (const [x, y] of [[-41, -62], [41, -62], [0, -88], [-24, -38], [24, -38]]) { c.fillStyle = rg(c, x, y + 1, 0, x, y + 1, 14, [[0,'rgba(255,200,110,.5)'],[1,'rgba(255,200,110,0)']]); c.fillRect(x - 14, y - 13, 28, 28); } c.restore(); }
+      c.strokeStyle = '#4a3a2a'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(0, -118); c.lineTo(0, -140); c.stroke(); c.fillStyle = '#d83a2a'; c.beginPath(); c.moveTo(0, -140); c.quadraticCurveTo(9, -137 + Math.sin(t * 3) * 2, 16, -136 + Math.sin(t * 3 + 1) * 2); c.lineTo(0, -131); c.closePath(); c.fill();
+      c.fillStyle = 'rgba(90,150,70,.6)'; for (const [x, y, r] of [[-48, -6, 5], [-30, -3, 4], [44, -10, 5], [20, -2, 3]]) dot(c, x, y, r);
+      break; }
+    case 'volcano': {
+      const ph = (t + (dc.seed % 10)) % 18, er = ph < 2.6 ? Math.sin(ph / 2.6 * Math.PI) : 0;
+      c.fillStyle = lg(c, 0, -72, 0, 0, [[0,'#4e3c34'],[1,'#2a2220']]); c.beginPath(); c.moveTo(-54, 0); c.quadraticCurveTo(-26, -40, -14, -70); c.lineTo(14, -70); c.quadraticCurveTo(26, -40, 54, 0); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(255,' + (100 + er * 80 | 0) + ',40,' + (.45 + er * .5).toFixed(2) + ')'; c.lineWidth = 1.8; c.beginPath(); c.moveTo(-6, -68); c.lineTo(-12, -44); c.lineTo(-8, -30); c.moveTo(7, -68); c.lineTo(14, -48); c.lineTo(22, -26); c.moveTo(-18, -40); c.lineTo(-28, -18); c.stroke();
+      c.fillStyle = 'rgba(255,' + (110 + er * 90 | 0) + ',40,' + (.7 + er * .3).toFixed(2) + ')'; c.beginPath(); c.ellipse(0, -70, 14, 4, 0, 0, TAU); c.fill();
+      if (er > 0 || rt.lightK < .5) { c.save(); c.globalCompositeOperation = 'lighter'; const a = Math.max(er, rt.lightK < .5 ? .35 : 0); c.fillStyle = rg(c, 0, -72, 0, 0, -72, 46, [[0,'rgba(255,140,50,' + (.55 * a).toFixed(3) + ')'],[1,'rgba(255,140,50,0)']]); c.fillRect(-46, -118, 92, 92); c.restore(); }
+      break; }
+    case 'scooter': {
+      c.save(); c.rotate(-.1);
+      c.fillStyle = '#1e1e22'; dot(c, -34, -12, 13); dot(c, 34, -12, 13); c.fillStyle = '#6a6a70'; dot(c, -34, -12, 5); dot(c, 34, -12, 5);
+      c.fillStyle = '#8ac0b0'; c.beginPath(); c.moveTo(-44, -18); c.quadraticCurveTo(-46, -40, -24, -42); c.lineTo(6, -40); c.lineTo(10, -22); c.lineTo(28, -22); c.quadraticCurveTo(30, -50, 36, -58); c.lineTo(46, -56); c.quadraticCurveTo(46, -30, 44, -18); c.closePath(); c.fill();
+      c.fillStyle = '#3a2a24'; c.beginPath(); c.ellipse(-12, -45, 22, 5, 0, 0, TAU); c.fill();
+      c.strokeStyle = '#3a3a40'; c.lineWidth = 2.4; c.beginPath(); c.moveTo(40, -57); c.lineTo(36, -70); c.moveTo(30, -70); c.lineTo(44, -72); c.stroke(); c.fillStyle = '#d8e8e8'; dot(c, 47, -50, 3.4);
+      c.fillStyle = 'rgba(140,80,40,.55)'; for (const [x, y, r] of [[-30, -30, 4], [-6, -36, 3], [40, -34, 3.5], [16, -26, 2.5]]) dot(c, x, y, r);
+      c.fillStyle = 'rgba(90,150,70,.7)'; for (const [x, y, r] of [[-40, -22, 4], [-20, -42, 3], [44, -24, 3], [30, -60, 2.5]]) dot(c, x, y, r);
+      c.fillStyle = '#f2f0e0'; c.fillRect(-48, -34, 9, 6); c.restore();
+      break; }
     case 'tangyuan': {
       c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(0, 0, 22, 4, 0, 0, TAU); c.fill(); c.fillStyle = '#e8e0cc'; c.fillRect(-7, -3, 14, 3);
       c.fillStyle = '#f6f3ea'; c.beginPath(); c.moveTo(-23, -22); c.quadraticCurveTo(-21, -2, 0, -2); c.quadraticCurveTo(21, -2, 23, -22); c.closePath(); c.fill();
@@ -3117,6 +3234,11 @@ function update(dt){
     if (ct <= 0) { ct = rand(180, 320); spawnCoin(b.x + rand(-8, 8) * s2, b.y - 34 * s2, 3 + ((Math.random() * 6) | 0)); }
     rt.chest.set(dc.id, ct);
   }
+  for (const dc of state.deco) if (dc.k === 'bubbletea' || dc.k === 'volcano') { const b = decoBase(dc), s2 = decoScale(dc), mir = dc.flip ? -1 : 1; let e = (rt.emit.get(dc.id) || 0) - dt;
+    if (dc.k === 'bubbletea') { if (e <= 0 && rt.bubbles.length < 90) { rt.bubbles.push({x:b.x + mir * 12 * s2, y:b.y - 114 * s2, r:rand(1.4, 3) * U, vy:rand(30, 55) * U, ph:rand(6)}); e = rand(.5, 1.4); } }
+    else { const ph = (rt.t + (dc.seed % 10)) % 18, er = ph < 2.6; if (er && e <= 0 && rt.bubbles.length < 90) { rt.bubbles.push({x:b.x + rand(-8, 8) * s2, y:b.y - 72 * s2, r:rand(2, 5) * U, vy:rand(60, 110) * U, ph:rand(6)}); e = rand(.03, .08); }
+      const was = (rt.volc || (rt.volc = new Map())).get(dc.id); if (er && !was) { if (Math.random() < .4) spawnCoin(b.x + rand(-10, 10) * s2, b.y - 76 * s2, 2 + ((Math.random() * 4) | 0)); } rt.volc.set(dc.id, er); }
+    rt.emit.set(dc.id, e); }
   for (const dc of state.deco) if (dc.k === 'bubbler' && !outageOn()) {
     let e = (rt.emit.get(dc.id) || 0) - dt;
     if (e <= 0 && rt.bubbles.length < 90) { const b = decoBase(dc), s = decoScale(dc); rt.bubbles.push({x:b.x + rand(-4, 4) * s, y:b.y - 14 * s, r:rand(1.4, 3.8) * U, vy:rand(46, 80) * U, ph:rand(6)}); e = rand(.08, .2); }
@@ -3272,7 +3394,7 @@ function drawRunner(r){
   ctx.save(); ctx.translate(r.x, r.y);
   if (r.stun > 0) ctx.translate(rand(-1.6, 1.6) * U, rand(-1.6, 1.6) * U);
   if (sp.snail && sp.zone === 'glass') { const left = r.x < W / 2; ctx.rotate(left ? Math.PI / 2 : -Math.PI / 2); ctx.scale((left ? r.vface < 0 : r.vface > 0) ? -1 : 1, 1); }
-  else { const s = Math.sign(r.turn) || 1, sx = s * Math.max(.18, Math.abs(r.turn)); ctx.rotate(r.tilt * s); ctx.scale(sx * (r.eat > 0 ? 1.06 : 1), r.preg ? 1.08 : 1); }
+  else { const s = Math.sign(r.turn) || 1, sx = s * Math.max(.18, Math.abs(r.turn)); ctx.rotate(r.tilt * s); ctx.scale(sx * (r.eat > 0 ? 1.06 : 1), (r.preg ? 1.08 : 1) * (sp.upside ? -1 : 1)); }
   const tier2 = r.d.rare && RARES[r.d.rare].tier === 2, aura = sp.alien && P.aura ? P.aura : tier2 ? RARES[r.d.rare].col : null;
   if (aura) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const a = .2 + Math.sin(rt.t * 2 + r.d.seed) * .08;
     ctx.fillStyle = rg(ctx, 0, 0, 0, 0, 0, L * .75, [[0,alpha(aura, a)],[1,alpha(aura, 0)]]); ctx.fillRect(-L, -L, L * 2, L * 2); ctx.restore(); }
@@ -3416,7 +3538,7 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['trade1','第一筆交易','跟其他玩家完成一次交易', s => [s.stats.trades | 0, 1], 200], ['trade10','魚市大亨','跟其他玩家完成 10 次交易', s => [s.stats.trades | 0, 10], 800], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['bobatea','珍奶控','在魚缸裡放一杯珍珠奶茶', s => [s.deco.some(d => d.k === 'bubbletea') ? 1 : 0, 1], 100], ['jungle','水草叢林','魚缸裡同時有 6 種不同的活水草', s => [new Set(s.deco.filter(d => DECOS[d.k].plant && !d.dead).map(d => d.k)).size, 6], 400], ['twriver','台灣溪流缸','同時養 5 種台灣原生生物', s => [new Set(s.fish.filter(d => isTwNative(d)).map(d => d.sp)).size, 5], 400], ['trade1','第一筆交易','跟其他玩家完成一次交易', s => [s.stats.trades | 0, 1], 200], ['trade10','魚市大亨','跟其他玩家完成 10 次交易', s => [s.stats.trades | 0, 10], 800], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
