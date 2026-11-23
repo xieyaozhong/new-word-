@@ -534,6 +534,15 @@ const SPECIES = {
   turtle:  {name:'麝香龜', kind:'inv', turtle:true, eats:true, price:450, len:52, interval:70, value:6, zone:'frog', speed:.4, rests:true, scav:true, tags:['兩棲','要餵食'], morphs:['原生'], desc:'小型水龜，會在沙上散步，時不時游上水面換氣。要吃飼料。'},
   tadpole: {name:'蝌蚪', kind:'inv', tadpole:true, eats:true, price:25, len:22, interval:120, value:1, zone:'bottom', speed:.5, scav:true, tags:['會長大'], morphs:['原生'], desc:'吃飽長大後會長出腳，變成侏儒爪蟾。'},
   horned:  {name:'角螺', kind:'inv', snail:true, price:60, len:20, interval:90, value:1, zone:'glass', speed:.1, rests:true, algae:.35, tags:['貼玻璃','吃藻'], morphs:['角螺'], desc:'殼上長著小角的迷你螺，也很會吃藻。'},
+  tigerbarb:{name:'虎皮魚', kind:'fish', draw:'tetra', price:80, len:46, interval:55, value:2, zone:'mid', speed:1.15, school:true, aggro:'nip', tags:['群游','會咬鰭'], traits:['少於 6 隻時會去咬鬥魚、神仙魚這些長鰭魚的鰭','養 6 隻以上就會忙著跟同伴玩，不去惹別人'], morphs:['原生'], desc:'金黃色的身體上有四條黑色直紋，像小老虎一樣活潑。'},
+  cherrybarb:{name:'櫻桃燈', kind:'fish', draw:'tetra', price:60, len:40, interval:55, value:2, zone:'mid', speed:.95, school:true, tags:['群游','溫和'], morphs:['櫻桃紅'], desc:'公魚發情時全身變成櫻桃一樣的紅色，個性很溫和。'},
+  lampeye:{name:'藍眼燈', kind:'fish', draw:'tetra', price:70, len:34, interval:55, value:2, zone:'top', speed:1.05, school:true, tags:['群游','上層'], traits:['眼睛上半部是亮藍色，關燈後會微微發光'], morphs:['原生'], desc:'非洲來的小型鱂魚，一群在水面下游的時候，像一串藍色小燈。'},
+  clownkilli:{name:'火箭燈', kind:'fish', draw:'tetra', price:110, len:32, interval:55, value:3, zone:'top', speed:.7, tags:['上層','小型'], traits:['總是貼在水面下慢慢漂，尾巴像一團小火焰'], morphs:['原生'], desc:'奶油色身體配上四條黑紋，尾巴紅藍相間，像一支要發射的小火箭。'},
+  krib:{name:'紅肚鳳凰', kind:'fish', draw:'apisto', cichlid:true, price:380, len:56, interval:55, value:6, zone:'low', speed:.75, cond:['cave'], tags:['中下層','慈鯛','洞穴繁殖'], traits:['要有陶罐或沉木當洞穴才會安心','母魚的肚子是粉紅色的，發情時特別亮'], morphs:['經典'], desc:'西非來的小型慈鯛，會躲在洞穴裡產卵，爸媽一起帶小孩。'},
+  newt:{name:'紅腹蠑螈', kind:'fish', draw:'axolotl', price:680, len:70, interval:60, value:9, zone:'bottom', speed:.32, rests:true, scav:true, tags:['兩棲','冷水','會上來換氣'], traits:['肚子是鮮豔的橘紅色，用來警告敵人「我有毒」','不時會游到水面吸一口空氣'], morphs:['紅腹'], desc:'跟六角恐龍是親戚，但長大後會用肺呼吸，喜歡偏涼的水。'},
+  firefly:{name:'黃緣螢幼蟲', kind:'inv', larva:true, price:220, len:34, interval:80, value:3, zone:'bottom', speed:.2, rests:true, hunt:{ratio:1, on:'pest'}, tags:['台灣原生','夜光','吃囊螺'], traits:['台灣少數住在水裡的螢火蟲幼蟲','會去吃煩人的囊螺','關燈後尾巴會一閃一閃發出綠光'], morphs:['原生'], desc:'黃緣螢的幼蟲住在乾淨的溝渠和水田裡，長大後才會飛上岸變成螢火蟲。'},
+  beetle:{name:'龍蝨', kind:'inv', beetle:true, hop:true, eats:true, price:260, len:40, interval:70, value:4, zone:'mid', speed:.7, scav:true, tags:['台灣原生','水生昆蟲','要餵食'], traits:['後腳像船槳一樣，一划一划地游','屁股帶著一顆空氣泡泡，用完了就游到水面換一顆'], morphs:['黃緣'], desc:'外殼油亮、邊緣有一圈黃色的水生甲蟲，以前在台灣的水田裡很常見。'},
+  softshell:{name:'中華鱉', kind:'inv', turtle:true, eats:true, burrow:true, price:620, len:62, interval:70, value:7, zone:'frog', speed:.38, rests:true, scav:true, tags:['台灣原生','兩棲','要餵食','鑽沙'], traits:['背甲是軟的，摸起來像皮革','喜歡把自己埋在沙裡，只露出長長的鼻子'], morphs:['原生'], desc:'俗稱甲魚。鼻子像一根小吸管，躲在沙裡也能伸出水面呼吸。'},
   garra:{name:'親親魚', kind:'fish', story:'chang', draw:'redtail', price:3000, len:52, interval:50, value:10, zone:'bottom', speed:.85, cleaner:true, tags:['清潔魚','劇情限定'], traits:['會游到其他魚身邊，輕輕啄掉牠們身上的髒東西','被清潔過的魚心情會變好，生病的魚有機會直接痊癒'], morphs:['原色'], desc:'在溫泉魚療裡幫人去角質的小魚。牠們也很喜歡幫別的魚「做 SPA」。'},
   chronojelly:{name:'時光水母', kind:'fish', story:'zorb', alien:true, draw:'jellyA', price:20000, len:62, interval:45, value:80, zone:'jelly', speed:.2, limit:1, nofeed:true, flat:true, tags:['外星生物','不用餵','劇情限定'], traits:['不用吃東西','每隔十分鐘左右，會讓一隻剛當完爸媽的魚的休息時間倒轉歸零'], morphs:['時光'], desc:'從時空裂縫漂出來的水母，傘緣的光像時鐘指針一樣慢慢轉。'},
   pararasbora:{name:'台灣副細鯽', kind:'fish', story:'lin', draw:'tetra', price:6000, len:44, interval:45, value:14, zone:'mid', speed:.9, school:true, picky:true, tags:['台灣特有','瀕臨絕種','劇情限定'], traits:['快要消失的台灣特有魚，對水質非常敏感','喜歡成群在乾淨的緩流裡游'], morphs:['原生'], desc:'曾經遍布台灣中北部的小溪，現在只剩零星的族群。身體細長，側面有一條深色的縱帶。'},
@@ -565,11 +574,11 @@ const RARES = {
 const GENE_TXT = {
   neon:'diamond:鑽石:D:metal, longfin:長鰭:R:longfin',
   cardinal:'gold:金化:R:xanth, longfin:長鰭:R:longfin',
-  zebra:'longfin:長鰭:D:longfin, leopard:豹紋:R:spots, glow:螢光:D:glow',
-  guppy:'ribbon:緞帶:D:ribbon:ster, dumbo:大耳:D:dumbo, snake:蛇王:D:lace, blueeye:藍眼:R:blueEye',
-  platy:'hifin:高鰭:D:longfin, tux:燕尾服:D:tux, marble:大理石:R:koi',
-  swordtail:'lyre:琴尾:D:longfin, tux:燕尾服:D:tux, gold:金化:R:xanth',
-  molly:'balloon:球型:R:balloon, lyre:琴尾:D:longfin, marble:大理石:D:koi',
+  zebra:'longfin:長鰭:D:longfin, leopard:豹紋:R:spots, glow:螢光:D:glow, gold:金化:R:xanth',
+  guppy:'ribbon:緞帶:D:ribbon:ster, dumbo:大耳:D:dumbo, snake:蛇王:D:lace, blueeye:藍眼:R:blueEye, mosaic:馬賽克:D:mosaic',
+  platy:'hifin:高鰭:D:longfin, tux:燕尾服:D:tux, marble:大理石:R:koi, blue:藍化:R:blue',
+  swordtail:'lyre:琴尾:D:longfin, tux:燕尾服:D:tux, gold:金化:R:xanth, pink:粉紅:R:pink',
+  molly:'balloon:球型:R:balloon, lyre:琴尾:D:longfin, marble:大理石:D:koi, dalmatian:大麥町:D:spots',
   rasbora:'gold:黃金:R:xanth, blue:藍化:R:blue, longfin:長鰭:R:longfin',
   rummy:'gold:黃金:R:xanth, longfin:長鰭:R:longfin, diamond:鑽石:D:metal',
   lemon:'longfin:長鰭:R:longfin, glow:螢光:D:glow, diamond:鑽石:D:metal',
@@ -584,9 +593,9 @@ const GENE_TXT = {
   oto:'spots:斑點:D:spots, giant:大型:R:giant',
   loach:'gold:黃金:R:xanth, dwarf:迷你:R:dwarf, spots:斑點:R:spots',
   sae:'gold:金線:R:xanth, giant:巨型:R:giant',
-  goldfish:'butterfly:蝶尾:D:veil, panda:熊貓:R:panda, short:短身:R:balloon, sakura:櫻花:D:koi',
-  ranchu:'panda:熊貓:R:panda, sakura:櫻花:D:koi, bighead:大頭:D:giant',
-  pearlscale:'panda:熊貓:R:panda, sakura:櫻花:D:koi, butterfly:蝶尾:D:veil',
+  goldfish:'butterfly:蝶尾:D:veil, panda:熊貓:R:panda, short:短身:R:balloon, sakura:櫻花:D:koi, telescope:龍睛:R:telescope, calico:五花:D:calico',
+  ranchu:'panda:熊貓:R:panda, sakura:櫻花:D:koi, bighead:大頭:D:giant, calico:五花:D:calico',
+  pearlscale:'panda:熊貓:R:panda, sakura:櫻花:D:koi, butterfly:蝶尾:D:veil, calico:五花:D:calico',
   gourami:'blue:藍化:R:blue, giant:巨型:D:giant, lace:蕾絲:D:lace',
   bluegourami:'gold:金化:R:xanth, opal:蛋白石:D:koi',
   dwarfgourami:'red:火焰:R:red, blue:粉藍:R:blue, neon:霓虹:D:metal',
@@ -594,9 +603,9 @@ const GENE_TXT = {
   goldgourami:'white:白化:R:leuc, red:紅化:R:red, giant:巨型:D:giant',
   ram:'balloon:球型:R:balloon, longfin:長鰭:D:longfin, gold:金化:R:xanth',
   apisto:'lyre:琴尾:D:longfin, red:雙紅:R:red, blue:藍化:R:blue',
-  angel:'veil:長鰭:D:veil, koi:錦鯉:D:koi, marble:大理石:R:stripes',
-  discus:'leopard:豹紋:D:spots, snake:蛇紋:D:lace, red:紅化:R:red',
-  betta:'halfmoon:大尾|半月:I:veil, dumbo:大耳:R:dumbo, dragon:龍鱗:D:dragon, koi:錦鯉:D:koi',
+  angel:'veil:長鰭:D:veil, koi:錦鯉:D:koi, marble:大理石:R:stripes, blue:藍化:R:blue',
+  discus:'leopard:豹紋:D:spots, snake:蛇紋:D:lace, red:紅化:R:red, blue:藍鑽:R:blue',
+  betta:'halfmoon:大尾|半月:I:veil, dumbo:大耳:R:dumbo, dragon:龍鱗:D:dragon, koi:錦鯉:D:koi, galaxy:銀河:D:galaxy, violet:紫羅蘭:R:violet',
   parrot:'white:白化:R:leuc, marble:花斑:D:koi, kingkong:金剛:D:giant',
   flowerhorn:'kamfa:珍珠:D:pearl, hump:巨頭:D:hump, red:血紅:R:red',
   arowana:'red:血紅:R:red, platinum:白金:R:metal, giant:巨型:D:giant',
@@ -608,8 +617,8 @@ const GENE_TXT = {
   glasscat:'glow:螢光:D:glow, giant:大型:R:giant, long:長身:R:long',
   rainbowfish:'blue:藍化:R:blue, red:紅化:R:red, longfin:長鰭:D:longfin',
   redtail:'gold:黃金:R:xanth, longfin:長鰭:D:longfin',
-  medaka:'glow:光體:D:glow, daruma:達摩:R:balloon, hire:長鰭:D:longfin',
-  pleco:'longfin:長鰭:R:longfin, blueeye:藍眼:R:blueEye',
+  medaka:'glow:光體:D:glow, daruma:達摩:R:balloon, hire:長鰭:D:longfin, galaxy:銀河:D:galaxy, blue:青:R:blue',
+  pleco:'longfin:長鰭:R:longfin, blueeye:藍眼:R:blueEye, galaxy:星點:D:galaxy',
   cavefish:'red:紅化:R:red, giant:大型:R:giant, glow:螢光:D:glow',
   bichir:'giant:巨型:D:giant, long:長身:R:long',
   archer:'gold:金化:R:xanth, spots:多星:D:spots, giant:巨型:R:giant',
@@ -618,13 +627,18 @@ const GENE_TXT = {
   piranha:'gold:金化:R:xanth, red:血紅:D:red, giant:巨型:R:giant',
   ember:'gold:金化:R:xanth, longfin:長鰭:R:longfin', phantom:'longfin:長鰭:D:longfin, white:白化:R:leuc', diamondtetra:'diamond:極光:D:metal, longfin:長鰭:D:longfin',
   emperor:'blue:藍帝:R:blue, longfin:長鰭:D:longfin', silverdollar:'red:紅鉤:D:red, spots:斑點:R:spots', severum:'red:紅化:R:red, spots:珍珠:D:pearl',
-  oscar:'red:全紅:R:red, longfin:長鰭:D:longfin', oranda:'butterfly:蝶尾:D:veil, panda:熊貓:R:panda, sakura:櫻花:D:koi', bubbleeye:'panda:熊貓:R:panda, sakura:櫻花:D:koi',
+  oscar:'red:全紅:R:red, longfin:長鰭:D:longfin', oranda:'butterfly:蝶尾:D:veil, panda:熊貓:R:panda, sakura:櫻花:D:koi', bubbleeye:'panda:熊貓:R:panda, sakura:櫻花:D:koi, calico:五花:D:calico',
   arapaima:'red:血紅:D:red, giant:巨型:D:giant',
   glowlight:'longfin:長鰭:R:longfin', kerri:'longfin:長鰭:R:longfin', redeye:'gold:金化:R:xanth', figure8:'gold:金化:R:xanth', leaffish:'red:紅葉:R:red', weather:'spots:豹紋:D:spots',
   mbuna:'blue:藍化:R:blue, spots:斑點:D:spots', moorii:'giant:巨型:R:giant', scat:'red:紅化:R:red, spots:豹紋:D:spots',
-  tilapia:'red:紅化:R:red, pearl:珍珠:D:pearl', koi:'butterfly:蝶尾:D:veil, gin:銀鱗:D:metal, big:巨型:R:giant', mosquito:'gold:金化:R:xanth, spots:黑斑:D:spots',
+  tilapia:'red:紅化:R:red, pearl:珍珠:D:pearl', koi:'butterfly:蝶尾:D:veil, gin:銀鱗:D:metal, big:巨型:R:giant, calico:三色:D:calico', mosquito:'gold:金化:R:xanth, spots:黑斑:D:spots',
   opsari:'longfin:長鰭:R:longfin, blue:藍化:R:blue', kuhua:'gold:金化:R:xanth, dwarf:短身:R:dwarf', culter:'giant:巨型:R:giant, gold:金化:R:xanth',
   chili:'longfin:長鰭:R:longfin, glow:螢光:R:glow', snakehead:'gold:金化:R:xanth, giant:巨型:D:giant', marbled:'gold:金化:R:xanth, giant:巨型:R:giant', mudskipper:'blue:藍化:R:blue, spots:斑點:D:spots',
+  balashark:'gold:金化:R:xanth, giant:巨型:D:giant', rbshark:'white:白化:R:leuc, glow:螢光:D:glow, giant:巨型:R:giant', altum:'red:紅肩:D:red, veil:長鰭:R:veil',
+  praecox:'longfin:長鰭:R:longfin, red:紅化:R:red', paradise:'blue:藍化:R:blue, white:白化:R:leuc, longfin:長鰭:D:longfin', bitterling:'gold:金化:R:xanth, red:婚姻色:D:red',
+  tigerbarb:'green:墨綠:R:melano, longfin:長鰭:R:longfin, glow:螢光:D:glow', cherrybarb:'longfin:長鰭:R:longfin, gold:金化:R:xanth, pink:粉紅:R:pink',
+  lampeye:'longfin:長鰭:R:longfin, gold:金化:R:xanth', clownkilli:'gold:金化:R:xanth, violet:紫焰:R:violet', krib:'red:紅化:R:red, galaxy:星點:D:galaxy, white:白化:R:leuc',
+  newt:'black:黑化:R:melano, spots:斑點:D:spots',
 };
 const DOM_LABEL = {D:'顯性', R:'隱性', I:'不完全顯性'};
 const GENES = {};
@@ -941,7 +955,7 @@ const CONDS = {
 };
 const CORE = ['neon','zebra','guppy','platy','cory','oto','goldfish','ghost','cherry','apple'];
 const ROT_FISH = SHOP_FISH.filter(k => !CORE.includes(k)), ROT_INV = INVS.filter(k => !CORE.includes(k));
-const STOCK_FISH = 6, STOCK_INV = 2;
+const STOCK_FISH = 8, STOCK_INV = 3;
 let stockCache = null;
 function dayKey(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 /* Same picks for everyone on the same calendar day, so the stock is stable across reloads and devices. */
@@ -1188,6 +1202,15 @@ Object.assign(PAL, {
   sawacrab:[{b1:'#b8301a',b2:'#f07a4a',leg:'rgba(190,60,30,.9)'},{b1:'#6a3a8a',b2:'#b088d0',leg:'rgba(110,60,140,.9)'}],
   loong:[{b1:'#c8901a',b2:'#ffe27a',belly:'#fff2c0',fin:'#e8602a',mane:'#ff8a3a',horn:'#f6ead0',whisker:'rgba(255,240,200,.9)',scale:'rgba(140,80,0,.35)',legF:'#a8700e',pearl:'#d8f2ff'}]});
 Object.assign(PAL, {
+  tigerbarb:[{b1:'#c8a040',b2:'#fff0c0',fin:'rgba(232,60,40,.78)',tband:'rgba(14,14,14,.86)',H:.46}],
+  cherrybarb:[{b1:'#a8302a',b2:'#f4987e',fin:'rgba(232,70,50,.6)',lat:'rgba(70,20,15,.5)',H:.34}],
+  lampeye:[{b1:'#8c9a90',b2:'#eef2e6',fin:'rgba(225,235,230,.4)',iris:'#1e9cff',eyeW:'#cdf2ff',eyeTop:'rgba(90,200,255,.9)',eyeGlow:1,H:.28}],
+  clownkilli:[{b1:'#c8b89a',b2:'#fff4e0',fin:'rgba(240,110,60,.72)',tband:'rgba(25,20,15,.82)',tbx:[.22,.06,-.1,-.26],longfin:1,H:.24}],
+  krib:[{b1:'#c8b070',b2:'#fff0c8',fin:'rgba(240,200,120,.75)',edge:'#e8a030',band:'rgba(40,30,20,.65)',cheek:'rgba(70,150,230,.5)',belly:'rgba(240,90,140,.7)'}],
+  newt:[{b1:'#3e3327',b2:'#625240',gill:'none',fin:'rgba(70,58,45,.7)',belly:'#f06a2a',iris:'#d8a040'}],
+  firefly:[{b1:'#2a2220',b2:'#3e3430',edge:'rgba(240,190,170,.75)',leg:'rgba(60,50,45,.8)',lamp:'#e8f0b0'}],
+  beetle:[{b1:'#1a1e16',b2:'#4a5236',rim:'#e8c040',leg:'rgba(60,55,30,.9)'}],
+  softshell:[{shell:'#55643a',shell2:'#7c8c56',scute:'rgba(0,0,0,0)',skin:'#6a7450',stripe:'rgba(40,40,30,.35)',flat:1,snout:1}],
   garra:[{b1:'#5c605c',b2:'#d6d6ca',tail:'#80847c',tip:'#80847c',pec:'rgba(215,205,185,.5)',parr:'rgba(25,25,25,.26)'}],
   chronojelly:[{bell:'rgba(30,80,100,.72)',rim:'rgba(255,222,140,.95)',gonad:'rgba(255,200,100,.8)',tent:'rgba(150,232,220,.6)',aura:'#ffd480',starsIn:1}],
   pararasbora:[{b1:'#7e8e6e',b2:'#eef0e2',lat:'rgba(35,45,35,.62)',fin:'rgba(225,205,150,.45)',H:.26}],
@@ -1270,6 +1293,8 @@ const GENE_FN = {
   xanth:(r, g, b) => { const t = (r * .3 + g * .59 + b * .11) / 255; return [lerp(160, 255, t), lerp(105, 236, t), lerp(20, 150, t)]; },
   blue:(r, g, b) => { const t = (r * .3 + g * .59 + b * .11) / 255; return [lerp(25, 170, t), lerp(55, 215, t), lerp(130, 255, t)]; },
   red:(r, g, b) => { const t = (r * .3 + g * .59 + b * .11) / 255; return [lerp(120, 255, t), lerp(18, 150, t), lerp(12, 110, t)]; },
+  violet:(r, g, b) => { const t = (r * .3 + g * .59 + b * .11) / 255; return [lerp(70, 215, t), lerp(28, 172, t), lerp(118, 255, t)]; },
+  pink:(r, g, b) => { const t = (r * .3 + g * .59 + b * .11) / 255; return [lerp(175, 255, t), lerp(72, 208, t), lerp(110, 226, t)]; },
 };
 function xformPal(P, fn){ const o = {}; for (const k in P) { const v = P[k]; if (k !== 'eyeW' && k !== 'iris' && typeof v === 'string' && (v[0] === '#' || v.startsWith('rgb'))) { const q = parseCol(v); if (!q) { o[k] = v; continue; } const c2 = fn(q[0], q[1], q[2]); o[k] = colStr(c2[0], c2[1], c2[2], q[3]); } else o[k] = v; } return o; }
 const fxCache = new WeakMap();
@@ -1278,8 +1303,9 @@ function geneFx(d){
   const key = JSON.stringify(d.g), hit = fxCache.get(d); if (hit && hit.key === key) return hit.fx;
   const fx = {pal:[], over:[], fk:1, pk:1, sx:1, sy:1, size:1, ribbon:false, glow:false, iris:null, hump:1};
   for (const {G, lv} of traitsOf(d)) switch (G.fx) {
-    case 'albino': case 'leuc': case 'melano': case 'xanth': case 'blue': case 'red': case 'metal': fx.pal.push(G.fx); break;
-    case 'koi': case 'lace': case 'spots': case 'stripes': case 'panda': case 'tux': case 'dragon': case 'pearl': fx.over.push(G.fx); break;
+    case 'albino': case 'leuc': case 'melano': case 'xanth': case 'blue': case 'red': case 'metal': case 'violet': case 'pink': fx.pal.push(G.fx); break;
+    case 'koi': case 'lace': case 'spots': case 'stripes': case 'panda': case 'tux': case 'dragon': case 'pearl': case 'galaxy': case 'calico': case 'mosaic': fx.over.push(G.fx); break;
+    case 'telescope': fx.eyeK = 1.7; break;
     case 'longfin': fx.fk = Math.max(fx.fk, 1.45); break;
     case 'veil': fx.fk = Math.max(fx.fk, G.dom === 'I' ? (lv >= 2 ? 1.75 : 1.3) : 1.6); break;
     case 'ribbon': fx.fk = Math.max(fx.fk, 1.25); fx.ribbon = true; break;
@@ -1298,7 +1324,7 @@ function geneFx(d){
 function palWithGenes(base, fx){
   if (!fx) return base; let P = base;
   for (const e of fx.pal) { P = xformPal(P, GENE_FN[e]); if (e === 'albino') P.iris = '#d8344c'; }
-  if (fx.iris || fx.hump !== 1) { if (P === base) P = Object.assign({}, base); if (fx.iris) P.iris = fx.iris; if (fx.hump !== 1) P.humpK = fx.hump; }
+  if (fx.iris || fx.hump !== 1 || fx.eyeK) { if (P === base) P = Object.assign({}, base); if (fx.iris) P.iris = fx.iris; if (fx.hump !== 1) P.humpK = fx.hump; if (fx.eyeK) P.eyeK = fx.eyeK; }
   return P;
 }
 function palOf(d, t){ const P = palWithGenes(palette(d.sp, d.seed, d.m), geneFx(d)); return d.rare ? rarePal(P, d.rare, t || 0) : P; }
@@ -1413,7 +1439,7 @@ const baseLen = d => SPECIES[d.sp].len * (.5 + .5 * growRatio(d)) * ((geneFx(d) 
 function preyFor(pd){
   const h = SPECIES[pd.sp].hunt; if (!h) return null;
   const maxLen = baseLen(pd) * h.ratio;
-  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
+  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : h.on === 'pest' ? SPECIES[d.sp].snail && SPECIES[d.sp].pest : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
   list.sort((a, b) => (a.sp === 'pestsnail' ? 0 : 1) - (b.sp === 'pestsnail' ? 0 : 1) || (a.rare ? 1 : 0) - (b.rare ? 1 : 0) || baseLen(a) - baseLen(b));
   return list[0] || null;
 }
@@ -1692,6 +1718,7 @@ function bodyPath(c, L, H, peak){
 }
 function fillBody(c, L, H, peak, P){ bodyPath(c, L, H, peak); c.fillStyle = lg(c, 0, -H/2, 0, H/2, [[0,P.b1],[1,P.b2]]); c.fill(); }
 function eye(c, x, y, r, P){
+  if (P.eyeK) { c.fillStyle = P.b2 || P.b1 || P.eyeW; dot(c, x - r * .2, y, r * P.eyeK * 1.12); c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = Math.max(.5, r * .12); c.beginPath(); c.arc(x - r * .2, y, r * P.eyeK * 1.12, 0, TAU); c.stroke(); r *= P.eyeK; }
   c.fillStyle = P.eyeW; dot(c, x, y, r);
   c.fillStyle = P.iris; dot(c, x + r * .15, y, r * .64);
   c.fillStyle = 'rgba(255,255,255,.9)'; dot(c, x + r * .35, y - r * .3, r * .26);
@@ -1789,6 +1816,24 @@ function drawCrab(c, P, L, ph){
   c.fillStyle = lg(c, 0, -L * .2, 0, 0, [[0,P.b2],[1,P.b1]]); c.beginPath(); c.ellipse(0, -L * .1, L * .17, L * .12, 0, 0, TAU); c.fill();
   c.fillStyle = '#111'; dot(c, -L * .05, -L * .2, L * .025); dot(c, L * .05, -L * .2, L * .025);
 }
+function drawLarva(c, P, L, ph){ const n = 10, H = L * .15;
+  for (let i = n - 1; i >= 0; i--) { const q = i / (n - 1), x = L * (.38 - q * .8), y = Math.sin(ph * .8 - q * 3) * L * .012, w = H * (1.05 - Math.abs(q - .35) * .75);
+    c.fillStyle = i % 2 ? P.b1 : P.b2; c.beginPath(); c.ellipse(x, y - w * .15, L * .055, w, 0, 0, TAU); c.fill(); c.fillStyle = P.edge; c.beginPath(); c.ellipse(x, y + w * .6, L * .045, w * .22, 0, 0, TAU); c.fill(); }
+  c.fillStyle = P.b1; dot(c, L * .45, H * .1, H * .5); c.fillStyle = P.edge; dot(c, L * .5, H * .05, H * .14);
+  c.strokeStyle = P.leg; c.lineWidth = Math.max(.6, L * .014); for (let k = 0; k < 3; k++) { const x = L * (.34 - k * .07), sw = Math.sin(ph * 2 + k) * L * .02; c.beginPath(); c.moveTo(x, H * .5); c.lineTo(x + sw - L * .02, H * 1.05); c.stroke(); }
+  const gl = typeof rt !== 'undefined' && rt.lightK < .6 ? (.6 - rt.lightK) / .6 : 0, pul = .55 + .45 * Math.sin(ph * .35);
+  c.fillStyle = gl > 0 ? 'rgba(215,255,140,' + (.6 + .4 * pul * gl).toFixed(3) + ')' : P.lamp; dot(c, -L * .4, H * .35, L * .032); dot(c, -L * .34, H * .4, L * .03); }
+function drawBeetle(c, P, L, ph){ const H = L * .3, st = Math.sin(ph * 2.2);
+  c.strokeStyle = P.leg; c.lineCap = 'round';
+  for (const o of [0, .5]) { c.save(); c.translate(-L * .05, H * .42); c.rotate(.85 + st * .55 + o * .35); c.lineWidth = Math.max(.8, L * .03); c.beginPath(); c.moveTo(0, 0); c.lineTo(-L * .3, 0); c.stroke();
+    c.lineWidth = Math.max(.4, L * .008); for (let k = 1; k < 6; k++) { c.beginPath(); c.moveTo(-L * .05 * k, 0); c.lineTo(-L * .05 * k - L * .02, L * .045); c.stroke(); } c.restore(); }
+  c.lineWidth = Math.max(.6, L * .018); for (const [x, o] of [[.24, 0], [.13, 1]]) { const sw = Math.sin(ph * 1.5 + o) * L * .02; c.beginPath(); c.moveTo(L * x, H * .35); c.lineTo(L * x + L * .05 + sw, H * .78); c.stroke(); }
+  c.fillStyle = lg(c, 0, -H, 0, H * .5, [[0,P.b2],[1,P.b1]]); c.beginPath(); c.moveTo(-L * .42, H * .1); c.quadraticCurveTo(-L * .38, -H * .95, L * .05, -H * .95); c.quadraticCurveTo(L * .36, -H * .9, L * .42, H * .05); c.quadraticCurveTo(0, H * .55, -L * .42, H * .1); c.closePath(); c.fill();
+  c.strokeStyle = P.rim; c.lineWidth = Math.max(.8, L * .028); c.beginPath(); c.moveTo(-L * .42, H * .1); c.quadraticCurveTo(0, H * .55, L * .42, H * .05); c.stroke();
+  c.strokeStyle = 'rgba(0,0,0,.4)'; c.lineWidth = Math.max(.5, L * .01); c.beginPath(); c.moveTo(L * .16, -H * .92); c.quadraticCurveTo(L * .2, -H * .2, L * .27, H * .22); c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.26)'; c.beginPath(); c.ellipse(-L * .06, -H * .56, L * .18, H * .14, -.1, 0, TAU); c.fill();
+  c.fillStyle = P.b1; c.beginPath(); c.ellipse(L * .42, -H * .08, L * .08, H * .36, 0, 0, TAU); c.fill(); c.fillStyle = P.rim; dot(c, L * .45, -H * .22, L * .02);
+  c.fillStyle = 'rgba(232,246,255,.8)'; dot(c, -L * .45, H * .02, L * .06); c.fillStyle = 'rgba(255,255,255,.95)'; dot(c, -L * .47, -H * .04, L * .018); }
 function drawTurtle(c, P, L, ph){
   c.fillStyle = P.skin;
   for (const [x, o] of [[L * .2, 0], [-L * .18, Math.PI]]) { c.save(); c.translate(x, L * .08); c.rotate(.4 + Math.sin(ph * 1.5 + o) * .4); c.beginPath(); c.ellipse(0, L * .07, L * .045, L * .09, 0, 0, TAU); c.fill(); c.restore(); }
@@ -1798,7 +1843,9 @@ function drawTurtle(c, P, L, ph){
   if (P.ear) { c.fillStyle = P.ear; c.beginPath(); c.ellipse(L * .335, -L * .03, L * .038, L * .015, -.1, 0, TAU); c.fill(); }
   c.fillStyle = '#111'; dot(c, L * .41, -L * .045, L * .015);
   c.fillStyle = P.shell2; c.beginPath(); c.ellipse(0, L * .06, L * .33, L * .05, 0, 0, TAU); c.fill();
-  c.fillStyle = lg(c, 0, -L * .3, 0, L * .06, [[0,P.shell2],[1,P.shell]]); c.beginPath(); c.moveTo(-L * .34, L * .06); c.bezierCurveTo(-L * .3, -L * .3, L * .3, -L * .3, L * .34, L * .06); c.closePath(); c.fill();
+  if (P.snout) { c.fillStyle = P.skin; c.beginPath(); c.moveTo(L * .43, -L * .055); c.quadraticCurveTo(L * .52, -L * .07, L * .53, -L * .05); c.lineTo(L * .44, -L * .01); c.closePath(); c.fill(); }
+  const shH = P.flat ? .17 : .3; c.fillStyle = lg(c, 0, -L * shH, 0, L * .06, [[0,P.shell2],[1,P.shell]]); c.beginPath(); c.moveTo(-L * .34, L * .06); c.bezierCurveTo(-L * .3, -L * shH, L * .3, -L * shH, L * .34, L * .06); c.closePath(); c.fill();
+  if (P.flat) { c.fillStyle = 'rgba(30,38,18,.3)'; for (let i = 0; i < 7; i++) dot(c, L * (-.2 + i * .065), -L * (.06 + (i % 3) * .025), L * .014); }
   c.strokeStyle = P.scute; c.lineWidth = Math.max(.6, L * .014); c.beginPath(); c.moveTo(-L * .2, -L * .14); c.lineTo(L * .2, -L * .14);
   for (const x of [-.12, .04, .18]) { c.moveTo(x * L, -L * .14); c.lineTo(x * L - L * .03, -L * .2); c.moveTo(x * L, -L * .14); c.lineTo(x * L + L * .02, L * .04); } c.stroke();
   c.fillStyle = 'rgba(255,255,255,.15)'; c.beginPath(); c.ellipse(-L * .05, -L * .17, L * .12, L * .04, -.1, 0, TAU); c.fill();
@@ -1852,7 +1899,7 @@ function drawFrog(c, P, L, ph){
 }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
-  if (S.kind === 'inv') return S.snail ? drawSnail(c, P, L, ph) : S.frog ? drawFrog(c, P, L, ph) : S.jelly ? drawJelly(c, P, L, ph) : S.crab ? drawCrab(c, P, L, ph) : S.turtle ? drawTurtle(c, P, L, ph) : S.tadpole ? drawTadpole(c, P, L, ph) : S.swarm ? drawSwarm(c, P, L, ph) : S.clam ? drawClam(c, P, L, ph) : S.nymph ? drawNymph(c, P, L, ph) : (drawShrimp(c, P, L, ph), P.led && drawLed(c, P, L, ph), P.fans && drawFans(c, P, L, ph));
+  if (S.kind === 'inv') return S.snail ? drawSnail(c, P, L, ph) : S.frog ? drawFrog(c, P, L, ph) : S.jelly ? drawJelly(c, P, L, ph) : S.crab ? drawCrab(c, P, L, ph) : S.turtle ? drawTurtle(c, P, L, ph) : S.tadpole ? drawTadpole(c, P, L, ph) : S.swarm ? drawSwarm(c, P, L, ph) : S.clam ? drawClam(c, P, L, ph) : S.nymph ? drawNymph(c, P, L, ph) : S.larva ? drawLarva(c, P, L, ph) : S.beetle ? drawBeetle(c, P, L, ph) : (drawShrimp(c, P, L, ph), P.led && drawLed(c, P, L, ph), P.fans && drawFans(c, P, L, ph));
   const w = Math.sin(ph) * amp, w2 = Math.sin(ph - 1.2) * amp, w3 = Math.sin(ph - 2.2) * amp;
   c.lineCap = 'round'; c.lineJoin = 'round';
   if (tpl === 'guppy') {
@@ -2280,6 +2327,7 @@ function drawFish(c, sp, P, L, ph, amp, ex){
     if (P.rear) { c.fillStyle = lg(c, L * .08, 0, b, 0, [[0,alpha(P.rear, 0)],[.3,P.rear],[1,P.rear]]); c.fillRect(b, -H, L * .6, H * 2); }
     if (P.vbars) { c.fillStyle = P.vbars; c.fillRect(L * .2, -H, L * .025, H * 2); c.fillRect(L * .1, -H, L * .02, H * 2); }
     if (P.bars) { c.fillStyle = P.bars; for (let i = 0; i < 9; i++) c.fillRect(L * (.22 - i * .065), -H, L * .026, H * 2); }
+    if (P.tband) { c.fillStyle = P.tband; for (const x of (P.tbx || [.3, .12, -.06, -.24])) c.fillRect(L * x - L * .028, -H, L * .056, H * 2); }
     if (P.lat) { c.fillStyle = P.lat; c.fillRect(b, -H * .08, L * .86, H * .17); }
     if (P.peng) { c.fillStyle = P.peng; c.beginPath(); c.moveTo(0, -H * .1); c.lineTo(b, -H * .08); c.lineTo(b, H * .12); c.lineTo(0, H * .08); c.closePath(); c.fill(); }
     if (P.shoulder) { c.fillStyle = P.shoulder; c.beginPath(); c.ellipse(L * .12, -H * .05, L * .05, H * .28, 0, 0, TAU); c.fill(); }
@@ -2305,7 +2353,7 @@ function drawFish(c, sp, P, L, ph, amp, ex){
     c.strokeStyle = P.edge; c.lineWidth = Math.max(.6, L * .012); c.beginPath(); for (let i = 0; i < 5; i++) { const x = L * .17 - i * L * .08; c.moveTo(x, -H * .45); c.lineTo(x - L * .02, -H * (1.38 - i * .14)); } c.stroke();
     fin(c, [L * .05, H * .44, -L * .1, H * .9 + w2 * L * .02, -L * .28, H * .4, -L * .18, H * .32], P.fin);
     fillBody(c, L, H, .05, P);
-    c.save(); c.clip(); c.fillStyle = P.band; c.fillRect(b, -H * .06, L * .84, H * .13);
+    c.save(); c.clip(); if (P.belly) { c.fillStyle = P.belly; c.beginPath(); c.ellipse(L * .06, H * .62, L * .24, H * .36, 0, 0, TAU); c.fill(); } c.fillStyle = P.band; c.fillRect(b, -H * .06, L * .84, H * .13);
     c.strokeStyle = P.cheek; c.lineWidth = L * .018; c.beginPath(); for (let i = 0; i < 3; i++) { c.moveTo(L * .44, H * (.0 + i * .1)); c.lineTo(L * .22, H * (.08 + i * .1)); } c.stroke(); sheen(c, L, H); c.restore();
     pectoral(c, L, H, ph, P.fin); eye(c, L * .32, -H * .1, L * .06, P);
   } else if (tpl === 'knife') {
@@ -2354,8 +2402,10 @@ function drawFish(c, sp, P, L, ph, amp, ex){
     c.beginPath(); c.moveTo(-L * .05, -H * .3); c.quadraticCurveTo(-L * .3, -H * .25 + w * L * .02, -L * .5, w * L * .05); c.quadraticCurveTo(-L * .3, H * .25 + w * L * .02, -L * .05, H * .3); c.closePath(); c.fill();
     c.beginPath(); c.ellipse(L * .08, 0, L * .22, H * .5, 0, 0, TAU); c.fill();
     c.beginPath(); c.ellipse(L * .34, -H * .02, L * .15, H * .58, 0, 0, TAU); c.fill();
+    if (P.belly) { c.save(); c.beginPath(); c.ellipse(L * .08, 0, L * .22, H * .5, 0, 0, TAU); c.ellipse(L * .34, -H * .02, L * .15, H * .58, 0, 0, TAU); c.clip(); c.fillStyle = P.belly; c.fillRect(-L * .16, H * .14, L * .64, H * .5); c.restore();
+      c.fillStyle = 'rgba(20,15,10,.35)'; for (let i = 0; i < 6; i++) dot(c, L * (.24 - i * .07), -H * (.2 - (i % 2) * .08), L * .012); }
     c.strokeStyle = P.gill; c.fillStyle = P.gill; c.lineWidth = Math.max(1, L * .022);
-    for (let i = 0; i < 3; i++) { const a = -2.25 + i * .42 + Math.sin(ph * .8 + i) * .08, x0 = L * .26, y0 = -H * .32, x1 = x0 + Math.cos(a) * L * .17, y1 = y0 + Math.sin(a) * L * .17;
+    if (P.gill !== 'none') for (let i = 0; i < 3; i++) { const a = -2.25 + i * .42 + Math.sin(ph * .8 + i) * .08, x0 = L * .26, y0 = -H * .32, x1 = x0 + Math.cos(a) * L * .17, y1 = y0 + Math.sin(a) * L * .17;
       c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke();
       for (let k = 1; k <= 4; k++) { const t = k / 4.5, px = lerp(x0, x1, t), py = lerp(y0, y1, t), nx = Math.cos(a + 1.57) * L * .022, ny = Math.sin(a + 1.57) * L * .022; dot(c, px + nx, py + ny, L * .017); dot(c, px - nx, py - ny, L * .017); } }
     leg(L * .2, 0); leg(-L * .06, Math.PI);
@@ -2437,6 +2487,9 @@ function drawOverlay(o, kind, seed){
   else if (kind === 'pearl') { o.fillStyle = 'rgba(255,255,245,.85)'; for (let i = 0; i < 80; i++) dt((R() - .5) * 1.2, (R() - .5), .008 + R() * .012); }
   else if (kind === 'stripes') { o.fillStyle = 'rgba(15,12,10,.5)'; for (let i = 0; i < 9; i++) { const x = .45 - i * .12; o.beginPath(); o.moveTo(x, -1); o.lineTo(x + .045, -1); o.lineTo(x - .02, 1); o.lineTo(x - .065, 1); o.closePath(); o.fill(); } }
   else if (kind === 'panda') { o.fillStyle = 'rgba(250,250,248,.72)'; o.fillRect(-1.3, -1.3, 2.6, 2.6); o.fillStyle = 'rgba(16,16,18,.9)'; o.fillRect(-1.3, -1.3, 2.6, 1); o.fillRect(-1.3, .3, 2.6, 1); o.fillRect(-1.3, -1.3, .9, 2.6); o.beginPath(); o.ellipse(.36, -.04, .1, .12, 0, 0, TAU); o.fill(); }
+  else if (kind === 'galaxy') { for (let i = 0; i < 70; i++) { const big = i % 9 === 0; o.fillStyle = big ? 'rgba(255,255,255,.95)' : i % 3 ? 'rgba(225,240,255,.85)' : 'rgba(150,205,255,.7)'; dt((R() - .5) * 1.2, (R() - .5) * .9, big ? .022 : .006 + R() * .01); } }
+  else if (kind === 'calico') { const cols = ['rgba(80,115,175,.6)','rgba(240,120,40,.72)','rgba(20,20,24,.7)','rgba(255,255,255,.72)']; for (let i = 0; i < 9; i++) { o.fillStyle = cols[i % 4]; o.beginPath(); o.ellipse((R() - .5) * .95, (R() - .5) * .6, .06 + R() * .1, .04 + R() * .08, R() * 3, 0, TAU); o.fill(); } o.fillStyle = 'rgba(15,15,18,.7)'; for (let i = 0; i < 40; i++) dt((R() - .5) * 1.1, (R() - .5) * .8, .006 + R() * .01); }
+  else if (kind === 'mosaic') { o.strokeStyle = 'rgba(20,20,35,.5)'; o.lineWidth = .014; for (let i = 0; i < 46; i++) { const x = (R() - .5) * 1.1, y = (R() - .5) * .8, a = R() * TAU; o.beginPath(); o.arc(x, y, .03 + R() * .04, a, a + 2.2 + R()); o.stroke(); } }
   else if (kind === 'tux') { o.fillStyle = lg(o, .05, 0, -.25, 0, [[0,'rgba(16,16,20,0)'],[1,'rgba(16,16,20,.88)']]); o.fillRect(-1.3, -1.3, 1.35, 2.6); }
   else if (kind === 'dragon') { o.lineWidth = .012; for (let i = 0; i < 9; i++) for (let j = 0; j < 7; j++) { const x = .3 - i * .075, y = -.3 + j * .1 + (i % 2) * .05; o.fillStyle = 'rgba(235,240,250,.5)'; o.beginPath(); o.arc(x, y, .04, -1.6, 1.6); o.fill(); o.strokeStyle = 'rgba(255,255,255,.75)'; o.beginPath(); o.arc(x, y, .045, -1.5, 1.5); o.stroke(); } }
 }
@@ -2477,7 +2530,7 @@ const EXT = {guppy:[1.5,.75,.18], neon:[1.12,.45,.05], zebra:[1.25,.55,.08], pla
   bamboo:[1.5,.75,-.2,.13], assassin:[1.1,.9,-.1,.38], clam:[1.1,.6,0,.12], pestsnail:[1.1,.85,-.1,.38], nymph:[1.3,.6,0,.05],
   cavefish:[1.12,.55,.05], bichir:[1.15,.45,.05], archer:[1.12,.8,.05], tigerfish:[1.12,.95,.05], eel:[1.05,.32,0], piranha:[1.12,.8,.05], prawn:[1.8,.75,-.35,.13], feeder:[1.12,.55,.05],
   ghost:[1.5,.75,-.2,.13], cherry:[1.5,.75,-.2,.13], amano:[1.5,.75,-.2,.13], crystal:[1.5,.75,-.2,.13], apple:[1.1,.85,-.1,.38], nerite:[1.1,.8,-.1,.35], horned:[1.1,.9,-.1,.38], moonjelly:[.75,1.15,0,-.22], paradise:[1.2,1.1,.06,-.1], bitterling:[1.12,.85,.05], sawacrab:[1.3,.7,0,.15], loong:[1.22,.5,.05,-.02]};
-Object.assign(EXT, {garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
+Object.assign(EXT, {tigerbarb:[1.12,.8,.05], cherrybarb:[1.12,.7,.05], lampeye:[1.12,.55,.05], clownkilli:[1.2,.5,.08], krib:EXT.apisto, newt:EXT.axolotl, firefly:[1.1,.45,0,.1], beetle:[1.25,.7,0,.05], softshell:EXT.turtle, garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
 function drawFishThumb(cnv, sp, P, ph, ex, fit, fx, seed){
   const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height, e = EXT[sp] || [1.3,1,0,0];
   c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
@@ -3062,12 +3115,13 @@ function update(dt){
   for (let i = rt.emotes.length - 1; i >= 0; i--) { const e = rt.emotes[i]; e.t += dt; if (e.t > e.life) rt.emotes.splice(i, 1); }
 }
 /* Movement styles: clams stay put on the sand, crawlers sink and walk, shrimp tail-flip backwards, jellies pulse, hoppers dart between rests. */
-const GULP = new Set(['betta','galaxybetta','gourami','bluegourami','dwarfgourami','paradise','cory','pandacory','bichir','arapaima','snakehead','axolotl']);
+const LONGFIN = new Set(['betta','galaxybetta','angel','altum','guppy','gourami','bluegourami','dwarfgourami','goldfish','oranda','bubbleeye','swordtail']);
+const GULP = new Set(['newt','beetle','betta','galaxybetta','gourami','bluegourami','dwarfgourami','paradise','cory','pandacory','bichir','arapaima','snakehead','axolotl']);
 function cleanDone(r, q){ r.cln = null; r.clnN = 0; const d = q.d; d.clnAt = Date.now(); state.stats.cleaned = (state.stats.cleaned | 0) + 1; rt.emotes.push({type:'heart', x:q.x, y:q.y - fishLen(q) * .4, t:0, life:1.2});
   if (d.ich && Math.random() < .4) { d.ich = 0; state.stats.cured = (state.stats.cured | 0) + 1; toast(r.d.name + '（親親魚）幫 ' + d.name + ' 把白點啄乾淨了！'); logEv('親親魚 ' + r.d.name + ' 治好了 ' + d.name + ' 的白點病'); }
   else if (!rt.warnedClean) { rt.warnedClean = true; toast(r.d.name + '（親親魚）在幫 ' + d.name + ' 做 SPA，' + d.name + ' 看起來很舒服'); }
   markDirty(); }
-function moveMode(sp){ if (sp.clam) return 'sessile'; if (sp.zone === 'glass') return 'swim'; if (sp.jelly || (sp.zone === 'jelly' && !sp.swarm)) return 'jelly';
+function moveMode(sp){ if (sp.clam) return 'sessile'; if (sp.larva) return 'crawl'; if (sp.zone === 'glass') return 'swim'; if (sp.jelly || (sp.zone === 'jelly' && !sp.swarm)) return 'jelly';
   if (sp.shrimp) return 'shrimp'; if (sp.kind === 'inv' && (sp.snail || sp.crab || sp.nymph)) return 'crawl'; if (sp.hop) return 'hop'; return 'swim'; }
 function shrimpFlip(r, L, dt){
   if (r.flip > 0) return; r.flipT = (r.flipT == null ? rand(5, 14) : r.flipT) - dt; r.thT = (r.thT || 0) - dt; let th = null;
@@ -3109,14 +3163,14 @@ function updateFish(r, dt, sleep){
       else if (r.huntT <= 0) { if (q.flee === r) q.flee = null; r.prey = null; r.huntCd = 30; } }
   }
   if (!busy && sp.aggro && rt.lightK > .4) {
-    const active = sp.aggro === true || d.full < 50;
+    const active = sp.aggro === 'nip' ? countSp(d.sp) < 6 : sp.aggro === true || d.full < 50;
     r.aggroT = (r.aggroT == null ? rand(10, 25) : r.aggroT) - dt;
     if (r.chase && (!rt.fish.includes(r.chase) || (r.chaseT -= dt) <= 0)) r.chase = null;
     if (!r.chase && active && r.aggroT <= 0) { r.aggroT = rand(25, 45) * (comfort() >= 60 ? 2 : 1);
-      let v = null, best = (170 * U) ** 2; for (const o of rt.fish) { if (o === r || o.sp === sp || o.sp.snail) continue; const dd = (o.x - r.x) ** 2 + (o.y - r.y) ** 2; if (dd < best) { best = dd; v = o; } }
+      let v = null, best = (170 * U) ** 2; for (const o of rt.fish) { if (o === r || o.sp === sp || o.sp.snail || (sp.aggro === 'nip' && !(LONGFIN.has(o.d.sp) || ((geneFx(o.d) || {}).fk || 1) > 1))) continue; const dd = (o.x - r.x) ** 2 + (o.y - r.y) ** 2; if (dd < best) { best = dd; v = o; } }
       if (v) { r.chase = v; r.chaseT = 3.5; } }
     if (r.chase) { const v = r.chase; r.tx = v.x; r.ty = v.y; spd = Math.max(spd, 85 * U * sp.speed); busy = true;
-      if (Math.hypot(v.x - (r.x + r.face * L * .4), v.y - r.y) < Math.max(10 * U, L * .22)) { bite(r, v); r.chase = null; } }
+      if (Math.hypot(v.x - (r.x + r.face * L * .4), v.y - r.y) < Math.max(10 * U, L * .22)) { bite(r, v); r.chase = null; if (sp.aggro === 'nip' && !rt.warnedNip) { rt.warnedNip = true; toast(d.name + '（虎皮魚）去咬 ' + v.d.name + ' 的長鰭！虎皮魚養到 6 隻以上就會比較乖'); } } }
   }
   if (sp.shock && rt.lightK > .2) { r.shockT = (r.shockT == null ? rand(15, 30) : r.shockT) - dt;
     if (r.shockT <= 0) { r.shockT = rand(30, 60); rt.shocks.push({x:r.x, y:r.y, t:0}); let hit = 0;
@@ -3170,7 +3224,7 @@ function updateFish(r, dt, sleep){
     else { r.vx *= Math.pow(.02, dt); r.vy *= Math.pow(.02, dt); } }
   else { r.vx += (dx / dist * want - r.vx) * k; r.vy += (dy / dist * want * (sp.snail ? 1 : .75) - r.vy) * k; }
   if (mv === 'shrimp' && !sleep) shrimpFlip(r, L, dt);
-  const onGlass = sp.snail && sp.zone === 'glass', floor = sp.snail ? sandY(r.x) - U : sp.crab ? sandY(r.x) - L * .1 : sp.clam ? sandY(r.x) - L * .02 : sp.burrow && r.bur ? sandY(r.x) + L * .03 : sandY(r.x) - Math.max(4 * U, L * .22);
+  const onGlass = sp.snail && sp.zone === 'glass', floor = sp.snail ? sandY(r.x) - U : sp.crab ? sandY(r.x) - L * .1 : sp.larva ? sandY(r.x) - L * .1 : sp.clam ? sandY(r.x) - L * .02 : sp.burrow && r.bur ? sandY(r.x) + L * .03 : sandY(r.x) - Math.max(4 * U, L * .22);
   if ((mv === 'sessile' || mv === 'crawl') && !onGlass) { if (r.y < floor - 1.5 * U) { r.fall = Math.min((r.fall || 0) + 340 * U * dt, 190 * U); r.vy = r.fall; if (mv === 'sessile') r.vx = 0; else r.vx *= Math.pow(.15, dt); } else { r.fall = 0; r.vy = 0; } }
   r.x += r.vx * dt; r.y += r.vy * dt;
   if (onGlass) { r.x = r.x < W / 2 ? 1.5 * U : W - 1.5 * U; r.y = clamp(r.y, safeT + 50 * U, sandTop - 10 * U); }
@@ -3348,7 +3402,7 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
@@ -3905,7 +3959,7 @@ function renderDiary(){
 
 /* Water temperature: follows the season at the player's latitude unless a heater/controller holds it. */
 const TEMP = {goldfish:[10,27], ranchu:[12,27], pearlscale:[12,27], oranda:[12,27], bubbleeye:[12,27], koi:[6,28], whitecloud:[14,25], medaka:[8,30], axolotl:[12,23], zebra:[18,28],
-  discus:[27,32], altum:[27,31], pararasbora:[14,26], garra:[18,34], sakura:[8,20], redarowana:[24,31], goby:[12,27], ram:[26,31], arapaima:[25,32], stingray:[25,31], cardinal:[24,30], angel:[24,30], loach:[24,30], tilapia:[16,35], crystal:[18,25], cherry:[16,29], neocaridina:[16,29], frog:[20,28], slider:[16,32], turtle:[18,30]};
+  discus:[27,32], altum:[27,31], pararasbora:[14,26], garra:[18,34], newt:[12,24], krib:[23,29], softshell:[18,32], tigerbarb:[20,28], sakura:[8,20], redarowana:[24,31], goby:[12,27], ram:[26,31], arapaima:[25,32], stingray:[25,31], cardinal:[24,30], angel:[24,30], loach:[24,30], tilapia:[16,35], crystal:[18,25], cherry:[16,29], neocaridina:[16,29], frog:[20,28], slider:[16,32], turtle:[18,30]};
 function tempRange(k){ const S = SPECIES[k]; if (!S || S.alien || S.myth || S.pest || k === 'feeder') return null; if (TEMP[k]) return TEMP[k]; if (S.kind === 'inv') return [15, 30];
   if (S.wild || (S.tags || []).some(t => t.includes('原生'))) return [12, 31]; return [22, 30]; }
 function ambientTemp(now){ const d = new Date(now), lat = HOME ? HOME.lat : 24, al = Math.abs(lat), doy = (d - new Date(d.getFullYear(), 0, 1)) / 864e5;
@@ -4141,7 +4195,7 @@ function finishTrip(tr, early){
   if (o.friend && SPECIES[o.friend]) { F = SPECIES[o.friend];
     if (F.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) { const a = Math.max(20, Math.floor(F.price * .4)); state.coins += a; got.push('一隻' + F.name + '（缸滿了，牠留下 ' + a + ' 金幣就走了）'); F = null; }
     else { friend = newCreature(o.friend, {grow:F.kind === 'inv' ? 10 : 14}); addCreature(friend); got.push('新朋友「' + friend.name + '」（' + F.name + '）'); tier = Math.max(tier, F.mystery ? 3 : F.wild ? 1 : 0); } }
-  const warn = F && (F.hunt || F.aggro) ? '注意：' + F.name + (F.hunt ? '餓了會吃掉比牠小的魚！' : '會追咬其他魚！') : '';
+  const warn = F && (F.hunt || F.aggro) ? '注意：' + F.name + (F.hunt ? (F.hunt.on === 'pest' ? '會吃掉缸裡的囊螺。' : '餓了會吃掉比牠小的魚！') : F.aggro === 'nip' ? '少於 6 隻時會去咬長鰭魚的鰭！' : '會追咬其他魚！') : '';
   expoLog(d.name + ' 從' + S.name + '帶回了' + (got.length ? got.join('、') : '滿滿的回憶') + (o.sick ? '，但染上了白點病' : '') + '。');
   markDirty();
   return {kind:'fish', d:friend || d, sp:(friend || d).sp, tier, head:'探險歸來', title:d.name + ' 從' + S.name + '回來了',
@@ -4424,7 +4478,9 @@ function draw(){
   for (const b of rt.bubbles) { c.strokeStyle = 'rgba(255,255,255,.55)'; c.fillStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.arc(b.x, b.y, b.r, 0, TAU); c.fill(); c.stroke(); c.fillStyle = 'rgba(255,255,255,.7)'; dot(c, b.x - b.r * .35, b.y - b.r * .35, b.r * .28); }
   if (state.dirt > 2) { c.fillStyle = 'rgba(86,108,46,' + (state.dirt / 100 * .28).toFixed(3) + ')'; c.fillRect(0, 0, W, H); }
   if (k < .99) { c.fillStyle = 'rgba(3,8,26,' + (.36 * (1 - k)).toFixed(3) + ')'; c.fillRect(0, 0, W, H);
-    for (const r of fish) { if (r.sp.glow) drawNightGlow(r, .9 * (1 - k)); if (r.fx && r.fx.glow) drawGeneGlow(r, .9 * (1 - k));
+    for (const r of fish) { if (r.sp.glow) drawNightGlow(r, .9 * (1 - k));
+      if (r.sp.larva || r.d.sp === 'lampeye') { const L = fishLen(r), s = Math.sign(r.turn) || 1, lv = !!r.sp.larva, gx = r.x + s * L * (lv ? -.37 : .31), gy = r.y + L * (lv ? .05 : -.03), R2 = L * (lv ? 1.4 : .32), a = (1 - k) * (lv ? .7 + .3 * Math.sin(rt.t * 2.2 + r.d.seed) : .8);
+        c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, gx, gy, 0, gx, gy, R2, lv ? [[0,'rgba(215,255,130,' + a.toFixed(3) + ')'],[.18,'rgba(200,255,120,' + (.6 * a).toFixed(3) + ')'],[.5,'rgba(180,255,100,' + (.18 * a).toFixed(3) + ')'],[1,'rgba(180,255,100,0)']] : [[0,'rgba(120,215,255,' + (.75 * a).toFixed(3) + ')'],[1,'rgba(120,215,255,0)']]); c.fillRect(gx - R2, gy - R2, R2 * 2, R2 * 2); c.restore(); } if (r.fx && r.fx.glow) drawGeneGlow(r, .9 * (1 - k));
       if (r.sp.alien) { const P2 = runnerPal(r); if (P2.aura) { const L = fishLen(r), rr = L * .8; c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, r.x, r.y, 0, r.x, r.y, rr, [[0,alpha(P2.aura, .45 * (1 - k))],[1,alpha(P2.aura, 0)]]); c.fillRect(r.x - rr, r.y - rr, rr * 2, rr * 2); c.restore(); } }
       if (r.sp.jelly) { const L = fishLen(r), y = r.y - L * .15, rr = L * .9; c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, r.x, y, 0, r.x, y, rr, [[0,'rgba(255,190,240,' + (.5 * (1 - k)).toFixed(3) + ')'],[1,'rgba(255,190,240,0)']]); c.fillRect(r.x - rr, y - rr, rr * 2, rr * 2); c.restore(); } }
     drawPlank(c, true);
