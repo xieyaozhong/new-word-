@@ -64,6 +64,35 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--coin);outline-o
 .lday.got{opacity:.45}
 .lday.now{border-color:var(--coin);background:rgba(245,196,81,.14)}
 #mini{position:fixed;inset:0;z-index:40;background:#0e4a72}
+#deep{position:fixed;inset:0;z-index:40;background:#010409;color:#d8f0ff;overflow:hidden}
+#deep canvas#deepCv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#deep .dhud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:16px;background:rgba(4,16,32,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:13px;z-index:2}
+#deep .dhud button{border:0;border-radius:10px;padding:6px 10px;background:rgba(255,255,255,.14);color:#fff;font:inherit;cursor:pointer}
+#deep .dtitle{font-weight:700;font-size:15px;color:#9ae4ff;white-space:nowrap}
+#deep #dInfo{margin-left:auto;font-size:12px;color:#a8c8dc;text-align:right}
+#deep .dbtns{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;z-index:2}
+#deep .dbtns button{border:1px solid rgba(120,220,255,.28);border-radius:14px;padding:12px 2px;background:rgba(4,22,44,.8);color:#cfefff;font:inherit;font-size:14px;cursor:pointer}
+#deep .dbtns button:disabled{opacity:.4}
+#deep .dbtns button.ping{border-color:#ffd65a;color:#ffe08a;box-shadow:0 0 12px rgba(255,214,90,.5)}
+#deep .dmsg{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 66px);transform:translateX(-50%);width:max-content;max-width:86%;margin:0;padding:8px 14px;border-radius:14px;background:rgba(4,20,40,.88);color:#e0f4ff;font-size:13px;line-height:1.45;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;z-index:3}
+#deep .dmsg.on{opacity:1}
+#deepPanel{position:absolute;left:0;right:0;bottom:0;max-height:74%;overflow:auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 18px);border-radius:22px 22px 0 0;background:rgba(5,16,30,.97);border-top:1px solid rgba(120,200,255,.2);transform:translateY(105%);transition:transform .25s;z-index:4}
+#deepPanel.on{transform:none}
+#deepPanel .dph{display:flex;align-items:center;justify-content:space-between}
+#deepPanel .dph h3{margin:4px 0 8px;font-size:18px;color:#bfeaff}
+#deepPanel .dx{border:0;background:rgba(255,255,255,.12);color:#fff;width:34px;height:34px;border-radius:12px;font-size:20px;cursor:pointer}
+#deepPanel .dp{margin:6px 0;font-size:14px;line-height:1.55;color:#cfe4f0}
+#deepPanel .dp.dim{color:#8fb0c4;font-size:13px}
+#deepPanel .dp.warn{color:#ffcf7a}
+#deepPanel>.buy{margin:8px 0;width:100%}
+#deepPanel .buy.alt{background:rgba(120,200,255,.16);color:#d8f0ff}
+#deepPanel .item>div{min-width:0}
+#deepPanel .item p{word-break:break-all}
+#deepPanel .dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#deepPanel .dcell{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:#b8d4e4}
+#deepPanel .dcell canvas{width:100%;height:auto;border-radius:10px}
+#deepPanel .dinfo{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;margin:4px 0}
+#deepPanel .dinfo canvas{width:120px;height:80px;border-radius:12px}
 #miniCv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
 .mhud{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:12px;right:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:16px;background:rgba(6,30,38,.62);color:#fff;font-size:15px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .mhud b{color:var(--coin);font-variant-numeric:tabular-nums}
@@ -396,6 +425,7 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
   <symbol id="i-fish" viewBox="0 0 24 24"><path d="M3 12c3-4.5 9-5.5 14 0-5 5.5-11 4.5-14 0zm14 0 4-3.5v7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.5" cy="11.2" r="1" fill="currentColor"/></symbol>
   <symbol id="i-map" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.2 8.8l-1.9 4.5-4.5 1.9 1.9-4.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
   <symbol id="i-food" viewBox="0 0 24 24"><circle cx="8" cy="9" r="2.6" fill="currentColor"/><circle cx="15.5" cy="8" r="2.2" fill="currentColor"/><circle cx="12" cy="15" r="2.8" fill="currentColor"/><circle cx="17.6" cy="15.6" r="1.8" fill="currentColor"/><circle cx="6.6" cy="16.4" r="1.6" fill="currentColor"/></symbol>
+  <symbol id="i-deep" viewBox="0 0 24 24"><path d="M3.5 14.2c0-2.9 3.8-4.7 8.5-4.7s8.5 1.8 8.5 4.7-3.8 4.3-8.5 4.3-8.5-1.4-8.5-4.3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9.6V6.4h3.4M13.4 6.4v1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.2" cy="14" r="1.3" fill="currentColor"/><circle cx="13.6" cy="14" r="1.3" fill="currentColor"/><path d="M20.5 14.2l2-1.6v3.2z" fill="currentColor"/></symbol>
   <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8.5h3.2l1.6-2.5h6.4l1.6 2.5H20v10H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-lamp" viewBox="0 0 24 24"><path d="M12 3.5a5.6 5.6 0 0 0-3.4 10.1c.8.6 1.2 1.4 1.2 2.3V17h4.4v-1.1c0-.9.4-1.7 1.2-2.3A5.6 5.6 0 0 0 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.8 19.6h4.4M10.6 21.6h2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 </svg>
@@ -422,6 +452,7 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
       <button class="lamp" id="lamp" aria-pressed="true" aria-label="魚缸燈" title="魚缸燈"><svg class="ico"><use href="#i-lamp"/></svg></button>
       <button class="lamp" id="foodBtn" aria-label="切換食物" title="切換食物"><svg class="ico"><use href="#i-food"/></svg><b class="fbadge" id="foodN" hidden></b></button>
       <button class="lamp" id="camBtn" aria-label="幫魚缸拍照" title="拍照"><svg class="ico"><use href="#i-cam"/></svg></button>
+      <button class="lamp" id="deepBtn" aria-label="深海研究站" title="深海研究站"><svg class="ico"><use href="#i-deep"/></svg><b class="fbadge" id="deepN" hidden>!</b></button>
     </div>
   </div>
 </header>
@@ -1703,6 +1734,8 @@ function migrate(s){
     ...(DECOS[d.k].plant ? {g:clamp(+d.g || 1, .3, 1.6), hp:d.hp == null ? 100 : clamp(+d.hp || 0, 0, 100), dead:+d.dead || 0} : {}) }));
   s.ib = (Array.isArray(s.ib) ? s.ib : []).filter(b => b && SPECIES[b.sp] && b.mom && b.dad).slice(0, 8).map(b => ({sp:b.sp, at:+b.at || Date.now(), n:clamp(b.n | 0, 1, 4), mom:snapParent(b.mom), dad:snapParent(b.dad)}));
   s.pvarDay = typeof s.pvarDay === 'string' ? s.pvarDay : '';
+  { const D = s.deep && typeof s.deep === 'object' ? s.deep : {}; s.deep = {built:!!D.built, lv:clamp(D.lv | 0, 0, DEEP_UP.length), list:(Array.isArray(D.list) ? D.list : []).filter(e => e && DSP[e.sp]).slice(0, 12).map(e => ({id:String(e.id || uid()), sp:e.sp, name:String(e.name || DSP[e.sp].name).slice(0, 24), at:+e.at || Date.now(), seed:(+e.seed || 1) | 0, full:clamp(+e.full || 0, 0, 100)})),
+    dive:D.dive && DZONES[D.dive.z | 0] ? {z:D.dive.z | 0, at:+D.dive.at || Date.now(), done:!!D.dive.done} : null, rp:Math.max(0, +D.rp || 0), rpT:+D.rpT || Date.now(), seen:Object.fromEntries(Object.keys(D.seen || {}).filter(k => DSP[k]).map(k => [k, 1])), lights:D.lights === 0 ? 0 : 1}; }
   s.fert = +s.fert || 0; s.rotted = Math.max(0, +s.rotted || 0);
   s.algae = (Array.isArray(s.algae) ? s.algae : []).slice(0, MAXA).map(a => ({x:clamp(+a.x || .5, 0, 1), y:clamp(+a.y || .5, 0, 1), r:clamp(+a.r || 1, .5, 1.5)}));
   s.sand = (Array.isArray(s.sand) ? s.sand : []).slice(0, MAXCOINS).map(c => ({x:clamp(+c.x || .5, .03, .97), v:Math.max(1, (+c.v || 1) | 0)}));
@@ -2904,6 +2937,344 @@ function drawPlantFront(){
   for (const q of PFX) { const a = 1 - q.t / q.life; ctx.fillStyle = q.kind === 'bub' ? 'rgba(255,255,255,0)' : q.col; ctx.globalAlpha = Math.max(0, a);
     if (q.kind === 'bub') { ctx.strokeStyle = q.col; ctx.lineWidth = Math.max(.6, .8 * U); ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, TAU); ctx.stroke(); } else dot(ctx, q.x, q.y, q.r); }
   ctx.globalAlpha = 1; }
+/* ---------- Expansion 48: deep-sea research station (a separate screen) ---------- */
+/* Deep-sea animals can't live at normal pressure, so they never enter the main tank: they're caught by submarine dives and kept in the station's pressure tank. */
+const DSP = {
+  lantern:{name:'燈籠魚', zone:0, w:60, len:24, rp:20, speed:1.1, beh:'school', fast:36, desc:'身體兩側排滿會發光的「燈籠」，一大群一起游。全世界數量最多的脊椎動物之一，每天晚上會成群游到淺海覓食。', trait:'點一下：整群一起閃光散開'},
+  viperfish:{name:'蝰魚', zone:0, w:25, len:80, rp:70, speed:.9, beh:'lunge', desc:'牙齒長到嘴巴關不起來，只好露在臉外面。背鰭的第一根刺末端會發光，用來引誘獵物。', trait:'點一下：張開血盆大口'},
+  barreleye:{name:'桶眼魚', zone:0, w:12, len:58, rp:120, speed:.45, beh:'hover', desc:'頭頂是一個透明的罩子，裡面一對綠色的管狀眼睛可以往上或往前轉。臉上那兩個「眼睛」其實是鼻孔。', trait:'牠的綠眼睛會一直盯著你的手電筒'},
+  oarfish:{name:'皇帶魚', zone:0, w:6, len:250, rp:220, speed:.35, beh:'vertical', desc:'世界上最長的硬骨魚，銀色的身體像一條緞帶，頭上頂著紅色的冠。常常直直地立在水中，傳說牠出現時會有地震。', trait:'點一下：甩動紅色的冠羽'},
+  coelacanth:{name:'腔棘魚', zone:0, w:3, len:130, rp:300, speed:.4, beh:'slow', desc:'曾經被認為和恐龍一起滅絕，1938 年卻在非洲被漁夫撈到。鰭的根部有肉，划水時像在走路。', trait:'點一下：表演倒立'},
+  atolla:{name:'警報水母', zone:1, w:40, len:62, rp:40, speed:.35, beh:'jelly', fast:60, desc:'深紅色的冠水母。被攻擊時會讓一圈藍光像警示燈一樣轉圈閃，引來更大的掠食者嚇跑攻擊牠的傢伙。', trait:'點一下：藍光繞圈的警報燈秀'},
+  anglerfish:{name:'安康魚', zone:1, w:28, len:72, rp:90, speed:.35, beh:'hover', desc:'頭上掛著一盞發光的小燈引誘獵物，大嘴裡滿是透明的長牙。小小的公魚會咬住母魚，一輩子黏在她身上。', trait:'點一下：小燈一閃，大嘴猛咬'},
+  gulper:{name:'寬咽魚', zone:1, w:22, len:150, rp:80, speed:.5, beh:'drift', desc:'嘴巴比身體還大，可以像鵜鶘一樣撐成一個大袋子，連水帶獵物一口吞下。細長的尾巴尖端會發紅光。', trait:'點一下：嘴巴鼓成大氣球'},
+  blobfish:{name:'水滴魚', zone:1, w:20, len:64, rp:100, speed:.18, beh:'bottom', desc:'身體幾乎是果凍做的，靠深海的水壓撐住形狀。被撈到水面時會塌成一張「全世界最醜」的哭喪臉，曾被選為最醜動物。', trait:'點一下：軟趴趴地抖一抖、嘆一口氣'},
+  vampsquid:{name:'吸血鬼魷魚', zone:1, w:12, len:72, rp:150, speed:.45, beh:'drift', desc:'不吸血也不是魷魚。腕之間連著一層黑紅色的斗篷，受到驚嚇時會把斗篷整個翻過來包住自己，露出一排軟刺。', trait:'點一下：翻起斗篷變成「鳳梨」，腕尖發藍光'},
+  frilled:{name:'皺鰓鯊', zone:1, w:8, len:160, rp:180, speed:.5, beh:'eel', desc:'活化石鯊魚，身體像鰻魚，鰓裂邊緣是一圈圈皺褶。嘴裡有 300 顆三叉戟形狀的小牙。', trait:'點一下：張嘴亮出三叉牙，鰓褶張開'},
+  giantsquid:{name:'大王魷魚', zone:1, w:2.5, len:230, rp:420, speed:.55, beh:'jet', desc:'傳說中的海怪克拉肯。眼睛像餐盤一樣大，是動物界最大的眼睛；兩條長觸腕末端的吸盤長著鋸齒。', trait:'點一下：長觸腕往前猛甩，噴出一團墨汁'},
+  tripod:{name:'三腳架魚', zone:2, w:35, len:72, rp:60, speed:.6, beh:'tripod', desc:'用兩片腹鰭和尾鰭的長鰭條撐在海底，像架著三腳架一樣站著，面向水流等小蝦自己送上門。', trait:'點一下：收起腳跳到別的地方'},
+  isopod:{name:'大王具足蟲', zone:2, w:35, len:64, rp:70, speed:.25, beh:'crawl', fast:600, desc:'巨大的深海鼠婦，全身披著盔甲。非常耐餓，曾經有一隻在水族館裡五年多不吃東西還活著。', trait:'點一下：縮成一顆球；幾乎不用餵'},
+  dumbo:{name:'小飛象章魚', zone:2, w:20, len:62, rp:160, speed:.4, beh:'bob', desc:'頭上兩片鰭像小飛象的耳朵，在深海慢慢拍著游。是住得最深的章魚之一。', trait:'點一下：拍拍耳朵轉一圈'},
+  snailfish:{name:'超深淵獅子魚', zone:2, w:5, len:70, rp:300, speed:.4, beh:'slow', desc:'住在八千公尺深海溝裡的透明小魚，是世界上住得最深的魚。身體透明到看得見肝臟和骨頭。', trait:'點一下：抖抖透明的身體'},
+};
+const DZONES = [
+  {name:'暮光帶', depth:'200–1000 公尺', m:600, cost:600, mins:3},
+  {name:'午夜帶', depth:'1000–4000 公尺', m:2500, cost:1800, mins:8},
+  {name:'深淵帶', depth:'4000 公尺以下', m:6000, cost:4500, mins:15},
+];
+const DEEP_BUILD = 8000, DEEP_CAPS = [6, 9, 12], DEEP_UP = [6000, 15000], DEEP_FEED = 30;
+let deepUI = null;
+function deepS(){ if (!state.deep || typeof state.deep !== 'object') state.deep = {built:false, lv:0, list:[], dive:null, rp:0, rpT:Date.now(), seen:{}, lights:1}; return state.deep; }
+const deepCap = () => DEEP_CAPS[clamp(deepS().lv | 0, 0, DEEP_CAPS.length - 1)];
+const deepRate = () => deepS().list.reduce((a, e) => a + (DSP[e.sp] && e.full > 0 ? DSP[e.sp].rp : 0), 0);
+const deepMax = () => Math.max(200, deepS().list.reduce((a, e) => a + (DSP[e.sp] ? DSP[e.sp].rp : 0), 0) * 24);
+function deepTick(now){ const D = deepS(); if (!D.built) return; const hrs = Math.max(0, Math.min(72, (now - (D.rpT || now)) / 3.6e6)); D.rpT = now;
+  if (hrs > 0) { let add = 0; for (const e of D.list) { const S = DSP[e.sp]; if (!S) continue; const per = 100 / (S.fast || 48), fh = Math.min(hrs, (e.full || 0) / per); add += S.rp * fh; e.full = Math.max(0, (e.full || 0) - per * hrs); } D.rp = Math.min(D.rp + add, deepMax()); }
+  if (D.dive && !D.dive.done && now >= D.dive.at) { D.dive.done = true; markDirty(); if (!deepUI) toast('潛水艇從' + DZONES[D.dive.z].name + '回來了！到深海研究站看看撈到什麼'); else { deepMsg('潛水艇回來了！點「潛水探測」看看收穫'); deepBtns(); } } }
+function deepMsg(s){ if (!deepUI) { toast(s); return; } const m = deepUI.el.querySelector('#deepMsg'); m.textContent = s; m.classList.add('on'); clearTimeout(deepUI.msgT); deepUI.msgT = setTimeout(() => m.classList.remove('on'), 2600); }
+/* ---- creature drawings: facing +x, centred, length L ---- */
+let DGL = null;
+function gl(c, x, y, r, col, a){ if (!DGL) return; const m = c.getTransform(), k = Math.hypot(m.a, m.b) / DPR; DGL.push({x:(m.a * x + m.c * y + m.e) / DPR, y:(m.b * x + m.d * y + m.f) / DPR, r:r * k, col, a:a == null ? 1 : a}); }
+const rxOf = e => e && e.re ? clamp(e.re.t / e.re.dur, 0, 1) : 0;
+const DDRAW = {
+  lantern(c, L, e, t){ const R = rxOf(e), sd = e ? e.d.seed : 3;
+    for (let k = 0; k < 7; k++) { const ox = Math.cos(k * 2.4 + sd) * L * 1.25 * (1 + R * 1.6), oy = Math.sin(k * 1.7 + sd) * L * .7 * (1 + R * 1.6) + Math.sin(t * 1.5 + k) * L * .08; c.save(); c.translate(ox, oy); const s = .8 + (k % 3) * .12; c.scale(s, s);
+      c.fillStyle = '#2e3c4c'; c.beginPath(); c.moveTo(-L * .5, 0); c.lineTo(-L * .62, -L * .1); c.lineTo(-L * .62, L * .1); c.fill(); c.fillStyle = lg(c, 0, -L * .15, 0, L * .15, [[0,'#3a4a5c'],[1,'#a8b8c8']]); c.beginPath(); c.ellipse(0, 0, L * .5, L * .15, 0, 0, TAU); c.fill();
+      c.fillStyle = '#e8f0f8'; dot(c, L * .34, -L * .03, L * .07); c.fillStyle = '#0a1018'; dot(c, L * .35, -L * .03, L * .045);
+      for (let j = 0; j < 6; j++) { const x = L * (.28 - j * .12); c.fillStyle = '#9ae8ff'; dot(c, x, L * .1, L * .025); gl(c, x, L * .1, L * (.09 + R * .12), '#5ad8ff', .7 + R); } c.restore(); } },
+  viperfish(c, L, e, t){ const R = rxOf(e), open = R > 0 ? Math.sin(Math.PI * R) : .08, H = L * .1;
+    c.fillStyle = '#1a2228'; c.beginPath(); c.moveTo(-L * .42, 0); c.lineTo(-L * .52, -H * .9); c.lineTo(-L * .52, H * .9); c.fill();
+    c.fillStyle = lg(c, 0, -H, 0, H, [[0,'#2a3844'],[1,'#121a20']]); c.beginPath(); c.moveTo(L * .3, -H * .7); c.quadraticCurveTo(0, -H * 1.05, -L * .44, -H * .2); c.lineTo(-L * .44, H * .2); c.quadraticCurveTo(0, H * 1.05, L * .3, H * .7); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(150,200,230,.15)'; c.beginPath(); c.ellipse(0, -H * .3, L * .3, H * .2, 0, 0, TAU); c.fill();
+    for (let j = 0; j < 12; j++) { const x = L * (.24 - j * .055); c.fillStyle = '#7ad8ff'; dot(c, x, H * .62, L * .01); gl(c, x, H * .62, L * .028, '#4ac8ff', .6); }
+    c.strokeStyle = '#3a4a54'; c.lineWidth = Math.max(.6, L * .008); c.beginPath(); c.moveTo(L * .16, -H * .85); c.quadraticCurveTo(L * .1, -H * 3.2, L * .36, -H * 2.6); c.stroke(); c.fillStyle = '#bff4ff'; dot(c, L * .36, -H * 2.6, L * .018); gl(c, L * .36, -H * 2.6, L * .06, '#8af0ff', 1);
+    c.save(); c.translate(L * .26, H * .25); c.rotate(open * .9); c.fillStyle = '#1e2a32'; c.beginPath(); c.moveTo(0, 0); c.lineTo(L * .22, -H * .1); c.lineTo(L * .2, H * .35); c.closePath(); c.fill();
+    c.fillStyle = '#e8f0f0'; for (const [x, h] of [[.19, 1.9], [.12, 1.3], [.06, .8]]) { c.beginPath(); c.moveTo(L * x - L * .012, -H * .05); c.quadraticCurveTo(L * (x + .02), -H * h * .6, L * (x + .004), -H * h); c.lineTo(L * x + L * .01, -H * .05); c.fill(); } c.restore();
+    c.fillStyle = '#e8f0f0'; for (const x of [.3, .24]) { c.beginPath(); c.moveTo(L * x - L * .01, H * .1); c.lineTo(L * x, H * .75); c.lineTo(L * x + L * .01, H * .1); c.fill(); }
+    c.fillStyle = '#c8d8e0'; dot(c, L * .26, -H * .35, L * .04); c.fillStyle = '#05080a'; dot(c, L * .265, -H * .35, L * .026); },
+  barreleye(c, L, e, t){ const look = e && e.look != null ? e.look : 0;
+    c.fillStyle = 'rgba(160,190,210,.35)'; for (const s of [-1, 1]) { c.beginPath(); c.moveTo(-L * .02, H0(L)); c.quadraticCurveTo(-L * .2, s * L * .3, -L * .36, s * L * .22); c.quadraticCurveTo(-L * .2, s * L * .08, -L * .02, H0(L)); c.fill(); }
+    c.fillStyle = '#2e2830'; c.beginPath(); c.moveTo(-L * .34, L * .04); c.lineTo(-L * .5, -L * .08); c.lineTo(-L * .5, L * .16); c.fill();
+    c.fillStyle = lg(c, 0, -L * .1, 0, L * .2, [[0,'#4a4048'],[1,'#1e181e']]); c.beginPath(); c.ellipse(-L * .04, L * .05, L * .32, L * .13, 0, 0, TAU); c.fill();
+    c.fillStyle = '#0a0808'; dot(c, L * .24, L * .02, L * .022); dot(c, L * .2, L * .03, L * .02);
+    for (const x of [.06, .14]) { c.save(); c.translate(L * x, -L * .02); c.rotate(look); c.fillStyle = '#2a5a3a'; c.fillRect(-L * .025, -L * .1, L * .05, L * .1); c.fillStyle = '#6aff9a'; c.beginPath(); c.ellipse(0, -L * .1, L * .028, L * .02, 0, 0, TAU); c.fill(); gl(c, 0, -L * .1, L * .06, '#5aff8a', .9); c.restore(); }
+    c.fillStyle = 'rgba(190,235,255,.14)'; c.strokeStyle = 'rgba(210,245,255,.55)'; c.lineWidth = Math.max(.6, L * .01); c.beginPath(); c.ellipse(L * .1, -L * .06, L * .18, L * .14, 0, Math.PI, TAU); c.closePath(); c.fill(); c.stroke();
+    c.strokeStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.arc(L * .1, -L * .06, L * .13, -2.6, -1.9); c.stroke(); },
+  oarfish(c, L, e, t){ const n = 30, pts = [], H = L * .03, ph = e ? e.ph : 0, R = rxOf(e);
+    for (let i = 0; i <= n; i++) { const q = i / n; pts.push([L * (.5 - q), Math.sin(ph - q * 7) * L * .025 * (.4 + q)]); }
+    c.strokeStyle = '#e0303a'; c.lineWidth = Math.max(.6, L * .004); c.beginPath(); for (let i = 1; i < n; i++) { const [x, y] = pts[i], h = H * (1.8 + .6 * Math.sin(t * 6 - i * .8)) * (1 - i / n * .6) * (1 + R); c.moveTo(x, y - H * .8); c.lineTo(x - L * .006, y - H * .8 - h); } c.stroke();
+    c.lineCap = 'round'; for (let i = 0; i < n; i++) { const q = i / n; c.strokeStyle = '#c8ccd6'; c.lineWidth = H * 2 * (1 - q * .7); c.beginPath(); c.moveTo(pts[i][0], pts[i][1]); c.lineTo(pts[i + 1][0], pts[i + 1][1]); c.stroke(); }
+    c.strokeStyle = 'rgba(60,70,90,.45)'; c.lineWidth = Math.max(.5, H * .35); c.beginPath(); for (let i = 2; i < n; i += 2) { c.moveTo(pts[i][0], pts[i][1] - H * .3); c.lineTo(pts[i][0] - L * .008, pts[i][1] + H * .3); } c.stroke();
+    c.strokeStyle = '#ff3a46'; c.lineWidth = Math.max(.8, L * .006); for (let k = 0; k < 6; k++) { c.beginPath(); c.moveTo(L * .47, -H * .8); c.quadraticCurveTo(L * (.42 - k * .02), -H * (6 + k * 1.6) * (1 + R * .6), L * (.3 - k * .03), -H * (4 + k) * (1 + R * .5) + Math.sin(t * 2 + k) * H); c.stroke(); }
+    c.fillStyle = '#d0d4de'; c.beginPath(); c.ellipse(L * .48, pts[0][1], L * .035, H * 1.3, 0, 0, TAU); c.fill(); c.fillStyle = '#0a0c10'; dot(c, L * .49, pts[0][1] - H * .3, L * .008); },
+  coelacanth(c, L, e, t){ const H = L * .22, g = e ? e.ph : 0, P = {b1:'#1c3656', b2:'#3e5e80'};
+    const lobe = (x, y, a, l) => { c.save(); c.translate(x, y); c.rotate(a); c.fillStyle = '#2a4a6a'; c.fillRect(0, -l * .12, l * .45, l * .24); c.fillStyle = 'rgba(70,110,150,.85)'; c.beginPath(); c.ellipse(l * .65, 0, l * .35, l * .22, 0, 0, TAU); c.fill(); c.restore(); };
+    lobe(-L * .02, H * .4, 2.2 + Math.sin(g) * .4, L * .16); lobe(-L * .18, H * .45, 2.4 - Math.sin(g) * .4, L * .14); lobe(-L * .16, -H * .45, -2.4 + Math.sin(g) * .4, L * .14);
+    c.fillStyle = 'rgba(60,96,130,.9)'; c.beginPath(); c.moveTo(-L * .36, 0); c.quadraticCurveTo(-L * .5, -H * .9, -L * .56, -H * .6); c.lineTo(-L * .5, 0); c.lineTo(-L * .56, H * .6); c.quadraticCurveTo(-L * .5, H * .9, -L * .36, 0); c.fill();
+    c.beginPath(); c.ellipse(-L * .6, 0, L * .06, H * .14, 0, 0, TAU); c.fill();
+    fillBody(c, L * .95, H, .02, P); c.save(); c.clip(); c.fillStyle = 'rgba(230,240,250,.7)'; for (let i = 0; i < 16; i++) dot(c, L * (.3 - (i * 37 % 64) / 100), H * ((i * 53 % 80) / 100 - .4), L * (.012 + (i % 3) * .006)); sheen(c, L, H); c.restore();
+    c.fillStyle = 'rgba(60,96,130,.9)'; c.beginPath(); c.moveTo(L * .08, -H * .48); c.lineTo(L * .02, -H * 1.1); c.lineTo(-L * .06, -H * .46); c.fill();
+    lobe(L * .14, H * .3, 2 + Math.sin(g + 1.5) * .4, L * .17);
+    c.fillStyle = '#c8e0d8'; dot(c, L * .34, -H * .1, L * .035); c.fillStyle = '#0a1414'; dot(c, L * .345, -H * .1, L * .022); gl(c, L * .345, -H * .1, L * .03, '#7affc8', .5); },
+  atolla(c, L, e, t){ const R = rxOf(e), pul = Math.sin(t * 2 + (e ? e.ph : 0)), rw = L * .34;
+    c.strokeStyle = 'rgba(150,40,50,.75)'; c.lineWidth = Math.max(.5, L * .01); c.beginPath(); for (let i = 0; i < 16; i++) { const x = -rw + i * rw * 2 / 15; c.moveTo(x, 0); c.quadraticCurveTo(x + Math.sin(t * 2 + i) * 3, L * .14, x + Math.sin(t * 1.4 + i) * 5, L * .26); } c.stroke();
+    c.lineWidth = Math.max(.7, L * .014); c.beginPath(); c.moveTo(rw * .4, 0); c.bezierCurveTo(rw * .5, L * .4, rw * .1 + Math.sin(t) * 8, L * .7, rw * .3, L * 1.0); c.stroke();
+    c.fillStyle = 'rgba(160,20,40,.82)'; c.beginPath(); c.ellipse(0, 0, rw * (1 - pul * .05), L * .22 * (1 + pul * .06), 0, Math.PI, TAU); c.fill();
+    c.fillStyle = 'rgba(90,6,20,.9)'; c.beginPath(); c.ellipse(0, -L * .06, rw * .45, L * .1, 0, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(255,120,130,.4)'; c.beginPath(); c.ellipse(0, -L * .02, rw * .8, L * .1, 0, Math.PI, TAU); c.stroke();
+    for (let i = 0; i < 12; i++) { const a = Math.PI + i / 11 * Math.PI, x = Math.cos(a) * rw * .95, y = Math.sin(a) * L * .04; const lit = R > 0 ? Math.max(0, Math.cos(a * 2 - t * 14)) * (1 - R * .3) : .15;
+      c.fillStyle = 'rgba(140,210,255,' + (.3 + .7 * lit).toFixed(2) + ')'; dot(c, x, y, L * .018); gl(c, x, y, L * (.04 + lit * .12), '#5ab8ff', lit); } },
+  anglerfish(c, L, e, t){ const R = rxOf(e), rr = L * .34, open = R > 0 ? Math.sin(Math.PI * Math.min(1, R * 1.6)) : .12 + .06 * Math.sin(t * .8), ph = e ? e.ph : 0;
+    c.fillStyle = '#241c1e'; c.beginPath(); c.moveTo(-rr * .85, 0); c.lineTo(-L * .55, -L * .12 + Math.sin(ph * 2) * L * .03); c.lineTo(-L * .55, L * .12 + Math.sin(ph * 2) * L * .03); c.closePath(); c.fill();
+    c.fillStyle = rg(c, -rr * .3, -rr * .4, rr * .1, 0, 0, rr * 1.15, [[0,'#4e3e40'],[1,'#130c0e']]); c.beginPath(); c.arc(0, 0, rr, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(120,20,30,.85)'; c.beginPath(); c.ellipse(rr * .55, rr * .3, rr * .4, rr * .12 + open * rr * .35, 0, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(240,245,250,.85)'; for (let i = 0; i < 6; i++) { const x = rr * (.22 + i * .13); c.beginPath(); c.moveTo(x - rr * .03, rr * .16); c.lineTo(x, rr * (.42 + (i % 2) * .1)); c.lineTo(x + rr * .03, rr * .16); c.fill(); }
+    c.save(); c.translate(rr * .05, rr * .3); c.rotate(open * .55); c.fillStyle = '#1c1416'; c.beginPath(); c.moveTo(-rr * .2, 0); c.quadraticCurveTo(rr * .5, rr * .55, rr * 1.08, -rr * .02); c.lineTo(rr * .95, -rr * .1); c.quadraticCurveTo(rr * .45, rr * .2, -rr * .2, -rr * .12); c.fill();
+    c.fillStyle = 'rgba(240,245,250,.85)'; for (let i = 0; i < 7; i++) { const x = rr * (.15 + i * .12), y = rr * (.14 - i * .02); c.beginPath(); c.moveTo(x - rr * .03, y); c.lineTo(x + rr * .01, y - rr * (.3 + (i % 2) * .12)); c.lineTo(x + rr * .03, y); c.fill(); } c.restore();
+    c.fillStyle = '#5a6a78'; dot(c, rr * .45, -rr * .38, rr * .07); c.fillStyle = '#0a0a0c'; dot(c, rr * .46, -rr * .38, rr * .04);
+    c.fillStyle = 'rgba(70,50,54,.9)'; c.beginPath(); c.ellipse(-rr * .25, rr * .45, rr * .22, rr * .1, -.5 + Math.sin(ph) * .2, 0, TAU); c.fill();
+    const bx = rr * 1.25 + Math.sin(t * 1.3) * rr * .08, by = -rr * 1.15 + Math.cos(t * 1.7) * rr * .08; c.strokeStyle = '#3a2c2a'; c.lineWidth = Math.max(.7, L * .012); c.beginPath(); c.moveTo(rr * .25, -rr * .92); c.quadraticCurveTo(rr * .5, -rr * 1.7, bx, by - rr * .12); c.stroke();
+    const fl = 1 + R * 1.5; c.fillStyle = '#d8fff0'; dot(c, bx, by, rr * .1); gl(c, bx, by, rr * .5 * fl, '#7affd8', 1);
+    if (e && e.d.seed % 3 === 0) { c.save(); c.translate(-rr * .1, rr * .98); c.rotate(.5); c.fillStyle = '#3a2e30'; c.beginPath(); c.ellipse(0, rr * .12, rr * .07, rr * .14, 0, 0, TAU); c.fill(); c.fillStyle = '#0a0a0c'; dot(c, -rr * .02, rr * .06, rr * .02); c.restore(); } },
+  gulper(c, L, e, t){ const R = rxOf(e), inf = R > 0 ? Math.sin(Math.PI * R) : 0, ph = e ? e.ph : 0, n = 24;
+    c.strokeStyle = '#1e181c'; c.lineCap = 'round'; for (let i = 0; i < n; i++) { const q0 = i / n, q1 = (i + 1) / n, y0 = Math.sin(ph * 1.3 - q0 * 7) * L * .05 * q0, y1 = Math.sin(ph * 1.3 - q1 * 7) * L * .05 * q1; c.lineWidth = Math.max(.5, L * .03 * (1 - q0)); c.beginPath(); c.moveTo(-L * (.06 + q0 * .55), y0); c.lineTo(-L * (.06 + q1 * .55), y1); c.stroke(); }
+    const ty = Math.sin(ph * 1.3 - 7) * L * .05; c.fillStyle = '#ff6a6a'; dot(c, -L * .62, ty, L * .012); gl(c, -L * .62, ty, L * .06, '#ff4a5a', 1);
+    c.fillStyle = 'rgba(40,30,36,.92)'; c.beginPath(); c.moveTo(L * .02, L * .02); c.quadraticCurveTo(L * .2, L * (.16 + inf * .28), L * .42, -L * .02); c.lineTo(L * .4, -L * .06 - inf * L * .06); c.quadraticCurveTo(L * .2, -L * (.06 + inf * .1), L * .02, -L * .03); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(120,100,110,.5)'; c.lineWidth = Math.max(.5, L * .005); c.stroke();
+    c.fillStyle = 'rgba(80,60,70,.35)'; c.beginPath(); c.ellipse(L * .22, L * (.03 + inf * .08), L * .12, L * (.04 + inf * .12), 0, 0, TAU); c.fill();
+    c.fillStyle = '#1a1418'; c.beginPath(); c.ellipse(0, 0, L * .07, L * .045, 0, 0, TAU); c.fill(); c.fillStyle = '#7a8a9a'; dot(c, L * .43, -L * .05 - inf * L * .06, L * .008); },
+  blobfish(c, L, e, t){ const R = rxOf(e), sq = 1 + .16 * Math.sin(Math.PI * R * 4) * (1 - R), ph = e ? e.ph : 0;
+    c.save(); c.scale(sq, 2 - sq);
+    c.fillStyle = 'rgba(214,150,150,.85)'; c.beginPath(); c.moveTo(-L * .22, 0); c.quadraticCurveTo(-L * .42, -L * .04 + Math.sin(ph) * L * .02, -L * .52, -L * .08); c.lineTo(-L * .5, L * .1); c.quadraticCurveTo(-L * .4, L * .1, -L * .22, L * .12); c.fill();
+    c.fillStyle = rg(c, L * .05, -L * .1, L * .02, L * .05, 0, L * .38, [[0,'#f2c4c0'],[1,'#c87e80']]); c.beginPath(); c.ellipse(L * .04, L * .02, L * .32, L * .24, 0, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(160,90,96,.5)'; c.lineWidth = Math.max(.5, L * .01); c.beginPath(); c.arc(L * .02, -L * .02, L * .18, 3.6, 4.4); c.stroke(); c.beginPath(); c.arc(-L * .05, L * .04, L * .14, 3.4, 4.2); c.stroke();
+    c.fillStyle = rg(c, L * .3, L * .02, L * .01, L * .32, L * .06, L * .16, [[0,'#f6cac6'],[1,'#d48a8c']]); c.beginPath(); c.ellipse(L * .31, L * .07, L * .11, L * .13, .2, 0, TAU); c.fill();
+    c.strokeStyle = '#8a4a50'; c.lineWidth = Math.max(.6, L * .012); c.beginPath(); c.moveTo(L * .14, L * .2); c.quadraticCurveTo(L * .24, L * .14, L * .34, L * .21); c.stroke();
+    c.fillStyle = '#2a1414'; dot(c, L * .2, -L * .07, L * .018); c.fillStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.ellipse(L * .02, -L * .12, L * .12, L * .05, -.2, 0, TAU); c.fill(); c.restore();
+    if (R > .1 && R < .9) { c.strokeStyle = 'rgba(220,240,255,' + (.8 * Math.sin(Math.PI * R)).toFixed(2) + ')'; c.lineWidth = Math.max(.6, L * .01); c.beginPath(); c.arc(L * .45, -L * .1 - R * L * .3, L * (.03 + R * .03), 0, TAU); c.stroke(); } },
+  vampsquid(c, L, e, t){ const R = rxOf(e), inv = R > 0 ? Math.sin(Math.PI * Math.min(1, R * 1.3)) : 0, fl = Math.sin(t * 2 + (e ? e.ph : 0)) * .25, tips = [];
+    for (let i = 0; i < 8; i++) { const sp = (i - 3.5) * .17, a = lerp(Math.PI + sp * (1 + fl * .3), sp * 1.3, inv), l = L * (.42 - Math.abs(i - 3.5) * .015); tips.push([L * .04 + Math.cos(a) * l, Math.sin(a) * l]); }
+    c.fillStyle = inv > .5 ? '#2a0610' : '#5a1020'; c.beginPath(); c.moveTo(L * .04, 0); c.lineTo(tips[0][0], tips[0][1]); for (let i = 1; i < 8; i++) { const mx = (tips[i - 1][0] + tips[i][0]) / 2, my = (tips[i - 1][1] + tips[i][1]) / 2; c.quadraticCurveTo(lerp(mx, L * .04, .3), lerp(my, 0, .3), tips[i][0], tips[i][1]); } c.closePath(); c.fill();
+    if (inv > .3) { c.strokeStyle = 'rgba(240,220,230,' + (inv * .8).toFixed(2) + ')'; c.lineWidth = Math.max(.5, L * .008); c.beginPath(); for (const [x, y] of tips) for (let k = 1; k < 5; k++) { const px = lerp(L * .04, x, k / 5), py = lerp(0, y, k / 5); c.moveTo(px, py); c.lineTo(px + (py > 0 ? 1 : -1) * L * .01, py + (py > 0 ? L * .03 : -L * .03)); } c.stroke(); }
+    for (const [x, y] of tips) { c.fillStyle = '#9ad8ff'; dot(c, x, y, L * .015); gl(c, x, y, L * (.04 + inv * .1), '#6ac0ff', .4 + inv); }
+    if (inv < .7) { c.fillStyle = rg(c, L * .12, -L * .05, 0, L * .12, 0, L * .22, [[0,'#8a2a3a'],[1,'#3a0a14']]); c.beginPath(); c.ellipse(L * .16, 0, L * .2, L * .16, 0, 0, TAU); c.fill();
+      c.fillStyle = '#6a1a2a'; for (const s of [-1, 1]) { c.save(); c.translate(L * .24, s * L * .14); c.rotate(s * (.4 + fl)); c.beginPath(); c.ellipse(0, s * L * .04, L * .05, L * .07, 0, 0, TAU); c.fill(); c.restore(); }
+      c.fillStyle = '#4ab8ff'; dot(c, L * .1, -L * .05, L * .05); c.fillStyle = '#c8202a'; dot(c, L * .1, -L * .05, L * .033); c.fillStyle = '#0a0204'; dot(c, L * .105, -L * .05, L * .016); } },
+  frilled(c, L, e, t){ const R = rxOf(e), n = 20, H = L * .05, pts = [], ph = e ? e.ph : 0, open = R > 0 ? Math.sin(Math.PI * R) : 0;
+    for (let i = 0; i <= n; i++) { const q = i / n; pts.push([L * (.46 - q * .94), Math.sin(ph * 1.1 - q * 5) * L * .04 * (.25 + q)]); }
+    c.fillStyle = '#5a4a3a'; const tl = pts[n]; c.beginPath(); c.moveTo(tl[0] + L * .04, tl[1]); c.lineTo(tl[0] - L * .03, tl[1] - H * 1.2); c.lineTo(tl[0] - L * .05, tl[1] + H * .8); c.fill();
+    c.lineCap = 'round'; for (let i = 0; i < n; i++) { const q = i / n; c.strokeStyle = '#6a5844'; c.lineWidth = H * 2 * (1 - q * .55); c.beginPath(); c.moveTo(pts[i][0], pts[i][1]); c.lineTo(pts[i + 1][0], pts[i + 1][1]); c.stroke(); }
+    c.strokeStyle = 'rgba(200,180,150,.35)'; c.lineWidth = H * .5; c.beginPath(); c.moveTo(pts[0][0], pts[0][1] + H * .5); for (let i = 1; i < n; i++) c.lineTo(pts[i][0], pts[i][1] + H * .5 * (1 - i / n * .5)); c.stroke();
+    c.fillStyle = '#7a6650'; c.beginPath(); c.ellipse(pts[0][0] + L * .02, pts[0][1], L * .07, H * 1.15, 0, 0, TAU); c.fill();
+    for (let k = 0; k < 6; k++) { const x = pts[0][0] - L * (.05 + k * .02), y = pts[1][1]; c.strokeStyle = 'rgba(200,80,80,' + (.6 + open * .4).toFixed(2) + ')'; c.lineWidth = Math.max(.6, L * .006); c.beginPath(); c.moveTo(x, y - H * (.9 + open * .5));
+      for (let j = 1; j <= 6; j++) c.lineTo(x + (j % 2 ? 1 : -1) * L * .008 * (1 + open * 1.5), y - H * (.9 + open * .5) + j * H * (1.8 + open) / 6); c.stroke(); }
+    const hx = pts[0][0] + L * .08; c.fillStyle = '#2a1010'; c.beginPath(); c.moveTo(hx - L * .06, pts[0][1]); c.lineTo(hx, pts[0][1] - H * .3 - open * H * .6); c.lineTo(hx, pts[0][1] + H * .3 + open * H * .9); c.fill();
+    if (open > .2) { c.fillStyle = '#f0ece0'; for (let j = 0; j < 4; j++) { const x = hx - L * .015 * j; c.beginPath(); c.moveTo(x, pts[0][1] - H * .3 - open * H * .5); c.lineTo(x - L * .006, pts[0][1] - H * .05); c.lineTo(x - L * .012, pts[0][1] - H * .3 - open * H * .5); c.fill(); } }
+    c.fillStyle = '#6aaa8a'; dot(c, pts[0][0] + L * .04, pts[0][1] - H * .45, L * .014); c.fillStyle = '#081010'; dot(c, pts[0][0] + L * .042, pts[0][1] - H * .45, L * .008); },
+  giantsquid(c, L, e, t){ const R = rxOf(e), pl = e ? e.pulse || 0 : 0, mw = L * .085 * (1 - .18 * pl), lash = R > 0 ? Math.sin(Math.PI * R) : 0;
+    c.lineCap = 'round';
+    for (let i = 0; i < 8; i++) { const y0 = (i - 3.5) * L * .007, ex = -L * (.36 + (i % 3) * .03), ey = (i - 3.5) * L * .022 + Math.sin(t * 1.4 + i) * L * .02; c.strokeStyle = i % 2 ? '#b04a46' : '#9a3a38'; c.lineWidth = Math.max(.8, L * .016); c.beginPath(); c.moveTo(-L * .08, y0); c.quadraticCurveTo(-L * .22, y0 + Math.sin(t + i) * L * .02, ex, ey); c.stroke(); }
+    for (const s of [-1, 1]) { const ex = lerp(-L * .92, L * .32, lash), ey = lerp(s * L * .05 + Math.sin(t * .9 + s) * L * .04, L * .14 + s * L * .02, lash); c.strokeStyle = '#a84442'; c.lineWidth = Math.max(.6, L * .006); c.beginPath(); c.moveTo(-L * .08, s * L * .01); c.bezierCurveTo(-L * .3, s * L * .06, lerp(-L * .6, L * .1, lash), lerp(s * L * .02, L * .3, lash), ex, ey); c.stroke();
+      c.fillStyle = '#b85450'; c.beginPath(); c.ellipse(ex, ey, L * .03, L * .012, 0, 0, TAU); c.fill(); }
+    c.fillStyle = '#a03c3a'; c.beginPath(); c.ellipse(-L * .04, 0, L * .07, mw * .8, 0, 0, TAU); c.fill();
+    c.fillStyle = lg(c, 0, -mw, 0, mw, [[0,'#c85c52'],[1,'#7a2a2c']]); c.beginPath(); c.moveTo(0, -mw); c.bezierCurveTo(L * .2, -mw * 1.05, L * .4, -mw * .5, L * .5, 0); c.bezierCurveTo(L * .4, mw * .5, L * .2, mw * 1.05, 0, mw); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(90,20,24,.4)'; for (let i = 0; i < 20; i++) dot(c, L * (.04 + (i * 37 % 40) / 100), mw * ((i * 53 % 160) / 100 - .8) * .8, L * .006);
+    c.fillStyle = '#b8504c'; for (const s of [-1, 1]) { c.beginPath(); c.moveTo(L * .34, s * mw * .4); c.quadraticCurveTo(L * .4, s * mw * 1.5, L * .5, 0); c.closePath(); c.fill(); }
+    c.fillStyle = '#e8e0d4'; dot(c, -L * .03, -mw * .1, L * .036); c.fillStyle = '#1a1218'; dot(c, -L * .028, -mw * .1, L * .026); c.fillStyle = 'rgba(255,255,255,.8)'; dot(c, -L * .036, -mw * .2, L * .008); gl(c, -L * .03, -mw * .1, L * .03, '#9ae0ff', .25); },
+  tripod(c, L, e, t){ const R = rxOf(e), hop = R > 0 ? Math.sin(Math.PI * R) : 0, by = -L * .36 - hop * L * .25, fold = hop;
+    c.strokeStyle = '#d8d0c0'; c.lineWidth = Math.max(.6, L * .009); c.beginPath(); c.moveTo(L * .06, by + L * .05); c.lineTo(L * .12 - fold * L * .1, by + L * .05 + (L * .36 - fold * L * .3)); c.moveTo(L * .0, by + L * .05); c.lineTo(-L * .03 - fold * L * .05, by + L * .05 + (L * .36 - fold * L * .3)); c.moveTo(-L * .42, by); c.lineTo(-L * .48 + fold * L * .1, by + (L * .36 - fold * L * .3)); c.stroke();
+    c.strokeStyle = '#bab2a4'; c.lineWidth = Math.max(.5, L * .007); for (const s of [0, 1]) { c.beginPath(); c.moveTo(L * .14, by - L * .02); c.quadraticCurveTo(L * .3, by - L * (.2 + s * .06), L * (.44 + s * .04), by - L * (.12 + s * .1)); c.stroke(); }
+    c.fillStyle = lg(c, 0, by - L * .07, 0, by + L * .07, [[0,'#5a5048'],[1,'#2e2824']]); c.beginPath(); c.moveTo(L * .3, by); c.quadraticCurveTo(L * .1, by - L * .09, -L * .42, by - L * .015); c.lineTo(-L * .42, by + L * .015); c.quadraticCurveTo(L * .1, by + L * .08, L * .3, by); c.fill();
+    c.fillStyle = '#3a322c'; c.beginPath(); c.moveTo(-L * .4, by); c.lineTo(-L * .5, by - L * .05); c.lineTo(-L * .5, by + L * .04); c.fill(); c.fillStyle = '#0a0808'; dot(c, L * .22, by - L * .025, L * .012); },
+  isopod(c, L, e, t){ const R = rxOf(e), curl = R > 0 ? Math.sin(Math.PI * R) : 0, ph = e ? e.ph : 0;
+    if (curl > .55) { const r = L * .24; c.fillStyle = lg(c, 0, -r * 2, 0, 0, [[0,'#d0c4d0'],[1,'#8a7c8c']]); c.beginPath(); c.arc(0, -r, r, 0, TAU); c.fill(); c.strokeStyle = 'rgba(90,76,92,.7)'; c.lineWidth = Math.max(.6, L * .01); for (let i = 1; i < 6; i++) { c.beginPath(); c.arc(0, -r, r, -Math.PI / 2 + i * .5 - 1.5, -Math.PI / 2 + i * .5 - 1.2); c.stroke(); c.beginPath(); c.moveTo(0, -r); c.lineTo(Math.cos(i * 1.05) * r, -r + Math.sin(i * 1.05) * r); c.stroke(); } return; }
+    c.save(); c.scale(1 - curl * .4, 1);
+    c.strokeStyle = '#9a8aa0'; c.lineWidth = Math.max(.6, L * .012); c.beginPath(); for (let i = 0; i < 7; i++) { const x = L * (.24 - i * .08), sw = Math.sin(ph * 2 + i) * L * .02; c.moveTo(x, -L * .04); c.lineTo(x + sw, L * .03); } c.stroke();
+    c.fillStyle = '#a89aaa'; c.beginPath(); c.ellipse(-L * .4, -L * .04, L * .07, L * .05, 0, 0, TAU); c.fill();
+    for (let i = 0; i < 8; i++) { const x = L * (.24 - i * .085); c.fillStyle = i % 2 ? '#c4b8c6' : '#b4a6b8'; c.beginPath(); c.ellipse(x, -L * .08, L * .06, L * .1, 0, Math.PI, TAU); c.fill(); c.strokeStyle = 'rgba(90,76,92,.6)'; c.lineWidth = Math.max(.5, L * .008); c.stroke(); }
+    c.fillStyle = '#b8acbc'; c.beginPath(); c.ellipse(L * .33, -L * .05, L * .07, L * .06, 0, 0, TAU); c.fill(); c.fillStyle = '#1a1420'; c.beginPath(); c.ellipse(L * .35, -L * .07, L * .03, L * .025, 0, 0, TAU); c.fill();
+    c.strokeStyle = '#a090a4'; c.lineWidth = Math.max(.5, L * .008); for (const s of [0, 1]) { c.beginPath(); c.moveTo(L * .38, -L * .06); c.quadraticCurveTo(L * .5, -L * (.16 + s * .06), L * (.56 + s * .04), -L * (.06 + s * .1) + Math.sin(t + s) * L * .02); c.stroke(); } c.restore(); },
+  dumbo(c, L, e, t){ const R = rxOf(e), flap = Math.sin(t * (R > 0 ? 16 : 4) + (e ? e.ph : 0)) * .45;
+    c.fillStyle = 'rgba(232,150,130,.85)'; c.beginPath(); c.moveTo(-L * .24, L * .04); for (let i = 0; i <= 8; i++) { const x = -L * .24 + i * L * .06, y = L * (.26 + (i % 2) * .06) + Math.sin(t * 2 + i) * L * .02; c.lineTo(x, y); } c.lineTo(L * .24, L * .04); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(200,110,100,.6)'; c.lineWidth = Math.max(.5, L * .01); c.beginPath(); for (let i = 0; i < 5; i++) { const x = -L * .18 + i * L * .09; c.moveTo(x, L * .06); c.lineTo(x + Math.sin(t * 2 + i) * L * .02, L * .28); } c.stroke();
+    for (const s of [-1, 1]) { c.save(); c.translate(s * L * .2, -L * .16); c.rotate(s * (.6 + flap)); c.fillStyle = '#f0a890'; c.beginPath(); c.ellipse(s * L * .08, 0, L * .13, L * .07, 0, 0, TAU); c.fill(); c.restore(); }
+    c.fillStyle = rg(c, -L * .06, -L * .16, L * .02, 0, -L * .05, L * .3, [[0,'#fcd8c8'],[1,'#e2907e']]); c.beginPath(); c.ellipse(0, -L * .05, L * .25, L * .23, 0, 0, TAU); c.fill();
+    c.fillStyle = '#1a1010'; dot(c, L * .1, -L * .02, L * .045); c.fillStyle = 'rgba(255,255,255,.9)'; dot(c, L * .085, -L * .04, L * .015); c.fillStyle = 'rgba(255,255,255,.3)'; c.beginPath(); c.ellipse(-L * .06, -L * .18, L * .1, L * .05, -.3, 0, TAU); c.fill(); },
+  snailfish(c, L, e, t){ const R = rxOf(e), ph = e ? e.ph : 0, sh = R > 0 ? Math.sin(t * 30) * L * .01 * (1 - R) : 0;
+    c.save(); c.translate(sh, 0); c.fillStyle = 'rgba(240,190,205,.5)'; c.strokeStyle = 'rgba(255,220,232,.75)'; c.lineWidth = Math.max(.5, L * .008);
+    c.beginPath(); c.moveTo(L * .38, 0); c.bezierCurveTo(L * .38, -L * .2, L * .05, -L * .2, -L * .1, -L * .1); for (let i = 0; i <= 8; i++) { const q = i / 8; c.lineTo(-L * (.1 + q * .44), -L * (.1 - q * .09) + Math.sin(ph * 1.5 - q * 5) * L * .03 * q); }
+    for (let i = 8; i >= 0; i--) { const q = i / 8; c.lineTo(-L * (.1 + q * .44), L * (.1 - q * .09) + Math.sin(ph * 1.5 - q * 5) * L * .03 * q); } c.bezierCurveTo(L * .05, L * .2, L * .38, L * .2, L * .38, 0); c.fill(); c.stroke();
+    c.fillStyle = 'rgba(150,60,80,.55)'; c.beginPath(); c.ellipse(L * .08, L * .04, L * .1, L * .06, 0, 0, TAU); c.fill(); c.strokeStyle = 'rgba(255,240,245,.45)'; c.beginPath(); c.moveTo(L * .2, -L * .02); c.lineTo(-L * .5, 0); c.stroke();
+    for (let i = 0; i < 9; i++) { const x = L * (.1 - i * .06); c.beginPath(); c.moveTo(x, -L * .06); c.lineTo(x - L * .01, L * .06); c.stroke(); }
+    c.fillStyle = 'rgba(240,180,200,.55)'; c.beginPath(); c.ellipse(L * .22, L * .16, L * .12, L * .06, .4 + Math.sin(ph * 2) * .2, 0, TAU); c.fill();
+    c.fillStyle = '#1a2440'; dot(c, L * .3, -L * .05, L * .02); c.restore(); },
+};
+const H0 = L => L * .02;
+/* ---- station screen ---- */
+function deepEnt(d, w, h){ const S = DSP[d.sp]; return {d, S, x:rand(.15, .85) * w, y:rand(.3, .7) * h, vx:0, vy:0, face:Math.random() < .5 ? -1 : 1, tx:0, ty:0, wait:0, ph:rand(6), re:null, pulse:0, jt:rand(1, 3), rot:0, look:0}; }
+function deepArea(){ const U2 = deepUI, top = 110, floor = U2.h - 128; return {top, floor, bot:floor - 20}; }
+function deepTarget(e){ const A = deepArea(), S = e.S, w = deepUI.w, L = S.len * U;
+  if (S.beh === 'bottom' || S.beh === 'crawl' || S.beh === 'tripod') { e.tx = rand(30, w - 30); e.ty = A.floor - (S.beh === 'crawl' ? 2 : S.beh === 'tripod' ? 0 : L * .2); e.wait = S.beh === 'tripod' ? rand(10, 20) : rand(4, 12); }
+  else if (S.beh === 'vertical') { e.tx = rand(40, w - 40); e.ty = rand(A.top + L * .5, A.bot - L * .5); e.wait = rand(6, 14); }
+  else { e.tx = rand(30 + L * .3, w - 30 - L * .3); e.ty = rand(A.top + L * .2, A.bot - L * .25); e.wait = S.beh === 'hover' ? rand(8, 16) : rand(3, 9); }
+  if (S.beh === 'tripod' && e.wait) e.re = {k:'hop', t:0, dur:1.2}; }
+function openDeep(){ if (deepUI || mini) return; closeSheet(); const D = deepS(); deepTick(Date.now());
+  const el = document.createElement('div'); el.id = 'deep';
+  el.innerHTML = '<canvas id="deepCv" aria-label="深海研究站的壓力缸"></canvas><div class="dhud"><button id="dBack" aria-label="回到魚缸">← 魚缸</button><span class="dtitle">深海研究站</span><span id="dInfo"></span></div>'
+    + '<p class="dmsg" id="deepMsg"></p><div class="dbtns"><button id="dDive">潛水探測</button><button id="dLab">研究資料</button><button id="dFeed">投餵</button><button id="dLight">熄燈</button></div><div id="deepPanel" role="dialog" aria-label="研究站面板"></div>';
+  document.body.appendChild(el);
+  const cnv = el.querySelector('canvas'); deepUI = {el, cnv, w:cnv.clientWidth || W, h:cnv.clientHeight || H, ents:[], snow:[], food:[], fxs:[], smoke:[], ptr:null, lamp:0, msgT:0, dk:document.createElement('canvas'), bg:null, panel:''};
+  deepUI.ents = D.list.filter(d => DSP[d.sp]).map(d => deepEnt(d, deepUI.w, deepUI.h)); for (const e of deepUI.ents) deepTarget(e);
+  for (let i = 0; i < 80; i++) deepUI.snow.push({x:Math.random(), y:Math.random(), s:rand(.4, 1.6), v:rand(4, 12), ph:rand(6)});
+  cnv.addEventListener('pointerdown', ev => { deepUI.ptr = {x:ev.clientX, y:ev.clientY, x0:ev.clientX, y0:ev.clientY, t0:performance.now(), id:ev.pointerId, down:true}; try { cnv.setPointerCapture(ev.pointerId); } catch (_) {} deepPanelClose(); });
+  cnv.addEventListener('pointermove', ev => { const p = deepUI && deepUI.ptr; if (p && p.id === ev.pointerId) { p.x = ev.clientX; p.y = ev.clientY; } });
+  const up = ev => { const p = deepUI && deepUI.ptr; if (!p || p.id !== ev.pointerId) return; p.down = false; deepUI.lamp = 1; if (Math.hypot(p.x - p.x0, p.y - p.y0) < 12 && performance.now() - p.t0 < 450) deepTap(p.x, p.y); };
+  cnv.addEventListener('pointerup', up); cnv.addEventListener('pointercancel', up);
+  el.querySelector('#dBack').addEventListener('click', closeDeep);
+  el.querySelector('#dDive').addEventListener('click', () => deepPanel('dive'));
+  el.querySelector('#dLab').addEventListener('click', () => deepPanel('lab'));
+  el.querySelector('#dFeed').addEventListener('click', deepFeed);
+  el.querySelector('#dLight').addEventListener('click', () => { D.lights = D.lights ? 0 : 1; markDirty(); deepBtns(); deepMsg(D.lights ? '打開照明：看得清楚每一隻' : '熄燈了：只看得到生物發出的光，按住螢幕可以用手電筒照'); });
+  deepBtns();
+  if (!D.built) deepPanel('build'); else if (D.dive && D.dive.done) deepPanel('dive'); else if (!D.list.length) deepMsg('壓力缸還是空的，按「潛水探測」派潛水艇下去採集');
+}
+function closeDeep(){ if (!deepUI) return; deepUI.el.remove(); deepUI = null; markDirty(); }
+function deepBtns(){ if (!deepUI) return; const D = deepS(), q = s => deepUI.el.querySelector(s); q('#dLight').textContent = D.lights ? '熄燈' : '開燈'; for (const b of ['#dDive', '#dLab', '#dFeed', '#dLight']) q(b).disabled = !D.built;
+  q('#dDive').classList.toggle('ping', !!(D.dive && D.dive.done)); }
+function deepFeed(){ const D = deepS(); if (!D.list.length) { deepMsg('壓力缸裡還沒有生物'); return; } if (state.coins < DEEP_FEED) { deepMsg('金幣不夠'); return; }
+  state.coins -= DEEP_FEED; bumpCoins(); markDirty(); for (let i = 0; i < 40; i++) deepUI.food.push({x:rand(20, deepUI.w - 20), y:rand(90, 150), vy:rand(16, 30), ph:rand(6), t:0});
+  deepMsg('撒下了海雪餌料（−' + DEEP_FEED + ' 金幣）。深海生物很久才吃一次，吃飽可以撐兩天'); }
+function deepTap(x, y){ let best = null, bd = 1e9; for (const e of deepUI.ents) { const L = e.S.len * U, cy = e.S.beh === 'tripod' ? e.y - L * .36 : e.S.beh === 'crawl' || e.S.beh === 'bottom' ? e.y - L * .1 : e.y, r = Math.max(26, L * (e.S.beh === 'vertical' ? .2 : .45)), d = Math.hypot((x - e.x) / (e.S.beh === 'vertical' ? .3 : 1), y - cy);
+    if (d < r && d < bd) { bd = d; best = e; } }
+  if (!best) return; deepReact(best); deepPanel('info', best); }
+function deepReact(e){ const k = e.S.beh, dur = {lantern:1.4, giantsquid:1.6, vampsquid:2.6, atolla:3, coelacanth:2.6, isopod:2.4, tripod:1.2, blobfish:2}[e.d.sp] || 1.4; e.re = {k:'tap', t:0, dur};
+  if (e.d.sp === 'giantsquid') { for (let i = 0; i < 26; i++) deepUI.fxs.push({x:e.x - e.face * e.S.len * U * .1, y:e.y, vx:rand(-40, 40) - e.face * 30, vy:rand(-30, 30), r:rand(6, 14), t:0, life:rand(2, 3.5), kind:'ink'}); e.vx += e.face * 160; }
+  if (e.d.sp === 'lantern') for (let i = 0; i < 10; i++) deepUI.fxs.push({x:e.x, y:e.y, vx:rand(-60, 60), vy:rand(-60, 60), r:2, t:0, life:.8, kind:'spark'});
+  if (e.d.sp === 'tripod') deepTarget(e); }
+function deepStep(dt){
+  const M = deepUI, cnv = M.cnv, w = cnv.clientWidth, h = cnv.clientHeight; if (!w || !h) return; const D = deepS();
+  if (cnv.width !== Math.round(w * DPR) || cnv.height !== Math.round(h * DPR)) { cnv.width = Math.round(w * DPR); cnv.height = Math.round(h * DPR); M.bg = null; } M.w = w; M.h = h;
+  const c = cnv.getContext('2d'), t = rt.t, A = deepArea(); c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (!M.bg) M.bg = deepBg(w, h); c.drawImage(M.bg, 0, 0, w, h);
+  const infoEl = M.el.querySelector('#dInfo'); if (infoEl) { const txt = D.built ? (D.list.length + '/' + deepCap() + ' 隻・研究 +' + deepRate() + '/時' + (D.dive && !D.dive.done ? '・潛艇 ' + fmtClock(D.dive.at - Date.now()) : D.dive && D.dive.done ? '・潛艇回來了！' : '')) : '尚未建造'; if (infoEl.textContent !== txt) infoEl.textContent = txt; }
+  /* hydrothermal vent smoke */
+  if (Math.random() < dt * 6) M.smoke.push({x:w * .14 + rand(-3, 3), y:A.floor - 66, r:rand(4, 7), t:0, life:rand(3, 5), vx:rand(-4, 6)});
+  for (let i = M.smoke.length - 1; i >= 0; i--) { const s = M.smoke[i]; s.t += dt; s.y -= 22 * dt; s.x += s.vx * dt; s.r += 6 * dt; if (s.t > s.life) { M.smoke.splice(i, 1); continue; } c.fillStyle = 'rgba(30,30,34,' + (.45 * (1 - s.t / s.life)).toFixed(3) + ')'; dot(c, s.x, s.y, s.r); }
+  /* food */
+  for (let i = M.food.length - 1; i >= 0; i--) { const f = M.food[i]; f.t += dt; f.y += f.vy * dt; f.x += Math.sin(t + f.ph) * 6 * dt; if (f.y > A.floor - 2) f.y = A.floor - 2; if (f.t > 40) { M.food.splice(i, 1); continue; } c.fillStyle = 'rgba(240,200,150,.85)'; dot(c, f.x, f.y, 1.8); }
+  /* creatures */
+  DGL = [];
+  const order = [...M.ents].sort((a, b) => b.S.len - a.S.len);
+  for (const e of M.ents) { const S = e.S, L = S.len * U; e.ph += dt * (1.2 + S.speed); if (e.re) { e.re.t += dt; if (e.re.t >= e.re.dur) e.re = null; }
+    let tx = e.tx, ty = e.ty, spd = S.speed * 28;
+    const hungry = (e.d.full | 0) < 70 && M.food.length > 0;
+    if (hungry) { let fb = null, fd = 1e9; for (const f of M.food) { const d = Math.hypot(f.x - e.x, f.y - e.y); if (d < fd) { fd = d; fb = f; } } if (fb) { tx = fb.x; ty = S.beh === 'bottom' || S.beh === 'tripod' ? e.ty : fb.y; spd = Math.max(spd * 2.2, 40); if (fd < Math.max(18, L * .35)) { M.food.splice(M.food.indexOf(fb), 1); e.d.full = Math.min(100, (e.d.full || 0) + 30); } } }
+    else { e.wait -= dt; if (e.wait <= 0 || Math.hypot(tx - e.x, ty - e.y) < 6) { if (e.wait <= 0) deepTarget(e); } }
+    if (S.beh === 'jet') { e.jt -= dt; e.pulse = Math.max(0, e.pulse - dt * 1.6); if (e.jt <= 0) { e.jt = rand(2.5, 4.5); e.pulse = 1; const dx = tx - e.x, dy = ty - e.y, dl = Math.hypot(dx, dy) || 1; e.vx += dx / dl * 90; e.vy += dy / dl * 50; } }
+    const dx = tx - e.x, dy = ty - e.y, dl = Math.hypot(dx, dy), k = dl > 4 ? 1 : 0, ax = S.beh === 'jet' ? 0 : dx / (dl || 1) * spd * k, ay = S.beh === 'jet' ? 0 : dy / (dl || 1) * spd * k;
+    const drag = S.beh === 'jet' ? .6 : 1.2; e.vx += (ax - e.vx) * Math.min(1, dt * drag); e.vy += (ay - e.vy) * Math.min(1, dt * drag);
+    if (S.beh === 'bob' || S.beh === 'jelly') e.vy += Math.sin(t * 1.6 + e.ph) * 6 * dt;
+    if (S.beh === 'tripod' && !e.re && !hungry) { e.vx *= .8; e.vy = 0; }
+    e.x = clamp(e.x + e.vx * dt, 10, w - 10); e.y = clamp(e.y + e.vy * dt, A.top, A.floor);
+    if (Math.abs(e.vx) > 4) e.face = e.vx > 0 ? 1 : -1;
+    if (e.d.sp === 'coelacanth') e.rot += ((e.re ? Math.PI / 2 * e.face : 0) - e.rot) * Math.min(1, dt * 2.5);
+    if (e.d.sp === 'barreleye') { const p = M.ptr && (M.ptr.down || M.lamp > .2) ? M.ptr : null, want = p ? clamp(Math.atan2((p.y - e.y), (p.x - e.x) * e.face) + Math.PI / 2, -1.3, 1.5) : 0; e.look += (want - e.look) * Math.min(1, dt * 4); } }
+  for (const e of order) { const S = e.S, L = S.len * U; c.save(); c.translate(e.x, e.y);
+    if (S.beh === 'vertical') c.rotate(-Math.PI / 2 + Math.sin(t * .5 + e.ph) * .08); else { if (e.rot) c.rotate(e.rot); c.scale(e.face, 1); if (S.beh === 'drift' || S.beh === 'hover' || S.beh === 'slow' || S.beh === 'eel') c.rotate(clamp(e.vy / 120, -.25, .25)); }
+    DDRAW[e.d.sp](c, L, e, t); c.restore(); }
+  /* ink, sparks */
+  for (let i = M.fxs.length - 1; i >= 0; i--) { const q = M.fxs[i]; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= .97; if (q.t > q.life) { M.fxs.splice(i, 1); continue; } const a = 1 - q.t / q.life;
+    if (q.kind === 'ink') { c.fillStyle = 'rgba(8,4,10,' + (.55 * a).toFixed(3) + ')'; dot(c, q.x, q.y, q.r * (1 + q.t)); } else { c.fillStyle = 'rgba(150,230,255,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, q.r); DGL.push({x:q.x, y:q.y, r:8, col:'#5ad8ff', a}); } }
+  /* marine snow */
+  c.fillStyle = 'rgba(220,235,255,.5)'; for (const s of M.snow) { s.y += s.v / h * dt; if (s.y > 1) { s.y = 0; s.x = Math.random(); } dot(c, s.x * w + Math.sin(t * .4 + s.ph) * 6, s.y * h, s.s); }
+  /* darkness + flashlight + bioluminescence */
+  const p = M.ptr; if (p && p.down) M.lamp = 1; else M.lamp = Math.max(0, M.lamp - dt * 1.4);
+  const dk = M.dk; if (dk.width !== cnv.width || dk.height !== cnv.height) { dk.width = cnv.width; dk.height = cnv.height; } const k2 = dk.getContext('2d'); k2.setTransform(DPR, 0, 0, DPR, 0, 0); k2.globalCompositeOperation = 'source-over'; k2.clearRect(0, 0, w, h);
+  k2.fillStyle = D.lights ? 'rgba(0,6,22,.26)' : 'rgba(0,2,8,.9)'; k2.fillRect(0, 0, w, h); k2.globalCompositeOperation = 'destination-out';
+  if (p && M.lamp > 0) { const R2 = 120; k2.fillStyle = rg(k2, p.x, p.y, 0, p.x, p.y, R2, [[0,'rgba(0,0,0,' + (.95 * M.lamp).toFixed(3) + ')'],[.6,'rgba(0,0,0,' + (.6 * M.lamp).toFixed(3) + ')'],[1,'rgba(0,0,0,0)']]); k2.fillRect(p.x - R2, p.y - R2, R2 * 2, R2 * 2); }
+  for (const g of DGL) { const rr = g.r * 1.3; k2.fillStyle = rg(k2, g.x, g.y, 0, g.x, g.y, rr, [[0,'rgba(0,0,0,' + (.7 * Math.min(1, g.a)).toFixed(3) + ')'],[1,'rgba(0,0,0,0)']]); k2.fillRect(g.x - rr, g.y - rr, rr * 2, rr * 2); }
+  c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(dk, 0, 0); c.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (p && M.lamp > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, p.x, p.y, 0, p.x, p.y, 120, [[0,'rgba(200,230,255,' + (.14 * M.lamp).toFixed(3) + ')'],[1,'rgba(200,230,255,0)']]); c.fillRect(p.x - 120, p.y - 120, 240, 240); c.restore(); }
+  c.save(); c.globalCompositeOperation = 'lighter'; const gk = D.lights ? .55 : 1; for (const g of DGL) { const a = Math.min(1, g.a) * gk; if (a <= .01) continue; c.fillStyle = rg(c, g.x, g.y, 0, g.x, g.y, g.r, [[0,alpha(g.col, .75 * a)],[.4,alpha(g.col, .25 * a)],[1,alpha(g.col, 0)]]); c.fillRect(g.x - g.r, g.y - g.r, g.r * 2, g.r * 2); } c.restore();
+  DGL = null;
+  /* viewport frame */
+  c.strokeStyle = 'rgba(120,150,170,.35)'; c.lineWidth = 3; c.beginPath(); c.roundRect ? c.roundRect(6, 6, w - 12, h - 12, 26) : c.rect(6, 6, w - 12, h - 12); c.stroke();
+  c.fillStyle = 'rgba(150,170,190,.4)'; for (let i = 0; i < 6; i++) { dot(c, 14, 60 + i * (h - 120) / 5, 2.2); dot(c, w - 14, 60 + i * (h - 120) / 5, 2.2); }
+  if (!D.list.length && D.built) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('壓力缸目前是空的', w / 2, h * .45); c.font = '13px ' + FONT; c.fillText('按「潛水探測」派潛水艇去深海採集', w / 2, h * .45 + 22); }
+}
+function deepBg(w, h){ const cv = document.createElement('canvas'); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); const c = cv.getContext('2d'); c.setTransform(DPR, 0, 0, DPR, 0, 0); const R = rng(4242), floor = h - 128;
+  c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#06203e'],[.45,'#03111f'],[1,'#010409']]); c.fillRect(0, 0, w, h);
+  c.fillStyle = 'rgba(80,140,200,.06)'; c.beginPath(); c.moveTo(w * .3, 0); c.lineTo(w * .62, 0); c.lineTo(w * .85, floor); c.lineTo(w * .1, floor); c.fill();
+  c.fillStyle = '#14120f'; c.beginPath(); c.moveTo(0, floor); for (let x = 0; x <= w; x += 12) c.lineTo(x, floor + Math.sin(x * .05) * 3 + R() * 3); c.lineTo(w, h); c.lineTo(0, h); c.fill();
+  c.fillStyle = 'rgba(60,56,50,.5)'; for (let i = 0; i < 60; i++) dot(c, R() * w, floor + 6 + R() * (h - floor), R() * 1.6 + .4);
+  for (let i = 0; i < 5; i++) { const x = R() * w, s = 10 + R() * 18; c.fillStyle = '#1e1c1a'; c.beginPath(); c.ellipse(x, floor + 2, s, s * .55, 0, Math.PI, TAU); c.fill(); }
+  const vx = w * .14; c.fillStyle = lg(c, vx - 14, 0, vx + 14, 0, [[0,'#1a1614'],[.5,'#3a2e26'],[1,'#141210']]); c.beginPath(); c.moveTo(vx - 18, floor + 2); c.lineTo(vx - 8, floor - 64); c.lineTo(vx + 8, floor - 66); c.lineTo(vx + 20, floor + 2); c.fill();
+  c.fillStyle = 'rgba(255,120,40,.25)'; dot(c, vx, floor - 64, 5);
+  for (let i = 0; i < 9; i++) { const x = vx + 22 + i * 6 + R() * 4, hh = 18 + R() * 22; c.strokeStyle = '#e8e0d0'; c.lineWidth = 2.2; c.beginPath(); c.moveTo(x, floor + 1); c.quadraticCurveTo(x + R() * 6 - 3, floor - hh * .5, x + R() * 4 - 2, floor - hh); c.stroke(); c.fillStyle = '#d8283a'; dot(c, x + R() * 2 - 1, floor - hh - 2, 3); }
+  const bx = w * .66; c.strokeStyle = 'rgba(210,205,190,.55)'; c.lineWidth = 3; c.beginPath(); c.moveTo(bx - 70, floor - 6); c.quadraticCurveTo(bx, floor - 16, bx + 80, floor - 4); c.stroke();
+  for (let i = 0; i < 9; i++) { const x = bx - 60 + i * 16; c.lineWidth = 2; c.beginPath(); c.moveTo(x, floor - 10); c.quadraticCurveTo(x + 10, floor - 40 - (i % 3) * 6, x + 18, floor - 3); c.stroke(); }
+  c.fillStyle = 'rgba(220,214,200,.6)'; c.beginPath(); c.ellipse(bx + 92, floor - 8, 16, 9, -.2, 0, TAU); c.fill();
+  return cv; }
+function deepPanelClose(){ if (!deepUI) return; const P = deepUI.el.querySelector('#deepPanel'); P.classList.remove('on'); deepUI.panel = ''; }
+function deepThumb(cnv, sp, seen){ const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height, S = DSP[sp]; c.clearRect(0, 0, w, h); c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#0a2a4a'],[1,'#020812']]); c.fillRect(0, 0, w, h);
+  const L = Math.min(w * (S.beh === 'vertical' ? .9 : sp === 'giantsquid' ? .62 : sp === 'gulper' ? .7 : .62), h * (S.beh === 'vertical' ? 1.9 : 1.1)) * (sp === 'lantern' ? .3 : 1), ox = sp === 'giantsquid' ? L * .2 : sp === 'gulper' ? L * .1 : 0; c.save(); c.translate(w / 2 + ox, h * (S.beh === 'tripod' ? .8 : S.beh === 'crawl' || S.beh === 'bottom' ? .62 : sp === 'anglerfish' ? .6 : .52));
+  DGL = []; DDRAW[sp](c, L, null, 1); const gls = DGL; DGL = null; c.restore();
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'lighter'; for (const g of gls) { const x = g.x * DPR, y = g.y * DPR, r = g.r * DPR; c.fillStyle = rg(c, x, y, 0, x, y, r, [[0,alpha(g.col, .6)],[1,alpha(g.col, 0)]]); c.fillRect(x - r, y - r, r * 2, r * 2); } c.restore();
+  if (!seen) { c.save(); c.globalCompositeOperation = 'source-atop'; c.fillStyle = '#01060e'; c.fillRect(0, 0, w, h); c.restore(); c.fillStyle = lg(c, 0, 0, 0, h, [[0,'rgba(10,42,74,.0)'],[1,'rgba(2,8,18,0)']]); c.fillStyle = 'rgba(150,200,240,.6)'; c.font = '700 ' + Math.round(h * .36) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', w / 2, h / 2); } }
+function deepPanel(kind, ent){ if (!deepUI) return; const P = deepUI.el.querySelector('#deepPanel'), D = deepS(); P.innerHTML = ''; deepUI.panel = kind;
+  const head = mk('div', 'dph'), close = mk('button', 'dx', '×'); close.setAttribute('aria-label', '關閉'); close.addEventListener('click', deepPanelClose);
+  const add = (...n) => P.append(...n);
+  if (kind === 'build') {
+    head.append(mk('h3', '', '建造深海研究站'), close); add(head);
+    add(mk('p', 'dp', '深海生物住在幾百到幾千公尺深的海裡，身體是照著那裡的超高水壓長的，放進一般魚缸會受不了。研究站有一個加壓、保持 4°C 的壓力缸，還附一艘無人潛水艇，可以下潛去採集牠們。'));
+    add(mk('p', 'dp', '養在研究站的深海生物會持續產生研究資料，整理成報告就能換金幣。'));
+    const b = mk('button', 'buy'); b.innerHTML = coinSvg + DEEP_BUILD.toLocaleString('zh-TW'); b.disabled = state.coins < DEEP_BUILD; if (state.coins < DEEP_BUILD) add(mk('p', 'dp dim', '還差 ' + (DEEP_BUILD - state.coins).toLocaleString('zh-TW') + ' 金幣'));
+    b.addEventListener('click', () => { if (state.coins < DEEP_BUILD || D.built) return; state.coins -= DEEP_BUILD; bumpCoins(); D.built = true; D.rpT = Date.now(); state.stats.deepBuilt = 1; markDirty(); deepBtns(); deepPanelClose(); deepMsg('研究站完工！按「潛水探測」派潛水艇下去採集深海生物'); });
+    add(b); }
+  else if (kind === 'dive') {
+    head.append(mk('h3', '', '潛水探測'), close); add(head);
+    if (D.dive && D.dive.done) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', '潛水艇從' + Z.name + '（' + Z.depth + '）回來了！'));
+      const b = mk('button', 'buy', '打開採集艙'); b.addEventListener('click', () => deepClaim()); add(b); }
+    else if (D.dive) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', '潛水艇正在' + Z.name + '（' + Z.depth + '）採集中，大約 ' + fmtClock(D.dive.at - Date.now()) + ' 後回來。可以先回魚缸，時間到會通知你。')); }
+    else { if (D.list.length >= deepCap()) add(mk('p', 'dp warn', '壓力缸已經滿了（' + D.list.length + '/' + deepCap() + '），先放回幾隻或擴建再下潛。'));
+      DZONES.forEach((Z, z) => { const row = mk('div', 'item dzone'), info = mk('div'), pool = Object.keys(DSP).filter(k => DSP[k].zone === z);
+        const h3 = mk('h3', '', Z.name); h3.appendChild(mk('span', 'tag', Z.depth)); const sn = pool.filter(k => D.seen[k]).map(k => DSP[k].name), un = pool.length - sn.length; info.append(h3, mk('p', '', '約 ' + Z.mins + ' 分鐘・' + (sn.length ? '已發現：' + sn.join('、') + (un ? '，還有 ' + un + ' 種未發現' : '') : '有 ' + un + ' 種未知的深海生物')));
+        const ic = document.createElement('canvas'); ic.className = 'thumb'; ic.width = 144; ic.height = 96; deepZoneIcon(ic, z);
+        const b = mk('button', 'buy'); b.innerHTML = coinSvg + Z.cost.toLocaleString('zh-TW'); b.disabled = state.coins < Z.cost || D.list.length >= deepCap();
+        b.addEventListener('click', () => { if (state.coins < Z.cost || D.dive || D.list.length >= deepCap()) return; state.coins -= Z.cost; bumpCoins(); D.dive = {z, at:Date.now() + Z.mins * 6e4, done:false}; state.stats.dives = (state.stats.dives | 0) + 1; markDirty(); deepPanelClose(); deepMsg('潛水艇出發了，正往' + Z.name + '下潛…'); });
+        row.append(ic, info, b); add(row); }); } }
+  else if (kind === 'lab') {
+    head.append(mk('h3', '', '研究資料'), close); add(head); deepTick(Date.now());
+    const v = Math.floor(D.rp), hungry = D.list.filter(e => !(e.full > 0)).length;
+    add(mk('p', 'dp', '目前累積 ' + v.toLocaleString('zh-TW') + ' 點研究資料（每小時 +' + deepRate() + '，最多存一天份）。' + (hungry ? hungry + ' 隻餓著肚子沒在產生資料，記得投餵。' : '')));
+    const b = mk('button', 'buy'); b.innerHTML = '整理成報告 ' + coinSvg + v.toLocaleString('zh-TW'); b.disabled = v < 1;
+    b.addEventListener('click', () => { const g = Math.floor(D.rp); if (g < 1) return; state.coins += g; D.rp -= g; bumpCoins(); state.stats.deepRp = (state.stats.deepRp | 0) + g; markDirty(); deepMsg('研究報告賣給了海洋研究所，得到 ' + g + ' 金幣'); deepPanel('lab'); }); add(b);
+    if ((D.lv | 0) < DEEP_UP.length) { const cost = DEEP_UP[D.lv | 0], u = mk('button', 'buy alt'); u.innerHTML = '擴建壓力缸 ' + deepCap() + '→' + DEEP_CAPS[(D.lv | 0) + 1] + ' 隻 ' + coinSvg + cost.toLocaleString('zh-TW'); u.disabled = state.coins < cost;
+      u.addEventListener('click', () => { if (state.coins < cost) return; state.coins -= cost; D.lv = (D.lv | 0) + 1; bumpCoins(); markDirty(); deepMsg('壓力缸擴建完成，現在可以養 ' + deepCap() + ' 隻'); deepPanel('lab'); }); add(u); }
+    const n = Object.keys(DSP).filter(k => D.seen[k]).length; add(mk('h4', 'sec', '深海圖鑑 ' + n + '/' + Object.keys(DSP).length));
+    const grid = mk('div', 'dgrid'); for (const k of Object.keys(DSP)) { const cell = mk('div', 'dcell'), cv = document.createElement('canvas'); cv.width = 150; cv.height = 100; deepThumb(cv, k, !!D.seen[k]); cell.append(cv, mk('span', '', D.seen[k] ? DSP[k].name : '？？？')); cell.title = DZONES[DSP[k].zone].name; grid.appendChild(cell); } add(grid); }
+  else if (kind === 'info' && ent) { const S = DSP[ent.d.sp], Z = DZONES[S.zone];
+    head.append(mk('h3', '', ent.d.name), close); add(head);
+    const row = mk('div', 'dinfo'), cv = document.createElement('canvas'); cv.width = 210; cv.height = 140; deepThumb(cv, ent.d.sp, true);
+    const tx = mk('div'); tx.append(mk('p', 'dp', S.name + '・' + Z.name + '（' + Z.depth + '）'), mk('p', 'dp', '研究資料 +' + S.rp + '/時・' + ((ent.d.full | 0) > 0 ? '吃飽了（' + Math.round(ent.d.full) + '%）' : '餓了，不會產生資料')), mk('p', 'dp dim', S.trait)); row.append(cv, tx); add(row);
+    add(mk('p', 'dp', S.desc));
+    const rel = mk('button', 'buy alt', '放回深海（研究補助 ' + S.rp * 3 + ' 金幣）');
+    rel.addEventListener('click', () => { D.list = D.list.filter(x => x !== ent.d); deepUI.ents = deepUI.ents.filter(x => x !== ent); state.coins += S.rp * 3; bumpCoins(); markDirty(); deepPanelClose(); deepMsg(ent.d.name + ' 被放回了' + Z.name); }); add(rel); }
+  else if (kind === 'result') {
+    head.append(mk('h3', '', '採集成果'), close); add(head);
+    for (const r of ent) { const row = mk('div', 'dinfo'), cv = document.createElement('canvas'); cv.width = 210; cv.height = 140; deepThumb(cv, r.sp, true); const tx = mk('div'), S = DSP[r.sp];
+      tx.append(mk('p', 'dp', (r.isNew ? '新發現！' : '') + S.name), mk('p', 'dp dim', r.kept ? '已經放進壓力缸' : '壓力缸滿了，只好放回深海（研究補助 ' + S.rp * 3 + ' 金幣）'), mk('p', 'dp dim', r.isNew ? '第一次記錄到這個物種，研究所發給你 ' + S.rp * 10 + ' 金幣獎金' : S.trait)); row.append(cv, tx); add(row); } }
+  P.classList.add('on'); }
+function deepZoneIcon(cv, z){ const c = cv.getContext('2d'), w = cv.width, h = cv.height; c.fillStyle = lg(c, 0, 0, 0, h, [[0,['#1b5a8a','#0e2a50','#06102a'][z]],[1,['#0a2a4a','#040c1e','#010308'][z]]]); c.fillRect(0, 0, w, h);
+  c.fillStyle = 'rgba(255,230,120,.9)'; c.beginPath(); c.ellipse(w * .5, h * .45, w * .18, h * .14, 0, 0, TAU); c.fill(); c.fillStyle = '#f0c040'; c.fillRect(w * .46, h * .22, w * .08, h * .12); c.fillStyle = '#1a3a5a'; dot(c, w * .44, h * .45, h * .06); dot(c, w * .56, h * .45, h * .06);
+  c.fillStyle = 'rgba(255,240,180,.25)'; c.beginPath(); c.moveTo(w * .62, h * .5); c.lineTo(w, h * .2); c.lineTo(w, h * .9); c.fill(); c.fillStyle = 'rgba(200,230,255,.6)'; c.font = '700 ' + Math.round(h * .2) + 'px ' + FONT; c.textAlign = 'center'; c.fillText(['200m', '1000m', '4000m'][z], w * .5, h * .9); }
+function deepClaim(){ const D = deepS(); if (!D.dive || !D.dive.done) return; const z = D.dive.z, pool = Object.keys(DSP).filter(k => DSP[k].zone === z), n = Math.random() < .3 ? 2 : 1, out = [];
+  for (let i = 0; i < n; i++) { const tot = pool.reduce((a, k) => a + DSP[k].w, 0); let r = Math.random() * tot, sp = pool[0]; for (const k of pool) { r -= DSP[k].w; if (r <= 0) { sp = k; break; } }
+    const S = DSP[sp], isNew = !D.seen[sp]; D.seen[sp] = 1; if (isNew) state.coins += S.rp * 10;
+    const cnt = D.list.filter(x => x.sp === sp).length + 1, d = {id:uid(), sp, name:S.name + (cnt > 1 ? ' ' + cnt + '號' : ''), at:Date.now(), seed:(Math.random() * 1e9) | 0, full:60};
+    let kept = false; if (D.list.length < deepCap()) { D.list.push(d); kept = true; if (deepUI) { const e = deepEnt(d, deepUI.w, deepUI.h); e.x = deepUI.w / 2; e.y = 120; deepTarget(e); deepUI.ents.push(e); } } else state.coins += S.rp * 3;
+    out.push({sp, isNew, kept}); }
+  D.dive = null; state.stats.deepCaught = (state.stats.deepCaught | 0) + n; bumpCoins(); markDirty(); deepBtns(); deepPanel('result', out); }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
   if (S.idraw) return IDRAW[S.idraw](c, P, L, ph, ex);
@@ -5914,7 +6285,7 @@ function eventTick(dt){
   const B = rt.bottle; if (B) { B.t += dt; B.y = Math.min(B.y + 10 * U * dt, sandY(B.x) - 10 * U); if (B.t > 45) { rt.bottle = null; toast('漂流瓶被水流帶走了'); } }
   if (rt.mode !== 'play') return;
   rt.evT = (rt.evT == null ? rand(240, 480) : rt.evT) - dt; if (rt.evT > 0) return;
-  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini || rt.cat || rt.storm || rt.bottle || rt.typhoon || rt.outage) { rt.evT = 30; return; }
+  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini || deepUI || rt.cat || rt.storm || rt.bottle || rt.typhoon || rt.outage) { rt.evT = 30; return; }
   rt.evT = rand(420, 900); const night = rt.lightK < .5, mo = new Date().getMonth(), opts = [['larva', 3], ['bottle', 2.5], ['quake', 1], ['storm', night ? 2.5 : 0], ['typhoon', mo >= 5 && mo <= 9 ? 1.6 : .45]];
   let x = Math.random() * opts.reduce((a, o) => a + o[1], 0), ev = 'larva'; for (const [k, w] of opts) { if ((x -= w) < 0) { ev = k; break; } }
   if (ev === 'larva') { const n = 10 + ((Math.random() * 7) | 0); for (let i = 0; i < n; i++) rt.plank.push({type:'larva', x:rand(.1, .9) * W, y:safeT + rand(120, 220) * U, vx:rand(-6, 6) * U, vy:0, t:-i * .15, life:rand(50, 75), ph:rand(6)});
@@ -6032,7 +6403,7 @@ function moonTick(dt){
   if (state.moonTip !== dayKey() && rt.mode === 'play' && !sheet.classList.contains('on') && !$('#modal').classList.contains('on')) { state.moonTip = dayKey(); markDirty(); toast('今天是滿月！魚兒比較容易配對，晚上關燈可能會有月光水母漂進來'); }
   if (rt.lightK > .35 || state.moonDay === dayKey() || rt.mode !== 'play') { rt.moonWait = null; return; }
   rt.moonWait = (rt.moonWait == null ? rand(15, 60) : rt.moonWait) - dt; if (rt.moonWait > 0) return;
-  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini) { rt.moonWait = 10; return; }
+  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini || deepUI) { rt.moonWait = 10; return; }
   state.moonDay = dayKey(); markDirty(); rt.moonJ = {x:rand(.3, .7) * W, y:safeT + 190 * U, t:0, m:Math.random() < .25 ? 1 : 0};
   toast('月光裡漂進來一隻月光水母！趁牠漂走前點牠');
 }
@@ -6206,7 +6577,7 @@ function catTick(dt){
   if (state.up.lid || state.catPet) { rt.cat = null; return; }
   if (rt.cat) { stepCat(dt); return; }
   rt.catT = (rt.catT == null ? rand(1800, 5400) : rt.catT) - dt; if (rt.catT > 0) return;
-  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || rt.mode !== 'play' || mini) { rt.catT = 20; return; }
+  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || rt.mode !== 'play' || mini || deepUI) { rt.catT = 20; return; }
   const prey = rt.fish.filter(r => !isInv(r.d) && !r.sp.alien && !r.sp.myth && !r.d.box); rt.catT = rand(1800, 5400); if (!prey.length) return;
   const tg = pickArr(prey);
   rt.cat = {x:clamp(tg.x, 40 * U, W - 40 * U), y:-60 * U, depth:clamp(tg.y, surfaceY + 130 * U, Math.max(surfaceY + 130 * U, Math.min(sandTop - 80 * U, surfaceY + 320 * U))), t:0, taps:0, ph:'down', col:pickArr(CAT_COLS), hit:0, sw:0, got:null};
@@ -7617,6 +7988,7 @@ $('#edSell').addEventListener('click', () => {
 });
 $('#foodBtn').addEventListener('click', cycleFood);
 $('#camBtn').addEventListener('click', takePhoto);
+$('#deepBtn').addEventListener('click', openDeep);
 $('#photoOk').addEventListener('click', () => $('#photo').classList.remove('on'));
 $('#photoDl').addEventListener('click', savePhoto);
 $('#photo').addEventListener('click', e => { if (e.target.id === 'photo') $('#photo').classList.remove('on'); });
@@ -8085,7 +8457,8 @@ function loop(now){
   if (dt > 3) { const away = catchUp(Date.now()); if (away) showWelcome(away); dt = .016; }
   dt = Math.min(dt, .05);
   rt.t += dt;
-  update(dt); draw(); updateHud(dt); placeEdTools();
+  update(dt); if (deepUI) deepStep(dt); else draw(); updateHud(dt); placeEdTools();
+  rt.deepT = (rt.deepT || 0) + dt; if (rt.deepT > 1) { rt.deepT = 0; deepTick(Date.now()); const D = state.deep, b = $('#deepN'); if (b) b.hidden = !(D && D.built && D.dive && D.dive.done); }
   if (sheetKind === 'fish') drawPortrait();
   if (sheetKind === 'expo') drawExpoMap();
   if (mini) (mini.kind === 'shrimp' ? stepShrimp : stepMini)(dt);
