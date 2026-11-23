@@ -1255,6 +1255,13 @@ Object.assign(DECOS, {
   tonina:{name:'太陽草', price:340, comfort:12, w:56, h:120, plant:true, need:2, desc:'莖上密密麻麻長滿細小的彎葉，像一根根毛茸茸的試管刷，在燈下閃著淡綠色的光。'},
 });
 HARDY.push('banana', 'isoetes'); SPREAD.push('sagittaria', 'staurogyne', 'marsilea');
+Object.assign(DECOS, {
+  snapweed:{name:'夾夾草', price:650, comfort:5, w:84, h:120, plant:true, eats:'fish', eatTxt:' 游太近，被夾夾草的捕蟲夾「啪」一聲夾住，慢慢吞進去了…', desc:'莖上長著四個像蛤蜊一樣的捕蟲夾，張開時裡面是紅色的。小魚一碰到就會瞬間夾起來，四個夾子各自獨立，消化完會再慢慢打開。只吃小魚。'},
+  sundew:{name:'毛氈藻', price:780, comfort:6, w:110, h:74, plant:true, eats:'fish', eatTxt:' 被毛氈藻的黏毛黏住，捲進中間消化掉了…', desc:'一圈長長的觸手上布滿紅色腺毛，每根尖端都掛著亮晶晶的黏液。觸手會慢慢伸過去黏住魚，再捲回中間，所有觸手握成一個拳頭消化。也會順便黏掉害蟲螺。'},
+  pitcher:{name:'水豬籠', price:1100, comfort:6, w:72, h:110, plant:true, eats:'fish', eatTxt:' 被水豬籠的漩渦捲進瓶子裡，蓋子「碰」地關上了…', desc:'一個長在沙上的大瓶子。白天蓋子半闔著打盹，天黑後掀開蓋子、瓶口冒出香甜的花蜜，把魚引過來，再用漩渦吸進瓶子裡。消化得慢，但吐出的金幣最多。'},
+  whiptongue:{name:'舌鞭草', price:1400, comfort:5, w:64, h:96, plant:true, eats:'fish', eatTxt:' 被舌鞭草的長舌頭一把捲回去吞掉了…', desc:'頂端的肉球長著兩顆假眼睛，會一直東張西望。看到游動的魚就會瞄準、射出黏黏的長舌頭，射程是所有食魚植物裡最遠的。不過大約三次會失手一次，被打到的魚會嚇得逃開。'},
+  anglerbloom:{name:'誘光花', price:2200, comfort:4, w:110, h:100, plant:true, eats:'fish', eatTxt:' 碰到了誘光花的小燈，沙底下突然冒出一張大嘴把牠吞了下去…', desc:'看起來只是一根掛著發光小燈的細桿，真正的本體是藏在沙子底下的大嘴。燈光會把魚引過來，一碰到就從沙裡張口咬住，拖進沙底。能吃比較大的魚，消化很久。'},
+});
 const CORE_PLANT = ['elodea','vallis','moss','fern','anubias','hornwort'], STOCK_PLANT = 6;
 const ROT_PLANT = Object.keys(DECOS).filter(k => DECOS[k].plant && !CORE_PLANT.includes(k) && !DECOS[k].npc && !DECOS[k].wild && !DECOS[k].season && !DECOS[k].award);
 const plantInShop = k => CORE_PLANT.includes(k) || dailyStock().plants.includes(k);
@@ -2544,6 +2551,8 @@ const PVAR_TXT = {
   lace:'red:紅網草, gold:金網草, giant:巨網草', eriocaulon:'red:紅穀精草, gold:金穀精草, glow:螢光穀精草', downoi:'red:紅小獅子, gold:金小獅子, dense:叢生小獅子',
   ottelia:'red:紅水車前, pale:白斑水車前, giant:巨水車前', marsilea:'gold:黃金田字草, red:紅田字草, dense:叢生田字草', staurogyne:'red:紅叉柱花, gold:金叉柱花, dense:叢生叉柱花',
   alternanthera:'purple:紫蝴蝶, gold:金蝴蝶, mini:迷你紅蝴蝶', tonina:'gold:金太陽草, red:紅太陽草, glow:螢光太陽草',
+  snapweed:'red:血夾草, gold:金夾草, giant:巨夾草', sundew:'red:血毛氈, glow:螢光毛氈, giant:巨毛氈', pitcher:'purple:紫豬籠, gold:金豬籠, giant:巨豬籠',
+  whiptongue:'blue:藍舌鞭, red:紅舌鞭, giant:巨舌鞭', anglerbloom:'glow:深淵誘光, purple:紫誘光, giant:巨誘光',
 };
 const PVC = new Map();
 function pvarsOf(k){ let L = PVC.get(k); if (L) return L; const s = PVAR_TXT[k] || 'red:紅葉變異, gold:黃金變異, mini:迷你變異';
@@ -2660,6 +2669,241 @@ const PDRAW = {
       for (const [col, k0] of [['#8ccf5c', 1], ['rgba(220,255,180,.55)', .6]]) { c.strokeStyle = col; c.lineWidth = k0 > .9 ? 1.1 : .6; c.beginPath();
         for (let i = 1; i <= seg; i++) { const [x, y, a] = pts[i], ln = (6.2 - i * .12) * k0; for (const sd of [-1, 1]) for (let j = 0; j < 3; j++) { const an = a + sd * (.55 + j * .45); c.moveTo(x, y); c.quadraticCurveTo(x + Math.sin(an) * ln * .5, y - Math.cos(an) * ln * .5 - 1, x + Math.sin(an) * ln, y - Math.cos(an) * ln - 1.5); } } c.stroke(); } } },
 };
+/* ---------- Expansion 47: carnivorous plants with visible hunts ---------- */
+/* Each hunter has its own way of catching: bite, snap traps, sticky tentacles, a suction pitcher, a lashing tongue, a jaw hidden in the sand. */
+const PEAT = {
+  maw:{style:'bite', reach:88, len:46, first:[240, 600], cd:[900, 1500], dig:30, mult:1},
+  snapweed:{style:'snap', traps:4, trig:30, len:40, cd:[240, 420], dig:40, mult:.7},
+  sundew:{style:'tentacle', reach:80, len:58, first:[120, 300], cd:[600, 1000], dig:55, mult:1.1, pest:true},
+  pitcher:{style:'suck', trig:36, lure:180, night:true, len:52, cd:[700, 1100], dig:70, mult:1.5},
+  whiptongue:{style:'tongue', reach:230, len:50, first:[90, 240], cd:[420, 700], dig:22, mult:1, miss:.3, moving:true},
+  anglerbloom:{style:'jaw', trig:30, lure:220, len:72, cd:[1500, 2400], dig:90, mult:2},
+};
+const PHASES = {
+  bite:[['aim', .4], ['strike', .22], ['hold', 1.5], ['pull', .7], ['gulp', .55]],
+  snap:[['snap', .14], ['hold', 1.8], ['pull', 1.1]],
+  tentacle:[['reach', 1.1], ['hold', 2.2], ['pull', 1.8], ['wrap', .9]],
+  suck:[['suck', 1.7], ['lid', .32]],
+  tongue:[['aim', .5], ['shoot', .14], ['reel', .55], ['gulp', .45]],
+  jaw:[['burst', .35], ['clamp', .18], ['sink', 1.4]],
+};
+const CATCH_AT = {bite:'strike', snap:'snap', tentacle:'hold', suck:'suck', tongue:'reel', jaw:'burst'};
+const LAST = {bite:'gulp', snap:'pull', tentacle:'wrap', suck:'lid', tongue:'gulp', jaw:'sink'};
+const PST = new Map(), PFX = [];
+const easeIO = p => p < .5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2, easeOut = p => 1 - (1 - p) ** 3, easeIn = p => p * p * p;
+function plantK(dc){ const s = decoScale(dc), g = dc.g || 1, V = pvarOf(dc.k, dc.v), z = V && V.sz || 1; return [(dc.flip ? -1 : 1) * s * (.6 + .4 * g) * z, s * g * z]; }
+function toWorldP(dc, lx, ly){ const b = decoBase(dc), [kx, ky] = plantK(dc); return {x:b.x + lx * kx, y:b.y + ly * ky}; }
+function toLocalP(dc, x, y){ const b = decoBase(dc), [kx, ky] = plantK(dc); return {x:(x - b.x) / kx, y:(y - b.y) / ky}; }
+function pst(dc){ let S = PST.get(dc.id); if (S) return S; const E = PEAT[dc.k];
+  S = {h:null, dig:0, cd:E.first ? rand(E.first[0], E.first[1]) : rand(20, 60), lid:1, curl:0, tr:E.traps ? Array.from({length:E.traps}, () => ({h:null, dig:0, cd:rand(5, 30), open:1})) : null}; PST.set(dc.id, S); return S; }
+const aliveR = v => rt.fish.includes(v) || rt.feeders.includes(v);
+function preyOK(r, E){ if (!r || r.caught || r.d.box || r.bur) return false; const S = r.sp;
+  if (r.d.sp === 'feeder') return true; if (E.pest && r.d.sp === 'pestsnail') return true;
+  return S.kind === 'fish' && isNative(r.d) && !S.special && !S.mystery && !S.story && !S.myth && !S.hidden && baseLen(r.d) <= E.len; }
+function pfx(x, y, n, kind, col){ for (let i = 0; i < n && PFX.length < 160; i++) PFX.push({x, y, vx:rand(-50, 50) * U, vy:(kind === 'sand' ? rand(-90, -20) : kind === 'bub' ? rand(-40, -18) : rand(-50, 30)) * U, t:0, life:kind === 'bub' ? rand(1, 2) : rand(.5, 1), r:(kind === 'sand' ? rand(1.2, 2.6) : kind === 'bub' ? rand(1.5, 3) : rand(1, 2)) * U, kind, col}); }
+/* where the plant's grabbing part is right now, in the plant's own (local) coordinates */
+const GRAB = {
+  maw(dc, S, t){ const rest = {x:Math.sin(t * .6 + (dc.seed % 7)) * 3, y:-72}, H = S && S.h; let hp = rest, rot = 0, open = .32 + Math.sin(t * 1.2 + (dc.seed % 5)) * .14, bulge = S && S.dig > 0 ? 1.12 : 1, fish = null;
+    if (H) { const tg = H.v ? (H.st === 'aim' ? toLocalP(dc, H.v.x, H.v.y) : H.tl) : H.tl || rest; let dx = tg.x - rest.x, dy = tg.y - rest.y; const dl = Math.hypot(dx, dy) || 1, k = Math.min(1, 100 / dl), ux = dx / dl, uy = dy / dl, ang = Math.atan2(uy, ux) + Math.PI / 2;
+      const ht = {x:rest.x + dx * k - Math.sin(ang) * 18, y:rest.y + dy * k + Math.cos(ang) * 18}, back = {x:rest.x - ux * 10, y:rest.y - uy * 10}, p = H.p;
+      if (H.st === 'aim') { hp = {x:lerp(rest.x, back.x, easeOut(p)), y:lerp(rest.y, back.y, easeOut(p))}; rot = ang * easeOut(p) * .7; open = lerp(open, 1, p); }
+      else if (H.st === 'strike') { hp = {x:lerp(back.x, ht.x, easeOut(p)), y:lerp(back.y, ht.y, easeOut(p))}; rot = ang; open = p > .8 ? .06 : 1; }
+      else if (H.st === 'hold') { hp = {x:ht.x + Math.sin(t * 38) * 2, y:ht.y + Math.cos(t * 31) * 1.5}; rot = ang + Math.sin(t * 22) * .12; open = .06; }
+      else if (H.st === 'pull' || H.st === 'recoil') { const e = easeIO(p); hp = {x:lerp(ht.x, rest.x, e), y:lerp(ht.y, rest.y, e)}; rot = ang * (1 - e); open = H.st === 'recoil' ? .5 : .06; }
+      else if (H.st === 'gulp') { rot = 0; open = 0; bulge = 1 + .28 * Math.sin(Math.PI * p); }
+      if (H.caught) fish = {x:hp.x + Math.sin(rot) * 18, y:hp.y - Math.cos(rot) * 18}; }
+    else if (S && S.dig > 0) open = .02;
+    return {hp, rot, open, bulge, fish}; },
+  snapweed(dc, S, t){ const sw = Math.sin(t * .7 + (dc.seed % 6)) * 4, top = {x:sw, y:-112}, ctl = {x:sw * .3 - 6, y:-56}, traps = [];
+    /* traps sit a little further out so the bigger clamshells don't overlap the stem */
+    for (let i = 0; i < 4; i++) { const q = [.3, .5, .7, .9][i], s = i % 2 ? 1 : -1, bx = 2 * (1 - q) * q * ctl.x + q * q * top.x, by = 2 * (1 - q) * q * ctl.y + q * q * top.y, hx = bx + s * 16, hy = by - 4,
+        a = s > 0 ? -.5 + Math.sin(t * .9 + i) * .08 : Math.PI + .5 + Math.sin(t * .9 + i) * .08, T = S && S.tr ? S.tr[i] : null; let open = T ? T.open : 1, sh = 0, fish = null;
+      if (T && T.h) { const H = T.h; if (H.st === 'snap') open = 1 - easeOut(H.p); else open = 0; if (H.st === 'hold') sh = Math.sin(t * 40) * .12;
+        if (H.caught) { const ox = Math.cos(a), oy = Math.sin(a), k = H.st === 'pull' ? 1 - easeIO(H.p) : 1, Lf = H.lf || 20; fish = {x:hx + ox * (15 + Lf * .32 * k), y:hy + oy * (15 + Lf * .32 * k), face:ox > 0 ? -1 : 1}; } }
+      traps.push({bx, by, hx, hy, a:a + sh, open, dig:T ? T.dig : 0, fish, s}); }
+    return {top, ctl, traps}; },
+  sundew(dc, S, t){ const g = decoGeo(dc), H = S && S.h, pad = {x:0, y:-20}; let curl = S ? S.curl : 0, fish = null, act = -1;
+    const tips = g.tn.map((n, i) => { const a = n.a + Math.sin(t * .7 + n.ph) * .05; return {x:Math.cos(a) * n.l, y:-6 + Math.sin(a) * n.l * .95, a}; });
+    if (H) { act = H.ti; const e = H.p, fl = H.tl;
+      if (H.st === 'reach') { const cur = H.v ? toLocalP(dc, H.v.x, H.v.y) : fl; tips[act] = {x:lerp(tips[act].x, cur.x, easeIO(e)), y:lerp(tips[act].y, cur.y, easeIO(e)), a:tips[act].a}; }
+      else if (H.st === 'hold') { const w = {x:fl.x + Math.sin(t * 30) * 1.6, y:fl.y + Math.cos(t * 27) * 1.2}; tips[act] = {x:w.x, y:w.y, a:tips[act].a}; fish = w; }
+      else if (H.st === 'pull') { const q = easeIO(e), cx = fl.x * .4, cy = fl.y - 24, x = (1 - q) ** 2 * fl.x + 2 * (1 - q) * q * cx + q * q * pad.x, y = (1 - q) ** 2 * fl.y + 2 * (1 - q) * q * cy + q * q * pad.y; tips[act] = {x, y, a:tips[act].a}; fish = {x, y}; }
+      else if (H.st === 'wrap') { curl = easeIO(e); tips[act] = {x:pad.x, y:pad.y, a:tips[act].a}; fish = {x:pad.x, y:pad.y}; }
+      else if (H.st === 'recoil') { const from = H.tl; tips[act] = {x:lerp(from.x, tips[act].x, easeIO(e)), y:lerp(from.y, tips[act].y, easeIO(e)), a:tips[act].a}; } }
+    else if (S && S.dig > 0) curl = clamp(S.dig / 8, 0, 1);
+    if (curl > 0) for (let i = 0; i < tips.length; i++) if (i !== act || (H && H.st === 'wrap')) { const sp = (i - (tips.length - 1) / 2) * 4; tips[i] = {x:lerp(tips[i].x, pad.x + sp, curl), y:lerp(tips[i].y, pad.y - 6 - Math.abs(sp) * .3, curl), a:tips[i].a}; }
+    return {tips, curl, fish: H && H.caught ? fish : null, act}; },
+  pitcher(dc, S, t){ const rim = {x:0, y:-90}, H = S && S.h; let fish = null, vort = 0;
+    if (H && H.caught && H.st === 'suck') { const p = H.p, rr = H.r0 * (1 - easeIn(p)), a = H.a0 + p * 2.3 * Math.PI * H.dir; fish = {x:rim.x + Math.cos(a) * rr, y:rim.y + Math.sin(a) * rr * .6}; vort = Math.sin(Math.PI * Math.min(1, p * 1.2)); }
+    else if (H && H.st === 'lid') fish = {x:rim.x, y:rim.y + 4};
+    return {rim, lid:S ? S.lid : 1, fish, vort}; },
+  whiptongue(dc, S, t){ const sx = Math.sin(t * .7 + (dc.seed % 6)) * 4, pod = {x:sx, y:-84}, H = S && S.h; let ang = -Math.PI / 2 + Math.sin(t * .5 + (dc.seed % 4)) * .5, tip = null, fish = null, squash = 1, glow = 0, bulge = S && S.dig > 0 ? 1.15 : 1;
+    if (H) { const tg = H.st === 'aim' && H.v ? toLocalP(dc, H.v.x, H.v.y) : H.tl, ta = Math.atan2(tg.y - pod.y, tg.x - pod.x), p = H.p;
+      ang = H.st === 'aim' ? ang + (((ta - ang + Math.PI * 3) % TAU) - Math.PI) * easeOut(p) : ta;
+      const mouth = {x:pod.x + Math.cos(ang) * 13, y:pod.y + Math.sin(ang) * 13};
+      if (H.st === 'aim') { squash = 1 - .18 * p; glow = p; }
+      else if (H.st === 'shoot') tip = {x:lerp(mouth.x, tg.x, easeOut(p)), y:lerp(mouth.y, tg.y, easeOut(p))};
+      else if (H.st === 'reel') { tip = {x:lerp(tg.x, mouth.x, easeIn(p)), y:lerp(tg.y, mouth.y, easeIn(p))}; fish = tip; }
+      else if (H.st === 'gulp') { fish = mouth; bulge = 1 + .32 * Math.sin(Math.PI * p); }
+      else if (H.st === 'recoil') { const from = H.tipFrom || tg; tip = {x:lerp(from.x, mouth.x, easeIO(p)), y:lerp(from.y, mouth.y, easeIO(p))}; } }
+    return {pod, ang, tip, fish: H && H.caught ? fish : null, squash, glow, bulge}; },
+  anglerbloom(dc, S, t){ const lure = {x:14 + Math.sin(t * 1.1 + (dc.seed % 5)) * 4, y:-74 + Math.sin(t * 1.7) * 3}, H = S && S.h; let jaw = 0, open = 0, fish = null, tg = null;
+    if (H) { tg = H.tl; const p = H.p;
+      if (H.st === 'burst') { jaw = easeOut(p); open = 1; } else if (H.st === 'clamp') { jaw = 1; open = 1 - easeOut(p); } else if (H.st === 'sink') { jaw = 1 - easeIn(p); open = 0; } else if (H.st === 'recoil') { jaw = 1 - p; open = .6; }
+      if (H.caught) { if (H.st === 'sink') { const e = easeIn(H.p); fish = {x:lerp(tg.x, 0, e), y:lerp(tg.y, -2, e)}; } else fish = {x:tg.x + Math.sin(t * 36) * 1.4, y:tg.y}; } }
+    return {lure, jaw, open, fish, tg, dim:S && S.dig > 0 ? .25 : 1}; },
+};
+function startHunt(dc, S, v, holder, extra){ const E = PEAT[dc.k], H = Object.assign({E, dc, v, list:PHASES[E.style].slice(), pi:0, t:0, p:0, st:PHASES[E.style][0][0], caught:false, tl:toLocalP(dc, v.x, v.y)}, extra || {}); holder.h = H; enterPhase(dc, S, H); return H; }
+function enterPhase(dc, S, H){ const st = H.list[H.pi][0], E = H.E, v = H.v; H.st = st;
+  if (v && st === 'shoot') { H.tl = toLocalP(dc, v.x, v.y); const [kx] = plantK(dc), maxL = E.reach * decoScale(dc) / Math.abs(kx), G = GRAB.whiptongue(dc, S, rt.t), dx = H.tl.x - G.pod.x, dy = H.tl.y - G.pod.y, dl = Math.hypot(dx, dy) || 1;
+    if (dl > maxL) H.tl = {x:G.pod.x + dx / dl * maxL, y:G.pod.y + dy / dl * maxL};
+    if (Math.random() < E.miss) { H.miss = true; const n = {x:-dy / dl, y:dx / dl}, o = rand(14, 22) * (Math.random() < .5 ? -1 : 1); H.tl = {x:H.tl.x + n.x * o, y:H.tl.y + n.y * o}; H.list = [['aim', .5], ['shoot', .14], ['recoil', .5]]; } }
+  if (v && st === CATCH_AT[E.style] && !H.miss) { H.caught = true; v.caught = H; H.x0 = v.x; H.y0 = v.y; if (E.style !== 'tongue') H.tl = toLocalP(dc, v.x, v.y); H.lf = fishLen(v) / Math.abs(plantK(dc)[0]); v.vx = v.vy = 0;
+    rt.emotes.push({type:'bang', x:v.x, y:v.y - fishLen(v) * .5, t:0, life:1.1}); for (let k = 0; k < 8; k++) rt.fx.push({type:'spark', x:v.x, y:v.y, vx:rand(-50, 50) * U, vy:rand(-50, 30) * U, t:0, life:.45, col:'#fff4c0'});
+    if (E.style === 'suck') { const m = GRAB.pitcher(dc, S, rt.t).rim; H.r0 = Math.hypot(H.tl.x - m.x, (H.tl.y - m.y) / .6); H.a0 = Math.atan2((H.tl.y - m.y) / .6, H.tl.x - m.x); H.dir = H.tl.x < m.x ? 1 : -1; }
+    if (E.style === 'jaw') { const b = toWorldP(dc, 0, 0); pfx(b.x, b.y - 4 * U, 26, 'sand', '#c8b48a'); }
+    if (!state.hints.carni) { state.hints.carni = 1; markDirty(); toast('趁水草還在消化前，點一下被抓住的魚就能把牠救出來！'); } }
+  if (H.miss && st === 'recoil' && v && H.pi === 2) { H.tipFrom = H.tl; rt.emotes.push({type:'bang', x:v.x, y:v.y - fishLen(v) * .5, t:0, life:1}); v.tx = clamp(v.x + (v.x < W / 2 ? 1 : -1) * 130 * U, 24 * U, W - 24 * U); v.ty = clamp(v.y - 30 * U, safeT + 60 * U, sandTop - 20 * U); v.wait = 0; } }
+function endHunt(dc, S, holder, ate){ const H = holder.h, E = PEAT[dc.k]; if (!H) return; if (H.v && H.v.caught === H) H.v.caught = null; holder.h = null;
+  if (ate) { holder.dig = E.dig; holder.cd = rand(E.cd[0], E.cd[1]); } else holder.cd = H.miss ? rand(18, 40) : rand(40, 90); }
+function stepHunt(dc, S, holder, dt){ const H = holder.h; if (!H) return;
+  if (H.v && !aliveR(H.v)) { endHunt(dc, S, holder, false); return; }
+  H.t += dt; while (H.t >= H.list[H.pi][1]) { H.t -= H.list[H.pi][1]; H.pi++;
+    if (H.pi >= H.list.length) { const v = H.v, ate = !!(v && H.caught && !H.miss && H.list[H.list.length - 1][0] === LAST[H.E.style]); if (ate) { v.caught = null; plantEat(dc, v); } endHunt(dc, S, holder, ate); return; }
+    enterPhase(dc, S, H); }
+  H.p = clamp(H.t / H.list[H.pi][1], 0, 1);
+  if (!H.caught || !H.v) return;
+  const v = H.v, G = GRAB[dc.k](dc, S, rt.t); let f = G.fish, face = null;
+  if (dc.k === 'snapweed') { const T = G.traps[H.ti]; f = T.fish; face = f && f.face; }
+  if (f) { const w = toWorldP(dc, f.x, f.y); v.x = w.x; v.y = w.y; if (face) { v.face = face; v.turn = face; } }
+  const last = H.st === LAST[H.E.style], p = H.p; H.vs = last ? lerp(1, H.E.style === 'jaw' ? .5 : .3, easeIn(p)) : H.E.style === 'suck' ? lerp(1, .45, p) : 1; H.va = last ? (H.E.style === 'suck' ? 0 : 1 - easeIn(p)) : 1;
+  v.tilt = Math.sin(rt.t * 18) * .25; }
+function plantHuntTick(dt){
+  for (const [id, S] of PST) { const dc = state.deco.find(d => d.id === id); if (!dc || dc.dead || !PEAT[dc.k]) { for (const h of [S, ...(S.tr || [])]) if (h.h && h.h.v && h.h.v.caught === h.h) h.h.v.caught = null; PST.delete(id); } }
+  for (let i = PFX.length - 1; i >= 0; i--) { const q = PFX[i]; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; if (q.kind === 'sand') q.vy += 160 * U * dt; else q.vx *= .96; if (q.t > q.life) PFX.splice(i, 1); }
+  const night = rt.lightK < .5, prey = [...rt.feeders, ...rt.fish], canStart = rt.mode === 'play';
+  for (const dc of state.deco) { const E = PEAT[dc.k]; if (!E || dc.dead) continue; const S = pst(dc), s2 = decoScale(dc);
+    if (dc.k === 'pitcher') { const want = S.h || S.dig > 0 ? 0 : night ? 1 : .35; S.lid += (want - S.lid) * Math.min(1, dt * (S.h ? 14 : 1.5)); if (S.h && S.h.st === 'lid') S.lid = 1 - easeOut(S.h.p); }
+    if (dc.k === 'sundew' && !S.h) S.curl = S.dig > 0 ? clamp(S.dig / 8, 0, 1) : Math.max(0, S.curl - dt);
+    if (E.traps) { for (let i = 0; i < S.tr.length; i++) { const T = S.tr[i]; if (T.h) { stepHunt(dc, S, T, dt); continue; }
+        if (T.dig > 0) { T.dig -= dt; T.open = 0; if (Math.random() < dt * .6) { const w = toWorldP(dc, GRAB.snapweed(dc, S, rt.t).traps[i].hx, GRAB.snapweed(dc, S, rt.t).traps[i].hy); pfx(w.x, w.y, 1, 'bub', 'rgba(200,255,200,.7)'); } continue; }
+        if (T.cd > 0) { T.cd -= dt; T.open = Math.min(1, T.open + dt * .6); continue; } T.open = Math.min(1, T.open + dt); if (!canStart) continue;
+        const P = GRAB.snapweed(dc, S, rt.t).traps[i], cp = toWorldP(dc, P.hx + Math.cos(P.a) * 15, P.hy + Math.sin(P.a) * 15), v = prey.find(r => preyOK(r, E) && Math.hypot(r.x - cp.x, r.y - cp.y) < E.trig * s2);
+        if (v) startHunt(dc, S, v, T, {ti:i}); }
+      continue; }
+    if (S.h) { stepHunt(dc, S, S, dt); continue; }
+    if (S.dig > 0) { S.dig -= dt; if (S.dig <= 0) S.dig = 0; if (Math.random() < dt * .5) { const b = toWorldP(dc, 0, dc.k === 'pitcher' ? -90 : dc.k === 'anglerbloom' ? -4 : -60); pfx(b.x + rand(-6, 6) * U, b.y, 1, 'bub', 'rgba(220,255,210,.7)'); } continue; }
+    if (S.cd > 0) { S.cd -= dt; if (!E.trig) continue; }
+    if ((E.night && !night) || !canStart) continue;
+    if (E.trig) { if (S.cd > 0) continue; const lp = lurePt(dc, S), w = toWorldP(dc, lp.x, lp.y), v = prey.find(r => preyOK(r, E) && Math.hypot(r.x - w.x, r.y - w.y) < E.trig * s2); if (v) startHunt(dc, S, v, S); continue; }
+    const g0 = dc.k === 'whiptongue' ? GRAB.whiptongue(dc, S, rt.t).pod : dc.k === 'maw' ? GRAB.maw(dc, S, rt.t).hp : {x:0, y:-20}, o = toWorldP(dc, g0.x, g0.y), reach = E.reach * s2;
+    const c = prey.filter(r => preyOK(r, E) && Math.hypot(r.x - o.x, r.y - o.y) < reach && (!E.moving || Math.hypot(r.vx, r.vy) > 6 * U)).sort((a, b) => (a.d.sp === 'feeder' ? -1e9 : Math.hypot(a.x - o.x, a.y - o.y)) - (b.d.sp === 'feeder' ? -1e9 : Math.hypot(b.x - o.x, b.y - o.y)));
+    if (c.length) { const v = c[0], extra = {}; if (dc.k === 'sundew') { const G = GRAB.sundew(dc, S, rt.t), lv = toLocalP(dc, v.x, v.y); let bi = 0, bd = 1e9; G.tips.forEach((tp, i) => { const d2 = (tp.x - lv.x) ** 2 + (tp.y - lv.y) ** 2; if (d2 < bd) { bd = d2; bi = i; } }); extra.ti = bi; } startHunt(dc, S, v, S, extra); }
+    else S.cd = rand(3, 6); } }
+function lurePt(dc, S){ return dc.k === 'pitcher' ? {x:0, y:-94} : dc.k === 'anglerbloom' ? GRAB.anglerbloom(dc, S, rt.t).lure : {x:0, y:-60}; }
+function plantLure(r){ if (r.sp.kind !== 'fish' || r.caught) return null; const night = rt.lightK < .5;
+  for (const dc of state.deco) { const E = PEAT[dc.k]; if (!E || !E.lure || dc.dead) continue; const S = pst(dc); if (S.h || S.dig > 0 || S.cd > 0 || (E.night && !night) || !preyOK(r, E)) continue;
+    const lp = lurePt(dc, S), w = toWorldP(dc, lp.x, lp.y); if (Math.hypot(r.x - w.x, r.y - w.y) < E.lure * decoScale(dc) && Math.random() < (night ? .55 : .35)) return w; }
+  return null; }
+function rescueFish(r){ const H = r.caught; if (!H) return false; if (H.st === LAST[H.E.style] && H.p > .35) return false; const dc = H.dc, S = pst(dc), holder = S.tr ? S.tr[H.ti] : S;
+  r.caught = null; H.caught = false; H.list = [['recoil', .6]]; H.pi = 0; H.t = 0; H.st = 'recoil'; H.tipFrom = H.tl; H.v = null;
+  r.tx = clamp(r.x + (r.x < W / 2 ? 1 : -1) * 120 * U, 24 * U, W - 24 * U); r.ty = clamp(r.y - 40 * U, safeT + 60 * U, sandTop - 20 * U); r.wait = 0; r.tilt = 0;
+  rt.emotes.push({type:'heart', x:r.x, y:r.y - fishLen(r) * .5, t:0, life:1.4}); addAff(r.d, 3); state.stats.rescued = (state.stats.rescued | 0) + 1; markDirty();
+  toast('你把 ' + r.d.name + ' 從' + DECOS[dc.k].name + '救了出來！'); if (holder) holder.cd = rand(40, 90); return true; }
+/* the grabbing parts, drawn in local coordinates */
+function drawMawHead(c, G, t, dig){ c.save(); c.translate(G.hp.x, G.hp.y); c.rotate(G.rot); c.scale(G.bulge, G.bulge);
+  for (const sx of [-1, 1]) { c.save(); c.rotate(sx * G.open); c.fillStyle = '#5a8a30'; c.beginPath(); c.ellipse(sx * 12, -18, 13, 22, sx * .15, 0, TAU); c.fill();
+    c.fillStyle = '#c8384e'; c.beginPath(); c.ellipse(sx * 9, -18, 7, 17, sx * .15, 0, TAU); c.fill();
+    c.strokeStyle = '#f4f0d8'; c.lineWidth = 1.6; c.beginPath(); for (let i = 0; i < 6; i++) { const y = -5 - i * 6; c.moveTo(sx * 2, y); c.lineTo(-sx * 5, y - 2); } c.stroke(); c.restore(); }
+  if (dig) { c.fillStyle = 'rgba(255,190,90,' + (.25 + .2 * Math.sin(t * 3)).toFixed(3) + ')'; c.beginPath(); c.ellipse(0, -18, 15, 20, 0, 0, TAU); c.fill(); }
+  c.strokeStyle = '#6a8a40'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, -34); c.quadraticCurveTo(5, -44, 0, -50); c.stroke();
+  c.fillStyle = 'rgba(255,230,120,.35)'; dot(c, 0, -52, 7 + Math.sin(t * 3) * 1.5); c.fillStyle = 'rgba(255,235,140,.95)'; dot(c, 0, -52, 3.5); c.restore(); }
+function drawTrap(c, P, t){ c.save(); c.translate(P.hx, P.hy); c.rotate(P.a); c.scale(1.4, 1.4); const o = .42 * P.open, sw = P.dig > 0 ? 1.12 : 1;
+  for (const s of [-1, 1]) { c.save(); c.rotate(s * o); c.scale(1, sw); c.fillStyle = 'rgba(150,200,96,.92)'; c.beginPath(); c.moveTo(0, 0); c.ellipse(10, 0, 10, 8, 0, s < 0 ? Math.PI : 0, s < 0 ? TAU : Math.PI); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(214,60,70,.85)'; c.beginPath(); c.moveTo(1, 0); c.ellipse(10, 0, 8, 5.4, 0, s < 0 ? Math.PI : 0, s < 0 ? TAU : Math.PI); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(240,245,210,.9)'; c.lineWidth = .8; c.beginPath(); for (let i = 0; i < 7; i++) { const a = (s < 0 ? Math.PI : 0) + (i + .5) / 7 * Math.PI * (s < 0 ? 1 : 1), x = 10 + Math.cos(a) * 10, y = Math.sin(a) * 8; c.moveTo(x, y); c.lineTo(x + Math.cos(a) * 3, y + Math.sin(a) * 3); } c.stroke(); c.restore(); }
+  if (P.dig > 0) { c.fillStyle = 'rgba(40,60,20,.35)'; c.beginPath(); c.ellipse(10, 0, 7, 5, 0, 0, TAU); c.fill(); }
+  c.restore(); }
+function drawTentacle(c, tip, base, dew, t, i){ const cx = (base.x + tip.x) / 2 + (tip.y - base.y) * .12, cy = (base.y + tip.y) / 2 - Math.abs(tip.x - base.x) * .12;
+  c.strokeStyle = '#7aa848'; c.lineWidth = 3.4; c.beginPath(); c.moveTo(base.x, base.y); c.quadraticCurveTo(cx, cy, tip.x, tip.y); c.stroke();
+  c.strokeStyle = '#b8d878'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(base.x, base.y); c.quadraticCurveTo(cx, cy, tip.x, tip.y); c.stroke();
+  for (let k = 3; k <= 10; k++) { const q = k / 10, x = (1 - q) ** 2 * base.x + 2 * (1 - q) * q * cx + q * q * tip.x, y = (1 - q) ** 2 * base.y + 2 * (1 - q) * q * cy + q * q * tip.y, dx = 2 * (1 - q) * (cx - base.x) + 2 * q * (tip.x - cx), dy = 2 * (1 - q) * (cy - base.y) + 2 * q * (tip.y - cy), dl = Math.hypot(dx, dy) || 1;
+    for (const s of [-1, 1]) { const hx = x - dy / dl * s * 5.5, hy = y + dx / dl * s * 5.5; c.strokeStyle = 'rgba(206,60,70,.9)'; c.lineWidth = .8; c.beginPath(); c.moveTo(x, y); c.lineTo(hx, hy); c.stroke();
+      if (dew) { c.fillStyle = 'rgba(255,226,236,.85)'; dot(c, hx, hy, 1.5); c.fillStyle = 'rgba(255,255,255,' + (.5 + .5 * Math.sin(t * 3 + k + i)).toFixed(2) + ')'; dot(c, hx - .4, hy - .4, .6); } } } }
+function drawPitcherLid(c, G){ c.save(); c.translate(-17, G.rim.y - 1); c.rotate(-1.15 * G.lid); c.fillStyle = '#5a9040'; c.beginPath(); c.ellipse(18, 0, 18, 5.5, 0, 0, TAU); c.fill(); c.fillStyle = 'rgba(200,60,70,.6)'; for (let i = 0; i < 5; i++) dot(c, 8 + i * 5, 1, 1.2); c.restore(); }
+function drawTongue(c, G){ if (!G.tip) return; const m = {x:G.pod.x + Math.cos(G.ang) * 13, y:G.pod.y + Math.sin(G.ang) * 13};
+  c.lineCap = 'round'; c.strokeStyle = '#d8607a'; c.lineWidth = 4.2; c.beginPath(); c.moveTo(m.x, m.y); c.lineTo(G.tip.x, G.tip.y); c.stroke();
+  c.strokeStyle = 'rgba(255,170,190,.8)'; c.lineWidth = 1.4; c.beginPath(); c.moveTo(m.x, m.y); c.lineTo(G.tip.x, G.tip.y); c.stroke();
+  c.fillStyle = '#e8708a'; dot(c, G.tip.x, G.tip.y, 5); c.fillStyle = 'rgba(255,230,240,.85)'; dot(c, G.tip.x - 1.4, G.tip.y - 1.6, 1.6); }
+function drawJaws(c, G, t){ if (G.jaw <= 0 || !G.tg) return; const tg = G.tg, dl = Math.hypot(tg.x, tg.y + 2) || 1, base = Math.atan2(tg.y + 2, tg.x), Lj = Math.max(60, dl * 1.12) * G.jaw;
+  for (const s of [-1, 1]) { c.save(); c.translate(0, -2); c.rotate(base + s * (.06 + .6 * G.open)); c.fillStyle = '#6a3a3a'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(Lj * .5, s * Lj * .42, Lj, 0); c.quadraticCurveTo(Lj * .5, s * Lj * .12, 0, 0); c.fill();
+    c.fillStyle = 'rgba(190,168,120,.55)'; for (let i = 1; i < 5; i++) dot(c, Lj * i / 5, s * Lj * .26 * Math.sin(Math.PI * i / 5), Lj * .035);
+    c.fillStyle = '#c83a4a'; c.beginPath(); c.moveTo(Lj * .04, 0); c.quadraticCurveTo(Lj * .5, s * Lj * .2, Lj * .96, 0); c.quadraticCurveTo(Lj * .5, s * Lj * .1, Lj * .04, 0); c.fill();
+    c.fillStyle = '#f6f0dc'; for (let i = 1; i < 9; i++) { const x = Lj * i / 9, y = s * Lj * .06 * Math.sin(Math.PI * i / 9); c.beginPath(); c.moveTo(x - Lj * .025, y); c.lineTo(x, y - s * Lj * .07); c.lineTo(x + Lj * .025, y); c.fill(); } c.restore(); } }
+Object.assign(PGEO, {
+  sundew:(g, R) => { g.tn = Array.from({length:7}, (_, i) => ({a:-2.7 + i * (2.25 / 6) + (R() - .5) * .12, l:40 + R() * 18, ph:R() * 6})); },
+});
+Object.assign(PDRAW, {
+  maw(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.maw(dc, S, t), sw = G.hp;
+    c.strokeStyle = '#3e6a2a'; c.lineWidth = 6; c.lineCap = 'round'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(-8, -40, sw.x, sw.y); c.stroke();
+    c.fillStyle = '#4a7a30'; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(0, -14); c.quadraticCurveTo(sx * 30, -32, sx * 36, -10); c.quadraticCurveTo(sx * 16, -6, 0, -14); c.fill(); }
+    if (!(S && S.h)) drawMawHead(c, G, t, S && S.dig > 0); },
+  snapweed(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.snapweed(dc, S, t);
+    c.strokeStyle = '#4a7a34'; c.lineWidth = 2.6; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(G.ctl.x, G.ctl.y, G.top.x, G.top.y); c.stroke();
+    for (const P of G.traps) { c.strokeStyle = '#5a8a3a'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(P.bx, P.by); c.lineTo(P.hx, P.hy); c.stroke();
+      c.fillStyle = '#6aa048'; for (const s of [-1, 1]) lfE(c, P.bx, P.by, -Math.PI / 2 + s * 1.2 * -P.s, 9, 2.4); }
+    for (let i = 0; i < G.traps.length; i++) if (!(S && S.tr[i].h)) drawTrap(c, G.traps[i], t);
+    c.fillStyle = '#7ab858'; lfE(c, G.top.x, G.top.y, -Math.PI / 2, 8, 3); },
+  sundew(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.sundew(dc, S, t), base = {x:0, y:-6};
+    c.fillStyle = 'rgba(150,40,50,.55)'; c.beginPath(); c.ellipse(0, -16, 10, 7, 0, 0, TAU); c.fill();
+    G.tips.forEach((tp, i) => { if (S && S.h && (i === G.act || S.h.st === 'wrap')) return; drawTentacle(c, tp, base, true, t, i); });
+    c.fillStyle = '#5a8a3a'; c.beginPath(); c.ellipse(0, -5, 9, 5, 0, 0, TAU); c.fill(); },
+  pitcher(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.pitcher(dc, S, t), lit = lightNow() < .5 && !(S && S.dig > 0);
+    c.strokeStyle = '#5a8a3a'; c.lineWidth = 2; c.beginPath(); c.moveTo(-6, -4); c.quadraticCurveTo(-30, -10, -34, -30); c.stroke(); c.fillStyle = '#5a9040'; lfE(c, -18, -6, Math.PI + .2, 18, 5);
+    c.fillStyle = lg(c, -24, 0, 24, 0, [[0,'#3f7a32'],[.45,'#7ab650'],[1,'#3a6e2e']]); c.beginPath(); c.moveTo(-10, -2); c.bezierCurveTo(-30, -10, -28, -58, -14, -76); c.quadraticCurveTo(-18, -84, -17, -90);
+    c.lineTo(17, -90); c.quadraticCurveTo(18, -84, 14, -76); c.bezierCurveTo(28, -58, 30, -10, 10, -2); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(170,50,60,.5)'; c.lineWidth = 1.1; c.beginPath(); for (let i = 0; i < 6; i++) { const x = -16 + i * 6.4; c.moveTo(x * .7, -80); c.quadraticCurveTo(x * 1.4, -45, x * .6, -6); } c.stroke();
+    if (S && S.dig > 0) { c.fillStyle = 'rgba(255,200,120,' + (.18 + .1 * Math.sin(t * 2.5)).toFixed(3) + ')'; c.beginPath(); c.ellipse(0, -36, 18, 26, 0, 0, TAU); c.fill(); }
+    c.fillStyle = '#2a1a1a'; c.beginPath(); c.ellipse(0, -90, 16, 4.6, 0, 0, TAU); c.fill();
+    c.strokeStyle = '#c8384a'; c.lineWidth = 3; c.beginPath(); c.ellipse(0, -90, 17, 5.2, 0, 0, TAU); c.stroke(); c.strokeStyle = 'rgba(255,220,220,.8)'; c.lineWidth = .7; c.beginPath(); for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; c.moveTo(Math.cos(a) * 15, -90 + Math.sin(a) * 4); c.lineTo(Math.cos(a) * 19, -90 + Math.sin(a) * 6); } c.stroke();
+    if (lit) { c.fillStyle = 'rgba(255,220,110,' + (.28 + .14 * Math.sin(t * 2.2)).toFixed(3) + ')'; dot(c, 0, -94, 14); for (let i = 0; i < 4; i++) { const ph = (t * .35 + i * .25) % 1; c.fillStyle = 'rgba(255,232,150,' + (.9 * (1 - ph)).toFixed(2) + ')'; dot(c, Math.sin(i * 2.3 + t) * 10, -94 - ph * 26, 1.6); } }
+    if (!(S && S.h)) drawPitcherLid(c, G); },
+  whiptongue(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.whiptongue(dc, S, t);
+    c.strokeStyle = '#4f7a36'; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(-14, -28, 14, -52, G.pod.x, G.pod.y + 8); c.stroke();
+    c.fillStyle = '#5a9040'; for (const s of [-1, 1]) lfE(c, s * 4, -6, -Math.PI / 2 + s * 1.1, 16, 4);
+    if (!(S && S.h)) drawPod(c, G, t, S && S.dig > 0); },
+  anglerbloom(c, g, t, dc){ const S = PST.get(dc.id), G = GRAB.anglerbloom(dc, S, t), dig = S && S.dig > 0, bul = dig ? 1 + .25 * Math.sin(t * 2.4) : 1;
+    c.strokeStyle = '#4a3a2a'; c.lineWidth = 2.2; c.lineCap = 'round'; c.beginPath(); c.moveTo(-18, -6); c.bezierCurveTo(-26, -60, 0, -96, 10, -86); c.stroke();
+    c.strokeStyle = 'rgba(70,60,40,.8)'; c.lineWidth = .9; c.beginPath(); c.moveTo(10, -86); c.quadraticCurveTo(13, -82, G.lure.x, G.lure.y - 4); c.stroke();
+    const a = G.dim * (lightNow() < .5 ? 1 : .65); c.fillStyle = 'rgba(140,255,220,' + (.25 * a + .1 * Math.sin(t * 3) * a).toFixed(3) + ')'; dot(c, G.lure.x, G.lure.y, 12); c.fillStyle = 'rgba(200,255,236,' + (.95 * a).toFixed(2) + ')'; dot(c, G.lure.x, G.lure.y, 4.4); c.fillStyle = 'rgba(255,255,255,' + (.9 * a).toFixed(2) + ')'; dot(c, G.lure.x - 1.2, G.lure.y - 1.3, 1.4);
+    c.save(); c.scale(1, bul); c.fillStyle = '#a89070'; c.beginPath(); c.ellipse(0, -4, 46, 9, 0, Math.PI, TAU); c.fill(); c.fillStyle = 'rgba(80,60,40,.45)'; for (let i = 0; i < 9; i++) dot(c, -38 + i * 9.5, -6 - (i % 3) * 1.6, 2.4);
+    c.strokeStyle = '#5a3030'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(-40, -3); c.quadraticCurveTo(0, -9, 40, -3); c.stroke(); c.fillStyle = '#f0e8d0'; for (let i = 0; i < 8; i++) { const x = -32 + i * 9; c.beginPath(); c.moveTo(x - 1.6, -5.4); c.lineTo(x, -3); c.lineTo(x + 1.6, -5.4); c.fill(); } c.restore(); },
+});
+function drawPod(c, G, t, dig){ c.save(); c.translate(G.pod.x, G.pod.y); c.rotate(G.ang); c.scale(G.squash * G.bulge, (2 - G.squash) * G.bulge);
+  if (G.glow > 0) { c.fillStyle = 'rgba(255,90,110,' + (.35 * G.glow).toFixed(3) + ')'; dot(c, 10, 0, 14); }
+  c.fillStyle = lg(c, -14, -12, 14, 12, [[0,'#8ac060'],[1,'#3f7a30']]); c.beginPath(); c.ellipse(0, 0, 15, 12, 0, 0, TAU); c.fill();
+  c.strokeStyle = '#7a2a3a'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(4, 2); c.quadraticCurveTo(10, 5, 15, 0); c.stroke();
+  const blink = Math.sin(t * .9) > .97 ? .15 : 1; for (const y of [-6, 5]) { c.fillStyle = '#f6e6a0'; c.beginPath(); c.ellipse(3, y, 3.4, 3.4 * blink, 0, 0, TAU); c.fill(); c.fillStyle = '#1a1408'; c.beginPath(); c.ellipse(4, y, 1.4, 2.4 * blink, 0, 0, TAU); c.fill(); }
+  if (dig) { c.fillStyle = 'rgba(255,200,120,' + (.2 + .12 * Math.sin(t * 3)).toFixed(3) + ')'; c.beginPath(); c.ellipse(-2, 0, 11, 9, 0, 0, TAU); c.fill(); }
+  c.restore(); }
+/* parts that must cover the caught fish are drawn after the fish */
+function drawPlantFront(){
+  for (const dc of state.deco) { const E = PEAT[dc.k]; if (!E || dc.dead) continue; const S = PST.get(dc.id); if (!S) continue; const busy = S.h || (S.tr && S.tr.some(T => T.h)); if (!busy) continue;
+    const b = decoBase(dc), [kx, ky] = plantK(dc), V = pvarOf(dc.k, dc.v), c = V && V.tint ? tintCtx(ctx, V) : ctx, t = rt.t;
+    ctx.save(); ctx.translate(b.x, b.y); ctx.scale(kx, ky); c.lineCap = 'round'; c.lineJoin = 'round';
+    if (dc.k === 'maw') drawMawHead(c, GRAB.maw(dc, S, t), t, false);
+    else if (dc.k === 'snapweed') { const G = GRAB.snapweed(dc, S, t); S.tr.forEach((T, i) => { if (T.h) drawTrap(c, G.traps[i], t); }); }
+    else if (dc.k === 'sundew') { const G = GRAB.sundew(dc, S, t); G.tips.forEach((tp, i) => { if (i === G.act || S.h.st === 'wrap') drawTentacle(c, tp, {x:0, y:-6}, true, t, i); });
+      if (G.fish && S.h.st === 'hold') { c.strokeStyle = 'rgba(255,235,245,.55)'; c.lineWidth = .6; c.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + t; c.moveTo(G.fish.x, G.fish.y); c.lineTo(G.fish.x + Math.cos(a) * 9, G.fish.y + Math.sin(a) * 6); } c.stroke(); } }
+    else if (dc.k === 'pitcher') { const G = GRAB.pitcher(dc, S, t); if (G.vort > 0) { c.strokeStyle = 'rgba(220,245,255,' + (.55 * G.vort).toFixed(3) + ')'; c.lineWidth = 1.3;
+        for (let k = 0; k < 3; k++) { c.beginPath(); for (let j = 0; j <= 30; j++) { const q = j / 30, rr = (S.h.r0 + 10) * (1 - q), a = q * 4 * Math.PI + k * TAU / 3 - t * 9; const x = G.rim.x + Math.cos(a) * rr, y = G.rim.y + Math.sin(a) * rr * .6; j ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke(); } }
+      drawPitcherLid(c, G); }
+    else if (dc.k === 'whiptongue') { const G = GRAB.whiptongue(dc, S, t); drawTongue(c, G); drawPod(c, G, t, false); }
+    else if (dc.k === 'anglerbloom') drawJaws(c, GRAB.anglerbloom(dc, S, t), t);
+    ctx.restore(); }
+  for (const q of PFX) { const a = 1 - q.t / q.life; ctx.fillStyle = q.kind === 'bub' ? 'rgba(255,255,255,0)' : q.col; ctx.globalAlpha = Math.max(0, a);
+    if (q.kind === 'bub') { ctx.strokeStyle = q.col; ctx.lineWidth = Math.max(.6, .8 * U); ctx.beginPath(); ctx.arc(q.x, q.y, q.r, 0, TAU); ctx.stroke(); } else dot(ctx, q.x, q.y, q.r); }
+  ctx.globalAlpha = 1; }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
   if (S.idraw) return IDRAW[S.idraw](c, P, L, ph, ex);
@@ -4008,6 +4252,7 @@ function pickTarget(r, sleep){
   if (sp.hover && !sleep) r.wait = rand(14, 30);
   if (sp.kiss && !sleep && Math.random() < .5) { const o = rt.fish.find(q => q !== r && q.sp.kiss); if (o) { x = clamp(o.x + rand(-20, 20) * U, 24 * U, W - 24 * U); y = o.y; } }
   if (r.d.friend && !sleep && Math.random() < .45) { const o = rt.fish.find(q => q !== r && q.d.id === r.d.friend && !q.d.box); if (o) { x = clamp(o.x + rand(-28, 28) * U, 24 * U, W - 24 * U); if (sp.kind !== 'inv' && sp.zone !== 'bottom') y = clamp((y + o.y) / 2, top, bot - 8 * U); } }
+  { const lp = plantLure(r); if (lp) { x = lp.x + rand(-8, 8) * U; y = lp.y + rand(-6, 6) * U; r.wait = rand(1.5, 3); } }
   r.tx = x; r.ty = y;
 }
 const coinR = c => (7 + Math.min(7, Math.log2(Math.max(1, c.v)) * 1.6)) * U;
@@ -4217,6 +4462,7 @@ function shrimpFlip(r, L, dt){
   r.vx = -r.face * rand(150, 230) * U * clamp(r.sp.speed + .4, .6, 1.2); r.vy = -rand(20, 70) * U; r.flip = .32; r.amp = 1.3;
 }
 function updateFish(r, dt, sleep){
+  if (r.caught) { r.phase += dt * 26; r.amp = 1.3; r.vx = r.vy = 0; r.turn = r.face; return; }
   if (r.sp.nocturnal) sleep = rt.lightK > .65;
   if (r.lit) sleep = false;
   const d = r.d, sp = r.sp, L = fishLen(r), inv = sp.kind === 'inv', nf = noFood(d);
@@ -4344,6 +4590,7 @@ function drawRunner(r){
   const L = fishLen(r), sp = r.sp, P = runnerPal(r);
   if (r.bur) { ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, sandY(r.x) - 1.5 * U); ctx.clip(); }
   ctx.save(); ctx.translate(r.x, r.y);
+  if (r.caught) { const C = r.caught; if (C.va != null) ctx.globalAlpha *= C.va; if (C.vs != null && C.vs !== 1) ctx.scale(C.vs, C.vs); }
   if (r.stun > 0) ctx.translate(rand(-1.6, 1.6) * U, rand(-1.6, 1.6) * U);
   if (sp.topview) { if (Math.hypot(r.vx, r.vy) > 3 * U) r.ang = Math.atan2(r.vy, r.vx); ctx.rotate(r.ang == null ? -Math.PI / 2 : r.ang); }
   else if (sp.snail && sp.zone === 'glass') { const left = r.x < W / 2; ctx.rotate(left ? Math.PI / 2 : -Math.PI / 2); ctx.scale((left ? r.vface < 0 : r.vface > 0) ? -1 : 1, 1); }
@@ -6233,7 +6480,7 @@ function catchStar(x, y){
     markDirty(); return true; }
   return false;
 }
-const NGLOW = {glowstone:['#5affd8', 18, 74], xmas:['#ffd27a', 52, 84], lantern:['#ff6a3a', 44, 74], glowgrass:['#5affe0', 90, 62], moonlotus:['#ff8ad8', 124, 48], glowkelp:['#6ac8ff', 90, 70], statue:['#9ae8ff', 34, 40], maw:['#ffe07a', 124, 24]};
+const NGLOW = {glowstone:['#5affd8', 18, 74], xmas:['#ffd27a', 52, 84], lantern:['#ff6a3a', 44, 74], glowgrass:['#5affe0', 90, 62], moonlotus:['#ff8ad8', 124, 48], glowkelp:['#6ac8ff', 90, 70], statue:['#9ae8ff', 34, 40], maw:['#ffe07a', 124, 24], pitcher:['#ffd86a', 94, 30], anglerbloom:['#8affe0', 74, 40]};
 const STATUE_P = {b1:'rgba(160,230,255,.72)', b2:'rgba(230,250,255,.62)', fin:'rgba(170,230,255,.5)', edge:'rgba(255,255,255,.85)', eye:'rgba(255,255,255,.95)'};
 const plankOk = (r, p) => { const S = r.sp, d = r.d; if (S.clam || r.d.box || (S.kind === 'inv' && !S.filterFeed) || (S.livefood && p.type !== 'larva') || S.alien) return false; if (p.type === 'larva') return !noFood(d) && d.full < 98; if (S.filterFeed) return true; if (p.type === 'daphnia') return !noFood(d) && d.full < 96; if (p.type === 'rotifer') return growRatio(d) < 1; return true; };
 function eatPlank(r, p){ const d = r.d; r.eat = .3; if (r.sp.filterFeed) { spawnCoin(p.x, p.y, 3); markDirty(); return; }
@@ -6244,12 +6491,13 @@ function eatPlank(r, p){ const d = r.d; r.eat = .3; if (r.sp.filterFeed) { spawn
   markDirty(); }
 function plantEat(dc, v){ const D = DECOS[dc.k], b = decoBase(dc), s2 = decoScale(dc); rt.snap.set(dc.id, 1);
   if (v.d.sp === 'feeder') { rt.feeders = rt.feeders.filter(x => x !== v); state.items.feeder = Math.max(0, state.items.feeder - 1); for (let i = 0; i < 3; i++) spawnCoin(b.x + rand(-10, 10) * s2, b.y - D.h * s2 * .7, 4); if (!rt.warnedMaw) { rt.warnedMaw = true; toast('食魚花吃掉了一隻活餌'); } markDirty(); return; }
-  const val = D.eats === 'fish' ? 30 + rehomeValue(v.d) * 3 : Math.max(6, rehomeValue(v.d) * 2), n = Math.min(8, 2 + Math.floor(val / 40));
+  const val = Math.round((D.eats === 'fish' ? 30 + rehomeValue(v.d) * 3 : Math.max(6, rehomeValue(v.d) * 2)) * ((PEAT[dc.k] || {}).mult || 1)), n = Math.min(10, 2 + Math.floor(val / 40));
   removeCreature(v.d); state.stats.eaten++; logEv(v.d.name + ' 被' + D.name + '吃掉了');
   for (let i = 0; i < n; i++) spawnCoin(b.x + rand(-14, 14) * s2, b.y - D.h * s2 * rand(.5, .85), Math.max(1, Math.round(val / n)));
   for (let k = 0; k < 10; k++) rt.fx.push({type:'spark', x:v.x, y:v.y, vx:rand(-40, 40) * U, vy:rand(-40, 20) * U, t:0, life:.6, col:'#c8ff9a'});
-  toast(v.d.name + (D.eats === 'fish' ? ' 被食魚花一口咬住吃掉了…' : ' 被狸藻的捕蟲囊吸進去了…')); markDirty(); }
+  toast(v.d.name + (D.eatTxt || (D.eats === 'fish' ? ' 被食魚花一口咬住吃掉了…' : ' 被狸藻的捕蟲囊吸進去了…'))); markDirty(); }
 function plantTick(dt){
+  plantHuntTick(dt);
   for (const [k, v] of rt.snap) { const nv = v - dt * 1.4; if (nv <= 0) rt.snap.delete(k); else rt.snap.set(k, nv); }
   for (const dc of state.deco) { const D = DECOS[dc.k];
     if (dc.dead) continue;
@@ -6258,7 +6506,7 @@ function plantTick(dt){
         if (n < cap && (D.plank !== 'noctiluca' || rt.lightK < .4)) { const b = decoBase(dc), s2 = decoScale(dc); rt.plank.push({type:D.plank, x:b.x + rand(-20, 20) * s2, y:b.y - rand(D.h * .2, D.h * .85) * s2 * (dc.g || 1), vx:rand(-8, 8) * U, vy:rand(-6, 2) * U, t:0, life:D.plank === 'noctiluca' ? rand(30, 50) : rand(60, 120), ph:rand(6)}); }
         e = D.plank === 'daphnia' ? rand(18, 32) : D.plank === 'rotifer' ? rand(12, 22) : rand(2.5, 5); }
       rt.plankT.set(dc.id, e); }
-    if (D.eats) { let tm = rt.trap.get(dc.id); if (tm == null) tm = D.eats === 'fish' ? rand(240, 600) : rand(30, 90); tm -= dt;
+    if (D.eats && !PEAT[dc.k]) { let tm = rt.trap.get(dc.id); if (tm == null) tm = D.eats === 'fish' ? rand(240, 600) : rand(30, 90); tm -= dt;
       if (tm <= 0) { const b = decoBase(dc), s2 = decoScale(dc), reach = (D.eats === 'fish' ? 80 : 60) * s2, top = b.y - D.h * s2 * (dc.g || 1), near = r => Math.abs(r.x - b.x) < reach && r.y > top - 20 * U && r.y < b.y + 10 * U;
         const v = D.eats === 'fish' ? (rt.feeders.find(near) || rt.fish.filter(r => near(r) && r.sp.kind === 'fish' && isNative(r.d) && !r.sp.special && !r.sp.mystery && baseLen(r.d) <= 46).sort((a, b2) => baseLen(a.d) - baseLen(b2.d))[0])
           : rt.fish.find(r => near(r) && r.sp.kind === 'fish' && isNative(r.d) && growRatio(r.d) < .25);
@@ -6365,6 +6613,7 @@ function draw(){
   for (const p of rt.food) if (p.landed) drawPellet(p);
   const fish = [...rt.fish, ...rt.feeders].sort((a, b) => (a.sp.kind === 'inv' ? 0 : 1) - (b.sp.kind === 'inv' ? 0 : 1) || a.z - b.z);
   for (const r of fish) drawRunner(r);
+  drawPlantFront();
   for (const p of rt.food) if (!p.landed && p.t >= 0) drawPellet(p);
   drawPlank(c, false); if (k > .4) drawPlank(c, true);
   drawFlies(c, 1 / 60);
@@ -7338,6 +7587,7 @@ function endPtr(e){
     if (se) scrapeSegg(se);
     else if (egg && egg.nest) toast(egg.dad.name + ' 守著的泡巢，約 ' + fmtClock(egg.at - Date.now()) + ' 後孵化');
     else if (egg) toast(egg.mom.name + ' 的卵，約 ' + fmtClock(egg.at - Date.now()) + ' 後孵化');
+    else if (f && f.caught && rescueFish(f)) {}
     else if (f && f.d.sp === 'puffer' && f.puff <= 0 && f.puffK < .2) { f.puff = 2.5; toast(f.d.name + ' 氣鼓鼓地膨起來了！再點一次看資料'); }
     else if (f) { rt.emotes.push({type:'heart', x:f.x, y:f.y - fishLen(f) * .4, t:0, life:1.4}); if (!f.petT || rt.t - f.petT > 20) { f.petT = rt.t; addAff(f.d, 1); } openSheet('fish', f.d.id); }
     else dropFood(p.x);
@@ -7825,7 +8075,7 @@ function renderCodeTab(box){
 function initRuntime(){
   rt.fish = state.fish.map(d => makeRunner(d, false));
   rt.coins = state.sand.map(s => ({x:s.x * W, y:0, nx:s.x, v:s.v, rest:true, age:rand(6), wob:rand(6), pulse:0}));
-  rt.food = []; rt.bubbles = []; rt.fx = []; rt.flyers = []; rt.emotes = []; rt.ripples = []; rt.geo.clear(); rt.emit.clear(); rt.schools = {}; rt.sel = null; rt.drag = null; rt.court = null; rt.feeders = []; rt.shocks = []; rt.jets = []; rt.stars = []; rt.flies = []; rt.chest.clear(); rt.lowO2 = false; refreshPlants(); rt.plank = []; rt.plankT.clear(); rt.trap.clear(); rt.snap.clear();
+  PST.clear(); PFX.length = 0; rt.food = []; rt.bubbles = []; rt.fx = []; rt.flyers = []; rt.emotes = []; rt.ripples = []; rt.geo.clear(); rt.emit.clear(); rt.schools = {}; rt.sel = null; rt.drag = null; rt.court = null; rt.feeders = []; rt.shocks = []; rt.jets = []; rt.stars = []; rt.flies = []; rt.chest.clear(); rt.lowO2 = false; refreshPlants(); rt.plank = []; rt.plankT.clear(); rt.trap.clear(); rt.snap.clear();
   rt.lightK = lightOn() ? 1 : 0; rt.showCoins = state.coins; rt.hudT = 0; rt.eggT = 0;
   countCache(); syncAlgae();
 }
