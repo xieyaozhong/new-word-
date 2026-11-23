@@ -67,7 +67,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--coin);outline-o
 #deep{position:fixed;inset:0;z-index:40;background:#010409;color:#d8f0ff;overflow:hidden}
 #deep canvas#deepCv{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 #deep .dhud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:16px;background:rgba(4,16,32,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font-size:13px;z-index:2}
-#deep .dhud button{border:0;border-radius:10px;padding:6px 10px;background:rgba(255,255,255,.14);color:#fff;font:inherit;cursor:pointer}
+#deep .dhud button{white-space:nowrap;flex:none;border:0;border-radius:10px;padding:6px 10px;background:rgba(255,255,255,.14);color:#fff;font:inherit;cursor:pointer}
+#deep #dMode{background:rgba(255,190,90,.2);color:#ffd890}
 #deep .dtitle{font-weight:700;font-size:15px;color:#9ae4ff;white-space:nowrap}
 #deep #dInfo{margin-left:auto;font-size:12px;color:#a8c8dc;text-align:right}
 #deep .dbtns{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 14px);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;z-index:2}
@@ -1735,7 +1736,9 @@ function migrate(s){
   s.ib = (Array.isArray(s.ib) ? s.ib : []).filter(b => b && SPECIES[b.sp] && b.mom && b.dad).slice(0, 8).map(b => ({sp:b.sp, at:+b.at || Date.now(), n:clamp(b.n | 0, 1, 4), mom:snapParent(b.mom), dad:snapParent(b.dad)}));
   s.pvarDay = typeof s.pvarDay === 'string' ? s.pvarDay : '';
   { const D = s.deep && typeof s.deep === 'object' ? s.deep : {}; s.deep = {built:!!D.built, lv:clamp(D.lv | 0, 0, DEEP_UP.length), list:(Array.isArray(D.list) ? D.list : []).filter(e => e && DSP[e.sp]).slice(0, 12).map(e => ({id:String(e.id || uid()), sp:e.sp, name:String(e.name || DSP[e.sp].name).slice(0, 24), at:+e.at || Date.now(), seed:(+e.seed || 1) | 0, full:clamp(+e.full || 0, 0, 100)})),
-    dive:D.dive && DZONES[D.dive.z | 0] ? {z:D.dive.z | 0, at:+D.dive.at || Date.now(), done:!!D.dive.done} : null, rp:Math.max(0, +D.rp || 0), rpT:+D.rpT || Date.now(), seen:Object.fromEntries(Object.keys(D.seen || {}).filter(k => DSP[k]).map(k => [k, 1])), lights:D.lights === 0 ? 0 : 1}; }
+    dive:D.dive && DZONES[D.dive.z | 0] ? {z:D.dive.z | 0, at:+D.dive.at || Date.now(), done:!!D.dive.done, ...(GIANTS[D.dive.g] ? {g:D.dive.g} : {})} : null, rp:Math.max(0, +D.rp || 0), rpT:+D.rpT || Date.now(), seen:Object.fromEntries(Object.keys(D.seen || {}).filter(k => DSP[k]).map(k => [k, 1])), lights:D.lights === 0 ? 0 : 1,
+    gown:Object.fromEntries(Object.entries(D.gown || {}).filter(([k]) => GIANTS[k]).map(([k, v]) => [k, +v || 1])), gclue:Object.fromEntries(Object.entries(D.gclue || {}).filter(([k]) => GIANTS[k]).map(([k, v]) => [k, clamp(v | 0, 0, 3)])),
+    gcur:GIANTS[D.gcur] && D.gown && D.gown[D.gcur] ? D.gcur : null, mode:D.mode === 'giant' ? 'giant' : 'tank', gseen:Object.fromEntries(Object.keys(D.gseen || {}).filter(k => GIANTS[k]).map(k => [k, 1]))}; }
   s.fert = +s.fert || 0; s.rotted = Math.max(0, +s.rotted || 0);
   s.algae = (Array.isArray(s.algae) ? s.algae : []).slice(0, MAXA).map(a => ({x:clamp(+a.x || .5, 0, 1), y:clamp(+a.y || .5, 0, 1), r:clamp(+a.r || 1, .5, 1.5)}));
   s.sand = (Array.isArray(s.sand) ? s.sand : []).slice(0, MAXCOINS).map(c => ({x:clamp(+c.x || .5, .03, .97), v:Math.max(1, (+c.v || 1) | 0)}));
@@ -2964,12 +2967,13 @@ const DZONES = [
 ];
 const DEEP_BUILD = 8000, DEEP_CAPS = [6, 9, 12], DEEP_UP = [6000, 15000], DEEP_FEED = 30;
 let deepUI = null;
-function deepS(){ if (!state.deep || typeof state.deep !== 'object') state.deep = {built:false, lv:0, list:[], dive:null, rp:0, rpT:Date.now(), seen:{}, lights:1}; return state.deep; }
+function deepS(){ if (!state.deep || typeof state.deep !== 'object') state.deep = {built:false, lv:0, list:[], dive:null, rp:0, rpT:Date.now(), seen:{}, lights:1, gown:{}, gclue:{}, gcur:null, mode:'tank', gseen:{}}; return state.deep; }
 const deepCap = () => DEEP_CAPS[clamp(deepS().lv | 0, 0, DEEP_CAPS.length - 1)];
-const deepRate = () => deepS().list.reduce((a, e) => a + (DSP[e.sp] && e.full > 0 ? DSP[e.sp].rp : 0), 0);
-const deepMax = () => Math.max(200, deepS().list.reduce((a, e) => a + (DSP[e.sp] ? DSP[e.sp].rp : 0), 0) * 24);
+const giantRp = () => Object.keys(deepS().gown || {}).reduce((a, k) => a + (GIANTS[k] ? GIANTS[k].rp : 0), 0);
+const deepRate = () => deepS().list.reduce((a, e) => a + (DSP[e.sp] && e.full > 0 ? DSP[e.sp].rp : 0), 0) + giantRp();
+const deepMax = () => Math.max(200, (deepS().list.reduce((a, e) => a + (DSP[e.sp] ? DSP[e.sp].rp : 0), 0) + giantRp()) * 24);
 function deepTick(now){ const D = deepS(); if (!D.built) return; const hrs = Math.max(0, Math.min(72, (now - (D.rpT || now)) / 3.6e6)); D.rpT = now;
-  if (hrs > 0) { let add = 0; for (const e of D.list) { const S = DSP[e.sp]; if (!S) continue; const per = 100 / (S.fast || 48), fh = Math.min(hrs, (e.full || 0) / per); add += S.rp * fh; e.full = Math.max(0, (e.full || 0) - per * hrs); } D.rp = Math.min(D.rp + add, deepMax()); }
+  if (hrs > 0) { let add = giantRp() * hrs; for (const e of D.list) { const S = DSP[e.sp]; if (!S) continue; const per = 100 / (S.fast || 48), fh = Math.min(hrs, (e.full || 0) / per); add += S.rp * fh; e.full = Math.max(0, (e.full || 0) - per * hrs); } D.rp = Math.min(D.rp + add, deepMax()); }
   if (D.dive && !D.dive.done && now >= D.dive.at) { D.dive.done = true; markDirty(); if (!deepUI) toast('潛水艇從' + DZONES[D.dive.z].name + '回來了！到深海研究站看看撈到什麼'); else { deepMsg('潛水艇回來了！點「潛水探測」看看收穫'); deepBtns(); } } }
 function deepMsg(s){ if (!deepUI) { toast(s); return; } const m = deepUI.el.querySelector('#deepMsg'); m.textContent = s; m.classList.add('on'); clearTimeout(deepUI.msgT); deepUI.msgT = setTimeout(() => m.classList.remove('on'), 2600); }
 /* ---- creature drawings: facing +x, centred, length L ---- */
@@ -3120,7 +3124,7 @@ function deepTarget(e){ const A = deepArea(), S = e.S, w = deepUI.w, L = S.len *
   if (S.beh === 'tripod' && e.wait) e.re = {k:'hop', t:0, dur:1.2}; }
 function openDeep(){ if (deepUI || mini) return; closeSheet(); const D = deepS(); deepTick(Date.now());
   const el = document.createElement('div'); el.id = 'deep';
-  el.innerHTML = '<canvas id="deepCv" aria-label="深海研究站的壓力缸"></canvas><div class="dhud"><button id="dBack" aria-label="回到魚缸">← 魚缸</button><span class="dtitle">深海研究站</span><span id="dInfo"></span></div>'
+  el.innerHTML = '<canvas id="deepCv" aria-label="深海研究站的壓力缸"></canvas><div class="dhud"><button id="dBack" aria-label="回到魚缸">← 魚缸</button><span class="dtitle">深海研究站</span><button id="dMode">巨獸區</button><span id="dInfo"></span></div>'
     + '<p class="dmsg" id="deepMsg"></p><div class="dbtns"><button id="dDive">潛水探測</button><button id="dLab">研究資料</button><button id="dFeed">投餵</button><button id="dLight">熄燈</button></div><div id="deepPanel" role="dialog" aria-label="研究站面板"></div>';
   document.body.appendChild(el);
   const cnv = el.querySelector('canvas'); deepUI = {el, cnv, w:cnv.clientWidth || W, h:cnv.clientHeight || H, ents:[], snow:[], food:[], fxs:[], smoke:[], ptr:null, lamp:0, msgT:0, dk:document.createElement('canvas'), bg:null, panel:''};
@@ -3133,18 +3137,19 @@ function openDeep(){ if (deepUI || mini) return; closeSheet(); const D = deepS()
   el.querySelector('#dBack').addEventListener('click', closeDeep);
   el.querySelector('#dDive').addEventListener('click', () => deepPanel('dive'));
   el.querySelector('#dLab').addEventListener('click', () => deepPanel('lab'));
-  el.querySelector('#dFeed').addEventListener('click', deepFeed);
+  el.querySelector('#dFeed').addEventListener('click', () => D.mode === 'giant' ? deepPanel('giants') : deepFeed());
+  el.querySelector('#dMode').addEventListener('click', () => { D.mode = D.mode === 'giant' ? 'tank' : 'giant'; markDirty(); deepUI.gs = null; deepPanelClose(); deepBtns(); if (D.mode === 'giant' && !D.gcur) deepPanel('giants'); });
   el.querySelector('#dLight').addEventListener('click', () => { D.lights = D.lights ? 0 : 1; markDirty(); deepBtns(); deepMsg(D.lights ? '打開照明：看得清楚每一隻' : '熄燈了：只看得到生物發出的光，按住螢幕可以用手電筒照'); });
   deepBtns();
   if (!D.built) deepPanel('build'); else if (D.dive && D.dive.done) deepPanel('dive'); else if (!D.list.length) deepMsg('壓力缸還是空的，按「潛水探測」派潛水艇下去採集');
 }
 function closeDeep(){ if (!deepUI) return; deepUI.el.remove(); deepUI = null; markDirty(); }
-function deepBtns(){ if (!deepUI) return; const D = deepS(), q = s => deepUI.el.querySelector(s); q('#dLight').textContent = D.lights ? '熄燈' : '開燈'; for (const b of ['#dDive', '#dLab', '#dFeed', '#dLight']) q(b).disabled = !D.built;
+function deepBtns(){ if (!deepUI) return; const D = deepS(), q = s => deepUI.el.querySelector(s); q('#dLight').textContent = D.lights ? '熄燈' : '開燈'; for (const b of ['#dDive', '#dLab', '#dFeed', '#dLight', '#dMode']) q(b).disabled = !D.built; q('#dFeed').textContent = D.mode === 'giant' ? '巨獸檔案' : '投餵'; q('#dMode').textContent = D.mode === 'giant' ? '壓力缸' : '巨獸區';
   q('#dDive').classList.toggle('ping', !!(D.dive && D.dive.done)); }
 function deepFeed(){ const D = deepS(); if (!D.list.length) { deepMsg('壓力缸裡還沒有生物'); return; } if (state.coins < DEEP_FEED) { deepMsg('金幣不夠'); return; }
   state.coins -= DEEP_FEED; bumpCoins(); markDirty(); for (let i = 0; i < 40; i++) deepUI.food.push({x:rand(20, deepUI.w - 20), y:rand(90, 150), vy:rand(16, 30), ph:rand(6), t:0});
   deepMsg('撒下了海雪餌料（−' + DEEP_FEED + ' 金幣）。深海生物很久才吃一次，吃飽可以撐兩天'); }
-function deepTap(x, y){ let best = null, bd = 1e9; for (const e of deepUI.ents) { const L = e.S.len * U, cy = e.S.beh === 'tripod' ? e.y - L * .36 : e.S.beh === 'crawl' || e.S.beh === 'bottom' ? e.y - L * .1 : e.y, r = Math.max(26, L * (e.S.beh === 'vertical' ? .2 : .45)), d = Math.hypot((x - e.x) / (e.S.beh === 'vertical' ? .3 : 1), y - cy);
+function deepTap(x, y){ if (deepS().mode === 'giant') { giantTap(x, y); return; } let best = null, bd = 1e9; for (const e of deepUI.ents) { const L = e.S.len * U, cy = e.S.beh === 'tripod' ? e.y - L * .36 : e.S.beh === 'crawl' || e.S.beh === 'bottom' ? e.y - L * .1 : e.y, r = Math.max(26, L * (e.S.beh === 'vertical' ? .2 : .45)), d = Math.hypot((x - e.x) / (e.S.beh === 'vertical' ? .3 : 1), y - cy);
     if (d < r && d < bd) { bd = d; best = e; } }
   if (!best) return; deepReact(best); deepPanel('info', best); }
 function deepReact(e){ const k = e.S.beh, dur = {lantern:1.4, giantsquid:1.6, vampsquid:2.6, atolla:3, coelacanth:2.6, isopod:2.4, tripod:1.2, blobfish:2}[e.d.sp] || 1.4; e.re = {k:'tap', t:0, dur};
@@ -3154,16 +3159,17 @@ function deepReact(e){ const k = e.S.beh, dur = {lantern:1.4, giantsquid:1.6, va
 function deepStep(dt){
   const M = deepUI, cnv = M.cnv, w = cnv.clientWidth, h = cnv.clientHeight; if (!w || !h) return; const D = deepS();
   if (cnv.width !== Math.round(w * DPR) || cnv.height !== Math.round(h * DPR)) { cnv.width = Math.round(w * DPR); cnv.height = Math.round(h * DPR); M.bg = null; } M.w = w; M.h = h;
-  const c = cnv.getContext('2d'), t = rt.t, A = deepArea(); c.setTransform(DPR, 0, 0, DPR, 0, 0);
-  if (!M.bg) M.bg = deepBg(w, h); c.drawImage(M.bg, 0, 0, w, h);
-  const infoEl = M.el.querySelector('#dInfo'); if (infoEl) { const txt = D.built ? (D.list.length + '/' + deepCap() + ' 隻・研究 +' + deepRate() + '/時' + (D.dive && !D.dive.done ? '・潛艇 ' + fmtClock(D.dive.at - Date.now()) : D.dive && D.dive.done ? '・潛艇回來了！' : '')) : '尚未建造'; if (infoEl.textContent !== txt) infoEl.textContent = txt; }
+  const c = cnv.getContext('2d'), t = rt.t, A = deepArea(), sk = M.shake || 0, GM = D.mode === 'giant'; M.shake = Math.max(0, sk - dt * 1.6); c.setTransform(DPR, 0, 0, DPR, rand(-1, 1) * sk * 12 * DPR, rand(-1, 1) * sk * 12 * DPR);
+  if (GM) giantBg(c, w, h, t); else { if (!M.bg) M.bg = deepBg(w, h); c.drawImage(M.bg, 0, 0, w, h); }
+  const infoEl = M.el.querySelector('#dInfo'); if (infoEl) { const txt = D.built ? ((GM ? '巨獸 ' + gOwnN() + '/' + Object.keys(GIANTS).length : D.list.length + '/' + deepCap() + ' 隻') + '・研究 +' + deepRate() + '/時' + (D.dive && !D.dive.done ? '・潛艇 ' + fmtClock(D.dive.at - Date.now()) : D.dive && D.dive.done ? '・潛艇回來了！' : '')) : '尚未建造'; if (infoEl.textContent !== txt) infoEl.textContent = txt; }
+  DGL = [];
+  if (GM) giantFrame(c, w, h, dt, t); else {
   /* hydrothermal vent smoke */
   if (Math.random() < dt * 6) M.smoke.push({x:w * .14 + rand(-3, 3), y:A.floor - 66, r:rand(4, 7), t:0, life:rand(3, 5), vx:rand(-4, 6)});
   for (let i = M.smoke.length - 1; i >= 0; i--) { const s = M.smoke[i]; s.t += dt; s.y -= 22 * dt; s.x += s.vx * dt; s.r += 6 * dt; if (s.t > s.life) { M.smoke.splice(i, 1); continue; } c.fillStyle = 'rgba(30,30,34,' + (.45 * (1 - s.t / s.life)).toFixed(3) + ')'; dot(c, s.x, s.y, s.r); }
   /* food */
   for (let i = M.food.length - 1; i >= 0; i--) { const f = M.food[i]; f.t += dt; f.y += f.vy * dt; f.x += Math.sin(t + f.ph) * 6 * dt; if (f.y > A.floor - 2) f.y = A.floor - 2; if (f.t > 40) { M.food.splice(i, 1); continue; } c.fillStyle = 'rgba(240,200,150,.85)'; dot(c, f.x, f.y, 1.8); }
   /* creatures */
-  DGL = [];
   const order = [...M.ents].sort((a, b) => b.S.len - a.S.len);
   for (const e of M.ents) { const S = e.S, L = S.len * U; e.ph += dt * (1.2 + S.speed); if (e.re) { e.re.t += dt; if (e.re.t >= e.re.dur) e.re = null; }
     let tx = e.tx, ty = e.ty, spd = S.speed * 28;
@@ -3185,22 +3191,24 @@ function deepStep(dt){
   /* ink, sparks */
   for (let i = M.fxs.length - 1; i >= 0; i--) { const q = M.fxs[i]; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= .97; if (q.t > q.life) { M.fxs.splice(i, 1); continue; } const a = 1 - q.t / q.life;
     if (q.kind === 'ink') { c.fillStyle = 'rgba(8,4,10,' + (.55 * a).toFixed(3) + ')'; dot(c, q.x, q.y, q.r * (1 + q.t)); } else { c.fillStyle = 'rgba(150,230,255,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, q.r); DGL.push({x:q.x, y:q.y, r:8, col:'#5ad8ff', a}); } }
+  }
   /* marine snow */
   c.fillStyle = 'rgba(220,235,255,.5)'; for (const s of M.snow) { s.y += s.v / h * dt; if (s.y > 1) { s.y = 0; s.x = Math.random(); } dot(c, s.x * w + Math.sin(t * .4 + s.ph) * 6, s.y * h, s.s); }
   /* darkness + flashlight + bioluminescence */
   const p = M.ptr; if (p && p.down) M.lamp = 1; else M.lamp = Math.max(0, M.lamp - dt * 1.4);
   const dk = M.dk; if (dk.width !== cnv.width || dk.height !== cnv.height) { dk.width = cnv.width; dk.height = cnv.height; } const k2 = dk.getContext('2d'); k2.setTransform(DPR, 0, 0, DPR, 0, 0); k2.globalCompositeOperation = 'source-over'; k2.clearRect(0, 0, w, h);
-  k2.fillStyle = D.lights ? 'rgba(0,6,22,.26)' : 'rgba(0,2,8,.9)'; k2.fillRect(0, 0, w, h); k2.globalCompositeOperation = 'destination-out';
+  k2.fillStyle = D.lights ? 'rgba(0,6,22,.26)' : GM ? 'rgba(0,2,8,.74)' : 'rgba(0,2,8,.9)'; k2.fillRect(0, 0, w, h); k2.globalCompositeOperation = 'destination-out';
   if (p && M.lamp > 0) { const R2 = 120; k2.fillStyle = rg(k2, p.x, p.y, 0, p.x, p.y, R2, [[0,'rgba(0,0,0,' + (.95 * M.lamp).toFixed(3) + ')'],[.6,'rgba(0,0,0,' + (.6 * M.lamp).toFixed(3) + ')'],[1,'rgba(0,0,0,0)']]); k2.fillRect(p.x - R2, p.y - R2, R2 * 2, R2 * 2); }
   for (const g of DGL) { const rr = g.r * 1.3; k2.fillStyle = rg(k2, g.x, g.y, 0, g.x, g.y, rr, [[0,'rgba(0,0,0,' + (.7 * Math.min(1, g.a)).toFixed(3) + ')'],[1,'rgba(0,0,0,0)']]); k2.fillRect(g.x - rr, g.y - rr, rr * 2, rr * 2); }
   c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(dk, 0, 0); c.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (p && M.lamp > 0) { c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, p.x, p.y, 0, p.x, p.y, 120, [[0,'rgba(200,230,255,' + (.14 * M.lamp).toFixed(3) + ')'],[1,'rgba(200,230,255,0)']]); c.fillRect(p.x - 120, p.y - 120, 240, 240); c.restore(); }
   c.save(); c.globalCompositeOperation = 'lighter'; const gk = D.lights ? .55 : 1; for (const g of DGL) { const a = Math.min(1, g.a) * gk; if (a <= .01) continue; c.fillStyle = rg(c, g.x, g.y, 0, g.x, g.y, g.r, [[0,alpha(g.col, .75 * a)],[.4,alpha(g.col, .25 * a)],[1,alpha(g.col, 0)]]); c.fillRect(g.x - g.r, g.y - g.r, g.r * 2, g.r * 2); } c.restore();
   DGL = null;
+  if (GM && M.gs && M.gs.crack > 0) gCrack(c, M.gs.cx || w / 2, M.gs.cy || h / 2, Math.min(1, M.gs.crack));
   /* viewport frame */
   c.strokeStyle = 'rgba(120,150,170,.35)'; c.lineWidth = 3; c.beginPath(); c.roundRect ? c.roundRect(6, 6, w - 12, h - 12, 26) : c.rect(6, 6, w - 12, h - 12); c.stroke();
   c.fillStyle = 'rgba(150,170,190,.4)'; for (let i = 0; i < 6; i++) { dot(c, 14, 60 + i * (h - 120) / 5, 2.2); dot(c, w - 14, 60 + i * (h - 120) / 5, 2.2); }
-  if (!D.list.length && D.built) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('壓力缸目前是空的', w / 2, h * .45); c.font = '13px ' + FONT; c.fillText('按「潛水探測」派潛水艇去深海採集', w / 2, h * .45 + 22); }
+  if (!GM && !D.list.length && D.built) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('壓力缸目前是空的', w / 2, h * .45); c.font = '13px ' + FONT; c.fillText('按「潛水探測」派潛水艇去深海採集', w / 2, h * .45 + 22); }
 }
 function deepBg(w, h){ const cv = document.createElement('canvas'); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); const c = cv.getContext('2d'); c.setTransform(DPR, 0, 0, DPR, 0, 0); const R = rng(4242), floor = h - 128;
   c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#06203e'],[.45,'#03111f'],[1,'#010409']]); c.fillRect(0, 0, w, h);
@@ -3221,7 +3229,7 @@ function deepThumb(cnv, sp, seen){ const c = cnv.getContext('2d'), w = cnv.width
   DGL = []; DDRAW[sp](c, L, null, 1); const gls = DGL; DGL = null; c.restore();
   c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'lighter'; for (const g of gls) { const x = g.x * DPR, y = g.y * DPR, r = g.r * DPR; c.fillStyle = rg(c, x, y, 0, x, y, r, [[0,alpha(g.col, .6)],[1,alpha(g.col, 0)]]); c.fillRect(x - r, y - r, r * 2, r * 2); } c.restore();
   if (!seen) { c.save(); c.globalCompositeOperation = 'source-atop'; c.fillStyle = '#01060e'; c.fillRect(0, 0, w, h); c.restore(); c.fillStyle = lg(c, 0, 0, 0, h, [[0,'rgba(10,42,74,.0)'],[1,'rgba(2,8,18,0)']]); c.fillStyle = 'rgba(150,200,240,.6)'; c.font = '700 ' + Math.round(h * .36) + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', w / 2, h / 2); } }
-function deepPanel(kind, ent){ if (!deepUI) return; const P = deepUI.el.querySelector('#deepPanel'), D = deepS(); P.innerHTML = ''; deepUI.panel = kind;
+function deepPanel(kind, ent){ if (!deepUI) return; if (kind === 'giants' || kind === 'gresult') { giantPanel(kind, ent); return; } const P = deepUI.el.querySelector('#deepPanel'), D = deepS(); P.innerHTML = ''; deepUI.panel = kind;
   const head = mk('div', 'dph'), close = mk('button', 'dx', '×'); close.setAttribute('aria-label', '關閉'); close.addEventListener('click', deepPanelClose);
   const add = (...n) => P.append(...n);
   if (kind === 'build') {
@@ -3233,16 +3241,16 @@ function deepPanel(kind, ent){ if (!deepUI) return; const P = deepUI.el.querySel
     add(b); }
   else if (kind === 'dive') {
     head.append(mk('h3', '', '潛水探測'), close); add(head);
-    if (D.dive && D.dive.done) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', '潛水艇從' + Z.name + '（' + Z.depth + '）回來了！'));
+    if (D.dive && D.dive.done) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', D.dive.g ? '追蹤' + GIANTS[D.dive.g].name + '的潛水艇回來了！' : '潛水艇從' + Z.name + '（' + Z.depth + '）回來了！'));
       const b = mk('button', 'buy', '打開採集艙'); b.addEventListener('click', () => deepClaim()); add(b); }
-    else if (D.dive) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', '潛水艇正在' + Z.name + '（' + Z.depth + '）採集中，大約 ' + fmtClock(D.dive.at - Date.now()) + ' 後回來。可以先回魚缸，時間到會通知你。')); }
+    else if (D.dive) { const Z = DZONES[D.dive.z]; add(mk('p', 'dp', '潛水艇正在' + Z.name + (D.dive.g ? '追蹤' + GIANTS[D.dive.g].name + '的蹤跡' : '（' + Z.depth + '）採集中') + '，大約 ' + fmtClock(D.dive.at - Date.now()) + ' 後回來。可以先回魚缸，時間到會通知你。')); }
     else { if (D.list.length >= deepCap()) add(mk('p', 'dp warn', '壓力缸已經滿了（' + D.list.length + '/' + deepCap() + '），先放回幾隻或擴建再下潛。'));
       DZONES.forEach((Z, z) => { const row = mk('div', 'item dzone'), info = mk('div'), pool = Object.keys(DSP).filter(k => DSP[k].zone === z);
         const h3 = mk('h3', '', Z.name); h3.appendChild(mk('span', 'tag', Z.depth)); const sn = pool.filter(k => D.seen[k]).map(k => DSP[k].name), un = pool.length - sn.length; info.append(h3, mk('p', '', '約 ' + Z.mins + ' 分鐘・' + (sn.length ? '已發現：' + sn.join('、') + (un ? '，還有 ' + un + ' 種未發現' : '') : '有 ' + un + ' 種未知的深海生物')));
         const ic = document.createElement('canvas'); ic.className = 'thumb'; ic.width = 144; ic.height = 96; deepZoneIcon(ic, z);
         const b = mk('button', 'buy'); b.innerHTML = coinSvg + Z.cost.toLocaleString('zh-TW'); b.disabled = state.coins < Z.cost || D.list.length >= deepCap();
         b.addEventListener('click', () => { if (state.coins < Z.cost || D.dive || D.list.length >= deepCap()) return; state.coins -= Z.cost; bumpCoins(); D.dive = {z, at:Date.now() + Z.mins * 6e4, done:false}; state.stats.dives = (state.stats.dives | 0) + 1; markDirty(); deepPanelClose(); deepMsg('潛水艇出發了，正往' + Z.name + '下潛…'); });
-        row.append(ic, info, b); add(row); }); } }
+        row.append(ic, info, b); add(row); }); add(mk('p', 'dp dim', '每次探測都有機會撿到深海巨獸的線索。集滿 3 個，就能在「巨獸區」的「巨獸檔案」派潛水艇追蹤牠。')); } }
   else if (kind === 'lab') {
     head.append(mk('h3', '', '研究資料'), close); add(head); deepTick(Date.now());
     const v = Math.floor(D.rp), hungry = D.list.filter(e => !(e.full > 0)).length;
@@ -3263,18 +3271,200 @@ function deepPanel(kind, ent){ if (!deepUI) return; const P = deepUI.el.querySel
   else if (kind === 'result') {
     head.append(mk('h3', '', '採集成果'), close); add(head);
     for (const r of ent) { const row = mk('div', 'dinfo'), cv = document.createElement('canvas'); cv.width = 210; cv.height = 140; deepThumb(cv, r.sp, true); const tx = mk('div'), S = DSP[r.sp];
-      tx.append(mk('p', 'dp', (r.isNew ? '新發現！' : '') + S.name), mk('p', 'dp dim', r.kept ? '已經放進壓力缸' : '壓力缸滿了，只好放回深海（研究補助 ' + S.rp * 3 + ' 金幣）'), mk('p', 'dp dim', r.isNew ? '第一次記錄到這個物種，研究所發給你 ' + S.rp * 10 + ' 金幣獎金' : S.trait)); row.append(cv, tx); add(row); } }
+      tx.append(mk('p', 'dp', (r.isNew ? '新發現！' : '') + S.name), mk('p', 'dp dim', r.kept ? '已經放進壓力缸' : '壓力缸滿了，只好放回深海（研究補助 ' + S.rp * 3 + ' 金幣）'), mk('p', 'dp dim', r.isNew ? '第一次記錄到這個物種，研究所發給你 ' + S.rp * 10 + ' 金幣獎金' : S.trait)); row.append(cv, tx); add(row); }
+    if (ent.clue) { const G = GIANTS[ent.clue.k], row = mk('div', 'dinfo'), cv = document.createElement('canvas'); cv.width = 210; cv.height = 140; giantThumb(cv, ent.clue.k, false);
+      row.append(cv, mk('p', 'dp warn', '還撿到了巨獸的線索：「' + ent.clue.name + '」（' + (ent.clue.n >= 3 ? G.name : '？？？') + ' ' + ent.clue.n + '/3）' + (ent.clue.n >= 3 ? '。線索集滿了，可以到巨獸區的「巨獸檔案」追蹤牠！' : ''))); add(row); } }
   P.classList.add('on'); }
 function deepZoneIcon(cv, z){ const c = cv.getContext('2d'), w = cv.width, h = cv.height; c.fillStyle = lg(c, 0, 0, 0, h, [[0,['#1b5a8a','#0e2a50','#06102a'][z]],[1,['#0a2a4a','#040c1e','#010308'][z]]]); c.fillRect(0, 0, w, h);
   c.fillStyle = 'rgba(255,230,120,.9)'; c.beginPath(); c.ellipse(w * .5, h * .45, w * .18, h * .14, 0, 0, TAU); c.fill(); c.fillStyle = '#f0c040'; c.fillRect(w * .46, h * .22, w * .08, h * .12); c.fillStyle = '#1a3a5a'; dot(c, w * .44, h * .45, h * .06); dot(c, w * .56, h * .45, h * .06);
   c.fillStyle = 'rgba(255,240,180,.25)'; c.beginPath(); c.moveTo(w * .62, h * .5); c.lineTo(w, h * .2); c.lineTo(w, h * .9); c.fill(); c.fillStyle = 'rgba(200,230,255,.6)'; c.font = '700 ' + Math.round(h * .2) + 'px ' + FONT; c.textAlign = 'center'; c.fillText(['200m', '1000m', '4000m'][z], w * .5, h * .9); }
-function deepClaim(){ const D = deepS(); if (!D.dive || !D.dive.done) return; const z = D.dive.z, pool = Object.keys(DSP).filter(k => DSP[k].zone === z), n = Math.random() < .3 ? 2 : 1, out = [];
+function deepClaim(){ const D = deepS(); if (!D.dive || !D.dive.done) return; if (D.dive.g) { giantClaim(); return; } const z = D.dive.z, pool = Object.keys(DSP).filter(k => DSP[k].zone === z), n = Math.random() < .3 ? 2 : 1, out = [];
   for (let i = 0; i < n; i++) { const tot = pool.reduce((a, k) => a + DSP[k].w, 0); let r = Math.random() * tot, sp = pool[0]; for (const k of pool) { r -= DSP[k].w; if (r <= 0) { sp = k; break; } }
     const S = DSP[sp], isNew = !D.seen[sp]; D.seen[sp] = 1; if (isNew) state.coins += S.rp * 10;
     const cnt = D.list.filter(x => x.sp === sp).length + 1, d = {id:uid(), sp, name:S.name + (cnt > 1 ? ' ' + cnt + '號' : ''), at:Date.now(), seed:(Math.random() * 1e9) | 0, full:60};
     let kept = false; if (D.list.length < deepCap()) { D.list.push(d); kept = true; if (deepUI) { const e = deepEnt(d, deepUI.w, deepUI.h); e.x = deepUI.w / 2; e.y = 120; deepTarget(e); deepUI.ents.push(e); } } else state.coins += S.rp * 3;
     out.push({sp, isNew, kept}); }
-  D.dive = null; state.stats.deepCaught = (state.stats.deepCaught | 0) + n; bumpCoins(); markDirty(); deepBtns(); deepPanel('result', out); }
+  out.clue = giantClueDrop(z); D.dive = null; state.stats.deepCaught = (state.stats.deepCaught | 0) + n; bumpCoins(); markDirty(); deepBtns(); deepPanel('result', out); }
+/* ---------- Expansion 49: abyssal giants (viewed through the station's giant observation window) ---------- */
+const GIANTS = {
+  dunkle:{name:'鄧氏魚', zone:0, cost:12000, mins:20, rp:400, era:'泥盆紀・3.6 億年前', desc:'史前的盔甲巨魚，頭部包著厚厚的骨板。牠沒有牙齒，而是用會自己磨利的骨刃咬合，咬合力是有史以來最強的魚之一。', act:'張開骨刃連咬三下', clues:['一片厚重的骨板化石', '被咬成兩半的古代鯊魚骨', '聲納上一閃而過的盔甲影子']},
+  mosa:{name:'滄龍', zone:0, cost:16000, mins:25, rp:500, era:'白堊紀・6600 萬年前', desc:'恐龍時代的海洋霸主，身長超過 15 公尺的海生爬蟲類。頭像鱷魚，尾巴末端長著像鯊魚一樣的尾鰭。', act:'餵食秀：從水底衝上來一口咬住誘餌', clues:['一枚圓錐形的巨大牙齒', '鯊魚屍體上的鱷魚狀咬痕', '水面下巨大的鰭狀肢影子']},
+  megalodon:{name:'巨齒鯊', zone:1, cost:20000, mins:30, rp:650, era:'中新世～上新世・360 萬年前', desc:'有史以來最大的鯊魚，體長可達 18 公尺，一顆牙齒就比手掌還大。據說牠們早已滅絕……真的嗎？', act:'正面朝觀測窗衝撞過來', clues:['一顆巴掌大的三角形牙齒', '鯨魚骨頭上的巨大咬痕', '聲納上 18 公尺長的影子']},
+  scylla:{name:'斯庫拉', zone:1, cost:22000, mins:30, rp:700, era:'希臘神話', desc:'荷馬史詩《奧德賽》裡守在海峽一側的怪物，有六條長脖子，每條都長著一顆可怕的頭，會把經過的水手一口叼走。', act:'六顆頭一起轉過來咆哮', clues:['一塊佈滿爪痕的岩石', '六道平行的咬痕', '岩洞深處傳來的低吼聲']},
+  kraken:{name:'克拉肯', zone:1, cost:24000, mins:35, rp:750, era:'北歐傳說', desc:'北歐水手口中的巨型海怪，大到會被誤認成一座島。只要牠的觸手纏上船身，再大的船也會被拖進海底。', act:'觸手拍上觀測窗，噴出滿滿墨汁', clues:['一個比輪胎還大的吸盤印', '被扯斷的鐵鍊', '海面下張開的巨大眼睛']},
+  charybdis:{name:'卡律布迪斯', zone:2, cost:26000, mins:35, rp:800, era:'希臘神話', desc:'和斯庫拉隔著海峽相對的海怪，只是一張長在海底的巨口。每天吞吐海水三次，形成能吞沒整艘船的大漩渦。', act:'張口吸水，捲起吞噬一切的大漩渦', clues:['被捲成螺旋狀的沉船殘骸', '海底一圈一圈的牙痕', '海流儀測到的異常漩渦']},
+  leviathan:{name:'利維坦', zone:2, cost:30000, mins:40, rp:900, era:'古代傳說', desc:'古代經典裡記載的海中巨蛇，身上的鱗片像盾牌一樣緊密排列，傳說牠的眼睛像黎明的光，口中會噴出火焰。', act:'抬起頭吐出耀眼的光之吐息', clues:['一片盾牌大小的鱗片', '深淵裡延伸數公里的拖痕', '一道從海底發出的藍光']},
+  kun:{name:'鯤', zone:2, cost:50000, mins:60, rp:1500, era:'《莊子・逍遙遊》', need:4, desc:'北冥有魚，其名為鯤。鯤之大，不知其幾千里也。化而為鳥，其名為鵬。觀測窗只看得到牠身上的一小片鱗。', act:'振起如翼的巨鰭——化而為鵬', clues:['一片比觀測站還大的鱗片', '深淵裡吹起的一陣暖流', '北方極深處的金色光芒']},
+};
+const GSUCC = .8;
+const gOwnN = () => Object.keys(deepS().gown || {}).length;
+function giantClueDrop(z){ const D = deepS(); D.gown = D.gown || {}; D.gclue = D.gclue || {};
+  if (Math.random() > .4) return null;
+  const c = Object.keys(GIANTS).filter(k => GIANTS[k].zone === z && !D.gown[k] && (D.gclue[k] | 0) < 3 && (!GIANTS[k].need || gOwnN() >= GIANTS[k].need)); if (!c.length) return null;
+  const k = pickArr(c), n = (D.gclue[k] | 0) + 1; D.gclue[k] = n; return {k, n, name:GIANTS[k].clues[n - 1]}; }
+function giantClaim(){ const D = deepS(), k = D.dive.g, G = GIANTS[k]; D.dive = null; const ok = Math.random() < GSUCC;
+  if (ok) { D.gown[k] = Date.now(); D.gcur = k; D.mode = 'giant'; state.stats.giants = gOwnN(); state.coins += G.rp * 4; bumpCoins(); if (deepUI) { deepUI.gs = null; deepPanelClose(); } }
+  markDirty(); deepBtns(); if (deepUI) giantPanel('gresult', {k, ok}); }
+/* ---- scene helpers ---- */
+function gCrack(c, x, y, k){ const R = rng(77); c.save(); c.strokeStyle = 'rgba(230,245,255,' + (.75 * k).toFixed(3) + ')'; c.lineWidth = 1.3; c.lineCap = 'round';
+  for (let i = 0; i < 11; i++) { let a = i / 11 * TAU + R() * .4, px = x, py = y; c.beginPath(); c.moveTo(px, py); const n = 4 + (R() * 4 | 0); for (let j = 0; j < n; j++) { a += (R() - .5) * .7; const l = 18 + R() * 40; px += Math.cos(a) * l; py += Math.sin(a) * l; c.lineTo(px, py); } c.stroke(); }
+  c.beginPath(); c.arc(x, y, 22, 0, TAU); c.stroke(); c.beginPath(); c.arc(x, y, 9, 0, TAU); c.stroke(); c.restore(); }
+function gFin(c, pts, col){ c.fillStyle = col; c.beginPath(); c.moveTo(pts[0], pts[1]); c.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]); c.quadraticCurveTo(pts[6], pts[7], pts[8], pts[9]); c.fill(); }
+function gTeeth(c, x0, y0, x1, y1, n, len, up){ c.fillStyle = '#efe8da'; for (let i = 0; i < n; i++) { const q = (i + .5) / n, x = lerp(x0, x1, q), y = lerp(y0, y1, q), b = Math.abs(x1 - x0) / n * .45; c.beginPath(); c.moveTo(x - b, y); c.lineTo(x, y + (up ? -len : len) * (.7 + .3 * Math.sin(i * 2.3))); c.lineTo(x + b, y); c.fill(); } }
+function drawMeg(c, L, t, open){ const H = L * .2;
+  c.fillStyle = '#4e5a64'; c.save(); c.translate(-L * .43, 0); c.rotate(Math.sin(t * 1.6) * .12); c.beginPath(); c.moveTo(0, -H * .22); c.quadraticCurveTo(-L * .08, -H * 1.2, -L * .15, -H * 1.55); c.quadraticCurveTo(-L * .06, -H * .3, -L * .02, 0); c.quadraticCurveTo(-L * .06, H * .3, -L * .12, H * 1.1); c.quadraticCurveTo(-L * .06, H * .9, 0, H * .22); c.fill(); c.restore();
+  gFin(c, [L * .04, -H * .44, -L * .01, -H * 1.4, -L * .09, -H * 1.35, -L * .07, -H * .8, -L * .12, -H * .4], '#4e5a64'); gFin(c, [-L * .3, -H * .26, -L * .33, -H * .5, -L * .36, -H * .48, -L * .35, -H * .35, -L * .37, -H * .22], '#4e5a64');
+  c.fillStyle = lg(c, 0, -H * .5, 0, H * .5, [[0,'#46525c'],[.5,'#6a7680'],[.56,'#d6dad6'],[1,'#c4c8c4']]); c.beginPath(); c.moveTo(L * .5, H * .02); c.bezierCurveTo(L * .5, -H * .42, L * .3, -H * .5, L * .1, -H * .5); c.quadraticCurveTo(-L * .2, -H * .44, -L * .43, -H * .12);
+  c.lineTo(-L * .43, H * .12); c.quadraticCurveTo(-L * .2, H * .44, L * .1, H * .46); c.bezierCurveTo(L * .3, H * .44, L * .48, H * .32, L * .5, H * .02); c.fill();
+  c.save(); c.translate(L * .2, H * .2); c.rotate(.5); c.fillStyle = '#5a6670'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(-L * .04, H * .9, -L * .14, H * 1.1); c.quadraticCurveTo(-L * .08, H * .5, -L * .1, 0); c.fill(); c.restore();
+  c.strokeStyle = 'rgba(40,46,52,.55)'; c.lineWidth = 2; for (let i = 0; i < 5; i++) { const x = L * (.27 - i * .022); c.beginPath(); c.moveTo(x, -H * .2); c.quadraticCurveTo(x - L * .01, 0, x, H * .22); c.stroke(); }
+  c.strokeStyle = 'rgba(230,235,235,.25)'; c.lineWidth = 1.5; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(L * (.05 - i * .07), -H * .3); c.lineTo(L * (.0 - i * .07), -H * .1); c.stroke(); }
+  c.fillStyle = '#7a3a40'; c.beginPath(); c.moveTo(L * .46, H * .16); c.quadraticCurveTo(L * .38, H * (.32 + open * .2), L * .3, H * .26); c.quadraticCurveTo(L * .38, H * .2, L * .46, H * .16); c.fill();
+  gTeeth(c, L * .44, H * .17, L * .32, H * .25, 8, H * .07, false); if (open > .2) gTeeth(c, L * .43, H * (.24 + open * .18), L * .32, H * (.28 + open * .06), 7, H * .06, true);
+  c.fillStyle = '#0a0c10'; dot(c, L * .4, -H * .14, L * .009); c.fillStyle = 'rgba(255,255,255,.7)'; dot(c, L * .398, -H * .15, L * .003); }
+function drawMegFront(c, cx, cy, s, open, w){ const rx = w * .5 * s, ry = w * .32 * s;
+  c.fillStyle = '#56626c'; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(cx + sx * rx * .6, cy + ry * .3); c.lineTo(cx + sx * rx * 1.7, cy + ry * 1.25); c.lineTo(cx + sx * rx * .8, cy + ry * .75); c.fill(); }
+  c.beginPath(); c.moveTo(cx - rx * .04, cy - ry * .8); c.lineTo(cx, cy - ry * 1.9); c.lineTo(cx + rx * .04, cy - ry * .8); c.fill();
+  c.fillStyle = lg(c, 0, cy - ry, 0, cy + ry, [[0,'#4a5660'],[.45,'#6c7882'],[.55,'#d4d8d4'],[1,'#c0c4c0']]); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
+  c.fillStyle = '#05070a'; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(cx + sx * rx * .8, cy - ry * .1, rx * .045, ry * .08, 0, 0, TAU); c.fill(); c.fillStyle = 'rgba(255,255,255,.6)'; dot(c, cx + sx * rx * .79, cy - ry * .14, rx * .012); c.fillStyle = '#05070a'; }
+  c.fillStyle = 'rgba(30,36,40,.6)'; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(cx + sx * rx * .22, cy - ry * .32, rx * .05, ry * .025, sx * .4, 0, TAU); c.fill(); }
+  const mx = rx * .62, my = ry * (.1 + .42 * open), mcy = cy + ry * .38; c.fillStyle = '#8a3040'; c.beginPath(); c.ellipse(cx, mcy, mx * 1.06, my + ry * .05, 0, 0, TAU); c.fill();
+  c.fillStyle = rg(c, cx, mcy, 0, cx, mcy, mx, [[0,'#050002'],[.7,'#2a0810'],[1,'#5a1824']]); c.beginPath(); c.ellipse(cx, mcy, mx, my, 0, 0, TAU); c.fill();
+  c.fillStyle = '#f2ece0'; for (const row of [0, 1]) { const k = row ? .82 : 1, n = 16; for (let i = 0; i < n; i++) { const a0 = Math.PI + (i + .5) / n * Math.PI, a1 = (i + .5) / n * Math.PI, tl = ry * (.1 - row * .03) * (.8 + .2 * Math.sin(i));
+      for (const [a, dir] of [[a0, 1], [a1, -1]]) { const x = cx + Math.cos(a) * mx * k, y = mcy + Math.sin(a) * my * k, bw = mx * .09 * k; c.beginPath(); c.moveTo(x - bw, y); c.lineTo(x, y + dir * tl); c.lineTo(x + bw, y); c.fill(); } } } }
+function drawMosa(c, L, t, open){ const H = L * .11, sw = Math.sin(t * 1.4);
+  c.fillStyle = '#34423e'; c.save(); c.translate(-L * .46, 0); c.rotate(sw * .1); c.beginPath(); c.moveTo(0, -H * .2); c.quadraticCurveTo(-L * .06, -H * .5, -L * .1, -H * .9); c.quadraticCurveTo(-L * .07, 0, -L * .04, H * .1); c.quadraticCurveTo(-L * .08, H * .9, -L * .13, H * 1.6); c.quadraticCurveTo(-L * .04, H * .8, 0, H * .2); c.fill(); c.restore();
+  for (const [x, a] of [[.22, .7], [-.18, .8]]) { c.save(); c.translate(L * x, H * .3); c.rotate(a + Math.sin(t * 1.2 + x * 9) * .25); c.fillStyle = '#3a4a46'; c.beginPath(); c.ellipse(-L * .05, H * .3, L * .07, H * .3, .6, 0, TAU); c.fill(); c.restore(); }
+  c.fillStyle = lg(c, 0, -H * .5, 0, H * .5, [[0,'#2e3c38'],[.55,'#4a5a54'],[.6,'#c8c4b0'],[1,'#b0ac98']]); c.beginPath(); c.moveTo(L * .36, -H * .3); c.quadraticCurveTo(0, -H * .62, -L * .46, -H * .12); c.lineTo(-L * .46, H * .12); c.quadraticCurveTo(0, H * .6, L * .36, H * .32); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(20,30,28,.35)'; for (let i = 0; i < 24; i++) dot(c, L * (.3 - i * .03), -H * (.3 - (i % 3) * .06), L * .006);
+  c.fillStyle = '#3a4844'; c.beginPath(); c.moveTo(L * .34, -H * .32); c.quadraticCurveTo(L * .45, -H * .38, L * .56, -H * .1); c.lineTo(L * .56, 0); c.lineTo(L * .34, H * .06); c.fill();
+  c.save(); c.translate(L * .36, H * .08); c.rotate(open * .45); c.fillStyle = '#4a5852'; c.beginPath(); c.moveTo(0, 0); c.lineTo(L * .2, -H * .02); c.lineTo(L * .18, H * .14); c.lineTo(0, H * .22); c.fill(); gTeeth(c, L * .02, 0, L * .19, -H * .02, 9, H * .1, true); c.restore();
+  gTeeth(c, L * .36, H * .05, L * .55, 0, 10, H * .1, false); c.fillStyle = '#e8c040'; dot(c, L * .42, -H * .2, L * .008); c.fillStyle = '#100a04'; c.fillRect(L * .418, -H * .26, L * .004, H * .12); }
+function drawDunk(c, L, t, open){ const H = L * .2;
+  c.fillStyle = '#2e3236'; c.save(); c.translate(-L * .42, 0); c.rotate(Math.sin(t * 1.5) * .12); c.beginPath(); c.moveTo(0, -H * .2); c.quadraticCurveTo(-L * .06, -H * .8, -L * .12, -H * 1.1); c.quadraticCurveTo(-L * .05, 0, -L * .1, H * .8); c.quadraticCurveTo(-L * .04, H * .5, 0, H * .2); c.fill(); c.restore();
+  c.fillStyle = lg(c, 0, -H * .5, 0, H * .5, [[0,'#2a2e32'],[1,'#6a6e70']]); c.beginPath(); c.moveTo(L * .1, -H * .48); c.quadraticCurveTo(-L * .2, -H * .4, -L * .42, -H * .1); c.lineTo(-L * .42, H * .1); c.quadraticCurveTo(-L * .2, H * .42, L * .1, H * .46); c.fill();
+  gFin(c, [-L * .02, -H * .45, -L * .06, -H * .95, -L * .14, -H * .9, -L * .12, -H * .6, -L * .16, -H * .38], '#2e3236');
+  c.save(); c.translate(L * .2, H * .2); c.rotate(-open * .75); c.fillStyle = '#7a6a48'; c.beginPath(); c.moveTo(-L * .08, 0); c.lineTo(L * .26, -H * .06); c.lineTo(L * .3, -H * .22); c.lineTo(L * .2, H * .1); c.lineTo(-L * .08, H * .22); c.fill(); c.strokeStyle = 'rgba(40,30,16,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(0, H * .08); c.lineTo(L * .22, -H * .02); c.stroke(); c.restore();
+  c.fillStyle = lg(c, L * .1, -H * .6, L * .4, H * .3, [[0,'#8a7a54'],[1,'#5a4a30']]); c.beginPath(); c.moveTo(L * .08, -H * .52); c.quadraticCurveTo(L * .38, -H * .6, L * .52, -H * .08); c.lineTo(L * .46, H * .12); c.lineTo(L * .36, H * .1); c.lineTo(L * .32, H * .26); c.lineTo(L * .08, H * .4); c.closePath(); c.fill();
+  c.strokeStyle = 'rgba(40,30,14,.6)'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(L * .22, -H * .55); c.quadraticCurveTo(L * .2, -H * .1, L * .26, H * .2); c.moveTo(L * .34, -H * .45); c.lineTo(L * .4, H * .05); c.moveTo(L * .1, -H * .1); c.lineTo(L * .3, -H * .2); c.stroke();
+  c.fillStyle = 'rgba(30,20,8,.35)'; for (let i = 0; i < 14; i++) dot(c, L * (.14 + (i * 37 % 30) / 100), -H * ((i * 53 % 80) / 100 - .25), L * .006);
+  c.fillStyle = '#e8dcc0'; c.beginPath(); c.moveTo(L * .5, -H * .06); c.lineTo(L * .47, H * .16); c.lineTo(L * .44, H * .1); c.fill();
+  c.fillStyle = '#2a2014'; c.beginPath(); c.arc(L * .34, -H * .22, L * .028, 0, TAU); c.fill(); c.fillStyle = '#d8c070'; dot(c, L * .34, -H * .22, L * .014); c.fillStyle = '#0a0804'; dot(c, L * .342, -H * .22, L * .007); }
+function drawGHead(c, s, open, t, i){ c.save(); c.scale(s, s);
+  c.fillStyle = '#3a4a3a'; c.beginPath(); c.moveTo(-20, -14); c.quadraticCurveTo(10, -22, 46, -8); c.lineTo(46, -2); c.lineTo(-20, 6); c.fill(); gTeeth(c, -4, -2, 44, -4, 7, 7, false);
+  c.save(); c.translate(-14, 4); c.rotate(open * .7); c.fillStyle = '#2e3c2e'; c.beginPath(); c.moveTo(0, 0); c.lineTo(56, -4); c.lineTo(50, 6); c.lineTo(0, 12); c.fill(); gTeeth(c, 8, -1, 54, -4, 7, 6, true); c.restore();
+  c.fillStyle = '#4a5a44'; c.beginPath(); c.ellipse(-14, -4, 22, 15, 0, 0, TAU); c.fill(); c.strokeStyle = '#2a3626'; c.lineWidth = 2; for (const y of [-18, -12]) { c.beginPath(); c.moveTo(-26, y); c.lineTo(-44, y - 10 - (i % 2) * 4); c.stroke(); }
+  c.fillStyle = '#ffd84a'; c.beginPath(); c.ellipse(4, -12, 5, 3, -.2, 0, TAU); c.fill(); gl(c, 4, -12, 18, '#ffcc40', .9); c.fillStyle = '#1a1000'; c.fillRect(3.2, -14.5, 1.6, 5); c.restore(); }
+/* ---- the eight scenes ---- */
+const GSCENE = {
+  dunkle(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, cyc = 12, u = (t % cyc) / cyc, dir = Math.floor(t / cyc) % 2 ? -1 : 1, L = w * 1.15;
+    let x = dir > 0 ? lerp(-L * .7, w + L * .7, u) : lerp(w + L * .7, -L * .7, u), y = h * .45 + Math.sin(t * .4) * 20, open = Math.max(0, Math.sin(t * .9)) * .3, Ls = L, f = dir;
+    if (A) { const k = Math.min(1, p * 5); Ls = lerp(L, w * .95, k); x = lerp(G.x0, w * .5 - G.f0 * Ls * .22, easeOut(k)); open = Math.abs(Math.sin(p * Math.PI * 3)); f = G.f0; if (Math.abs(Math.sin(p * Math.PI * 3)) < .08 && p > .15) G.shake = .35; }
+    else { G.x0 = x; G.f0 = dir; }
+    c.save(); c.translate(x, y); c.scale(f, 1); drawDunk(c, Ls, t, open); c.restore(); },
+  mosa(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, cyc = 16, u = (t % cyc) / cyc, dir = Math.floor(t / cyc) % 2 ? -1 : 1, L = w * 1.9;
+    if (!A) { const x = dir > 0 ? lerp(-L * .7, w + L * .7, u) : lerp(w + L * .7, -L * .7, u); c.save(); c.translate(x, h * .58 + Math.sin(t * .35) * 24); c.scale(dir, 1); drawMosa(c, L, t, Math.max(0, Math.sin(t * .7)) * .2); c.restore(); return; }
+    const by = lerp(-60, h * .34, easeOut(Math.min(1, p / .33))), gone = p > .53;
+    if (!gone) { c.strokeStyle = 'rgba(160,160,150,.7)'; c.lineWidth = 2; c.beginPath(); c.moveTo(w * .5, 0); c.lineTo(w * .5, by - 30); c.stroke();
+      c.save(); c.translate(w * .5, by); c.rotate(Math.PI / 2 + Math.sin(t * 2) * .05); c.fillStyle = '#7a8088'; c.beginPath(); c.ellipse(0, 0, 60, 16, 0, 0, TAU); c.fill(); c.beginPath(); c.moveTo(-56, 0); c.lineTo(-80, -16); c.lineTo(-76, 14); c.fill(); c.beginPath(); c.moveTo(4, -14); c.lineTo(-8, -34); c.lineTo(-16, -14); c.fill(); c.restore(); }
+    let my, rot = -Math.PI / 2, op = 0, al = 1; if (p < .33) my = h + L * .6; else if (p < .53) { const q = (p - .33) / .2; my = lerp(h + L * .55, by + L * .5, easeOut(q)); op = q < .75 ? 1 : 0; } else { const q = (p - .53) / .47; my = lerp(by + L * .5, h + L * .7, easeIn(q)); rot += q * .5; al = 1 - q * .6; if (!G.bit) { G.bit = 1; G.shake = .7; for (let i = 0; i < 30; i++) G.parts.push({x:w * .5, y:by, vx:rand(-120, 120), vy:rand(-120, 60), t:0, life:rand(.8, 1.6), kind:'debris'}); } }
+    if (p < .3) G.bit = 0;
+    c.save(); c.globalAlpha = al; c.translate(w * .5, my); c.rotate(rot); drawMosa(c, L, t, op); c.restore(); },
+  megalodon(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, cyc = 14, u = (t % cyc) / cyc, dir = Math.floor(t / cyc) % 2 ? -1 : 1, L = w * 2.3;
+    if (!A || p > .9) { const al = A ? 1 - (p - .9) * 10 : 1; const x = dir > 0 ? lerp(-L * .7, w + L * .7, u) : lerp(w + L * .7, -L * .7, u); c.save(); if (A) c.globalAlpha = 1 - al; c.translate(x, h * .46 + Math.sin(t * .3) * 22); c.scale(dir, 1); drawMeg(c, L, t, Math.max(0, Math.sin(t * .6)) * .3); c.restore(); }
+    if (A && p <= .9) { const q = Math.min(1, p / .7), s = lerp(.05, 1.75, easeIn(q)); c.save(); c.globalAlpha = Math.min(1, q * 4) * (p > .78 ? 1 - (p - .78) / .12 : 1); drawMegFront(c, w * .5, h * .46, s, Math.min(1, q * 1.4), w); c.restore();
+      if (p >= .7 && !G.hit) { G.hit = 1; G.shake = 1; G.crack = 3; G.cx = w * .5 + rand(-40, 40); G.cy = h * .44; } }
+    if (!A) G.hit = 0; },
+  scylla(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, k = A ? Math.sin(Math.PI * Math.min(1, p * 1.2)) : 0;
+    c.fillStyle = '#0e1612'; c.beginPath(); c.moveTo(w * .72, 0); c.quadraticCurveTo(w * .66, h * .4, w * .76, h); c.lineTo(w, h); c.lineTo(w, 0); c.fill(); c.fillStyle = '#020403'; c.beginPath(); c.ellipse(w * .9, h * .52, w * .09, h * .16, 0, 0, TAU); c.fill();
+    for (let i = 0; i < 6; i++) { const bx = w * .9, by = h * (.44 + i * .03), ix = w * (.22 + .32 * Math.sin(t * .37 + i * 1.1)), iy = h * (.2 + .6 * (i / 5) + .06 * Math.sin(t * .6 + i * 2)), tx = w * (.5 + (i - 2.5) * .14), ty = h * (.36 + Math.abs(i - 2.5) * .05);
+      const hx = lerp(ix, tx, k), hy = lerp(iy, ty, k), cx = (bx + hx) / 2 + Math.sin(t * .5 + i) * 40, cy = (by + hy) / 2 - 60 + Math.cos(t * .4 + i) * 30;
+      c.lineCap = 'round'; c.strokeStyle = '#26321e'; c.lineWidth = 30; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, hx, hy); c.stroke(); c.strokeStyle = '#3a4a30'; c.lineWidth = 20; c.stroke(); c.strokeStyle = 'rgba(90,110,70,.5)'; c.lineWidth = 3; c.setLineDash([4, 9]); c.stroke(); c.setLineDash([]);
+      const ang = Math.atan2(hy - cy, hx - cx), open = A ? k : Math.max(0, Math.sin(t * 1.3 + i * 1.7)) * .5; c.save(); c.translate(hx, hy); const fl = Math.cos(ang) < 0; c.rotate(fl ? ang + Math.PI : ang); if (fl) c.scale(-1, 1); drawGHead(c, 1.3 + k * .6, open, t, i); c.restore(); } },
+  kraken(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, ex = w * (.5 + .22 * Math.sin(t * .13)), ey = h * (.44 + .08 * Math.sin(t * .17)), R = w * .42, bl = Math.max(0, Math.sin(t * .45) - .96) * 25;
+    c.fillStyle = rg(c, ex, ey, R * .5, ex, ey, R * 1.8, [[0,'#3a1814'],[1,'rgba(20,6,6,0)']]); c.fillRect(0, 0, w, h);
+    c.fillStyle = '#d8c890'; c.beginPath(); c.ellipse(ex, ey, R, R * .62, 0, 0, TAU); c.fill(); c.fillStyle = rg(c, ex, ey, 0, ex, ey, R * .56, [[0,'#3a2a08'],[.35,'#c89a28'],[.8,'#7a5a14'],[1,'#3a2a08']]); c.beginPath(); c.arc(ex, ey, R * .55, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(60,40,6,.5)'; c.lineWidth = 1.5; for (let i = 0; i < 28; i++) { const a = i / 28 * TAU; c.beginPath(); c.moveTo(ex + Math.cos(a) * R * .2, ey + Math.sin(a) * R * .2); c.lineTo(ex + Math.cos(a) * R * .53, ey + Math.sin(a) * R * .53); c.stroke(); }
+    c.fillStyle = '#050302'; c.beginPath(); c.ellipse(ex, ey, R * .34, R * .07 + Math.max(0, Math.sin(t * .3)) * R * .05, 0, 0, TAU); c.fill(); gl(c, ex, ey, R * .7, '#ffb840', .35); c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.ellipse(ex - R * .2, ey - R * .22, R * .08, R * .04, -.4, 0, TAU); c.fill();
+    if (bl > 0) { c.fillStyle = '#2a120e'; c.beginPath(); c.ellipse(ex, ey, R * 1.05, R * .66 * Math.min(1, bl), 0, 0, TAU); c.fill(); }
+    const bases = [[-50, h * .15], [w + 50, h * .28], [-50, h * .82], [w + 50, h * .7]];
+    bases.forEach(([bx, by], i) => { const sl = A ? easeOut(Math.min(1, p * 3)) : 0, tx = lerp(w * (.5 + (bx < 0 ? -.05 : .05) + .2 * Math.sin(t * .2 + i * 1.7)), w * .5 + (bx < 0 ? -30 : 30), sl), ty = lerp(h * (.3 + i * .14 + .06 * Math.sin(t * .3 + i)), h * .45 + (i - 1.5) * 50, sl);
+      const cx = (bx + tx) / 2 + Math.sin(t * .4 + i) * 60, cy = (by + ty) / 2 + Math.cos(t * .5 + i * 2) * 60, n = 22;
+      for (let j = 0; j < n; j++) { const q0 = j / n, q1 = (j + 1) / n, P0 = [(1 - q0) ** 2 * bx + 2 * (1 - q0) * q0 * cx + q0 * q0 * tx, (1 - q0) ** 2 * by + 2 * (1 - q0) * q0 * cy + q0 * q0 * ty], P1 = [(1 - q1) ** 2 * bx + 2 * (1 - q1) * q1 * cx + q1 * q1 * tx, (1 - q1) ** 2 * by + 2 * (1 - q1) * q1 * cy + q1 * q1 * ty];
+        c.strokeStyle = '#6a2a28'; c.lineCap = 'round'; c.lineWidth = 64 * (1 - q0 * .85); c.beginPath(); c.moveTo(P0[0], P0[1]); c.lineTo(P1[0], P1[1]); c.stroke();
+        if (j % 2 === 0) { const dx = P1[0] - P0[0], dy = P1[1] - P0[1], dl = Math.hypot(dx, dy) || 1, o = 20 * (1 - q0 * .85), sx = P0[0] - dy / dl * o, sy = P0[1] + dx / dl * o; c.fillStyle = '#e8b0a8'; dot(c, sx, sy, 9 * (1 - q0 * .8)); c.fillStyle = '#8a3a38'; dot(c, sx, sy, 5 * (1 - q0 * .8)); } } });
+    if (A && p > .33 && !G.hit) { G.hit = 1; G.shake = .9; G.crack = 2.5; G.cx = w * .5; G.cy = h * .45; for (let i = 0; i < 70; i++) G.parts.push({x:w * .5 + rand(-60, 60), y:h * .45 + rand(-60, 60), vx:rand(-90, 90), vy:rand(-90, 90), t:0, life:rand(2.5, 4), kind:'ink'}); }
+    if (!A) G.hit = 0; },
+  charybdis(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, inh = A ? (p < .62 ? easeIn(Math.min(1, p / .3)) : p < .75 ? 1 : 0) : 0, exh = A && p >= .75 ? 1 - (p - .75) / .25 : 0, cx = w * .5, cy = h * .8, br = 1 + Math.sin(t * .6) * .05 + inh * .15, rx = w * .6 * br, ry = h * .1 * br;
+    c.fillStyle = '#0c0a0c'; c.beginPath(); c.moveTo(0, cy - 10); c.quadraticCurveTo(w * .2, cy - 40, w * .5, cy - ry - 30); c.quadraticCurveTo(w * .8, cy - 40, w, cy - 10); c.lineTo(w, h); c.lineTo(0, h); c.fill();
+    c.fillStyle = '#3a1418'; c.beginPath(); c.ellipse(cx, cy, rx * 1.12, ry * 1.25, 0, 0, TAU); c.fill(); c.fillStyle = rg(c, cx, cy, 0, cx, cy, rx, [[0,'#000'],[.6,'#1a0408'],[1,'#5a1a22']]); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
+    for (let k = 0; k < 3; k++) { const s = 1 - k * .14, n = 30 - k * 6; c.fillStyle = k ? 'rgba(220,206,180,' + (.9 - k * .25) + ')' : '#e8dcc4'; for (let i = 0; i < n; i++) { const a = i / n * TAU + k * .2 + t * .05 * (k + 1), x = cx + Math.cos(a) * rx * s, y = cy + Math.sin(a) * ry * s, tx = cx + Math.cos(a) * rx * (s - .14), ty = cy + Math.sin(a) * ry * (s - .14), nx = -Math.sin(a), ny = Math.cos(a); c.beginPath(); c.moveTo(x + nx * 7, y + ny * 2); c.lineTo(tx, ty); c.lineTo(x - nx * 7, y - ny * 2); c.fill(); } }
+    if (inh > 0) { for (let j = 0; j < 12; j++) { const y = cy - j * h * .055, r = rx * (.2 + j * .1), sp = t * (6 - j * .3); c.strokeStyle = 'rgba(180,220,250,' + (.6 * inh * (1 - j / 14)).toFixed(3) + ')'; c.lineWidth = 3.5; c.setLineDash([24, 18]); c.lineDashOffset = -sp * 40; c.beginPath(); c.ellipse(cx, y, r, r * .16, 0, 0, TAU); c.stroke(); } c.setLineDash([]);
+      if (Math.random() < .9) for (let i = 0; i < 3; i++) G.parts.push({kind:'vortex', r:rand(w * .4, w * .9), a:rand(0, TAU), y:rand(h * .1, h * .7), t:0, life:6, fish:Math.random() < .15}); G.shake = Math.max(G.shake, .12 * inh); }
+    if (exh > 0 && !G.blew) { G.blew = 1; G.shake = .6; for (let i = 0; i < 60; i++) G.parts.push({x:cx + rand(-40, 40), y:cy, vx:rand(-160, 160), vy:rand(-320, -120), t:0, life:rand(1, 2), kind:'spray'}); }
+    if (!A) G.blew = 0;
+    for (let i = G.parts.length - 1; i >= 0; i--) { const q = G.parts[i]; if (q.kind !== 'vortex') continue; const dt2 = 1 / 60; q.t += dt2; q.a += dt2 * (1.2 + 260 / Math.max(30, q.r)) * (inh || .2); q.r *= 1 - dt2 * .55 * (inh || .1); q.y += (cy - q.y) * dt2 * .5 * (inh || .1);
+      const x = cx + Math.cos(q.a) * q.r, y = q.y + Math.sin(q.a) * q.r * .16; if (q.r < 20 || q.t > q.life || (!inh && exh)) { G.parts.splice(i, 1); continue; }
+      if (q.fish) { c.save(); c.translate(x, y); c.rotate(q.a + Math.PI / 2); c.fillStyle = 'rgba(40,50,60,.9)'; c.beginPath(); c.ellipse(0, 0, 8, 3, 0, 0, TAU); c.fill(); c.beginPath(); c.moveTo(-7, 0); c.lineTo(-12, -4); c.lineTo(-12, 4); c.fill(); c.restore(); } else { c.fillStyle = 'rgba(210,230,250,.6)'; dot(c, x, y, 1.6); } } },
+  leviathan(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, k = A ? Math.sin(Math.PI * Math.min(1, p * 1.15)) : 0, n = 110, Pt = u => ({x:w * (.5 + .66 * Math.sin(u * .8 + t * .22)), y:h * (.48 + .3 * Math.sin(u * 1.3 + t * .31 + 1))}), Wd = u => h * .1 * (u < .5 ? .65 + u * .7 : 1 - Math.pow(u / 9, 2) * .75);
+    const pts = []; for (let i = 0; i <= n; i++) { const u = i / n * 9; pts.push([Pt(u), Wd(u)]); }
+    for (let i = n - 1; i >= 0; i--) { const [a, wa] = pts[i], [b] = pts[i + 1]; c.strokeStyle = '#0c3442'; c.lineCap = 'round'; c.lineWidth = wa; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.strokeStyle = 'rgba(40,110,120,.5)'; c.lineWidth = wa * .35; c.beginPath(); c.moveTo(a.x, a.y - wa * .18); c.lineTo(b.x, b.y - wa * .18); c.stroke();
+      if (i % 6 === 3) { c.fillStyle = 'rgba(120,230,255,.85)'; dot(c, a.x, a.y + wa * .2, 2.4); gl(c, a.x, a.y + wa * .2, 16 + k * 20, '#4ad8ff', .7 + k); } }
+    const h0 = pts[0][0], h1 = pts[2][0]; let ang = Math.atan2(h0.y - h1.y, h0.x - h1.x); c.save(); c.translate(h0.x, h0.y); const fl = Math.cos(ang) < 0; c.rotate(fl ? ang + Math.PI : ang); if (fl) c.scale(-1, 1); c.scale(1 + k * .5, 1 + k * .5);
+    c.fillStyle = '#0e3a48'; c.beginPath(); c.moveTo(-20, -26); c.quadraticCurveTo(40, -34, 80, -8); c.lineTo(84, 4); c.quadraticCurveTo(40, 20, -20, 26); c.fill(); c.save(); c.translate(30, 6); c.rotate(k * .5); c.fillStyle = '#0a2c38'; c.beginPath(); c.moveTo(-10, 0); c.lineTo(52, 4); c.lineTo(-10, 18); c.fill(); c.restore(); gTeeth(c, 30, 4, 80, 2, 8, 8, false);
+    c.strokeStyle = '#c8d8d0'; c.lineWidth = 5; for (const s of [0, 1]) { c.beginPath(); c.moveTo(-4 + s * 12, -24); c.quadraticCurveTo(-30 + s * 8, -60, -60 + s * 10, -54 - s * 8); c.stroke(); }
+    c.fillStyle = '#bff8ff'; c.beginPath(); c.ellipse(40, -14, 7, 4, -.2, 0, TAU); c.fill(); gl(c, 40, -14, 30, '#7af0ff', 1);
+    if (k > .2) { const bl = 260 * k; c.fillStyle = rg(c, 86, 6, 0, 86, 6, bl, [[0,'rgba(200,250,255,' + (.8 * k).toFixed(3) + ')'],[.3,'rgba(90,220,255,' + (.45 * k).toFixed(3) + ')'],[1,'rgba(40,160,255,0)']]); c.beginPath(); c.moveTo(84, 4); c.lineTo(84 + bl, -bl * .35); c.lineTo(84 + bl, bl * .35); c.fill(); gl(c, 120, 6, 90 * k, '#8af4ff', 1.2 * k); }
+    c.restore(); if (k > .6) G.flash = Math.max(G.flash || 0, (k - .6) * .5); },
+  kun(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, k = A ? Math.sin(Math.PI * p) : 0, S = h * .17, off = (t * 18) % (S * 1.2);
+    c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#06202c'],[.5,'#0e3a48'],[1,'#051820']]); c.fillRect(0, 0, w, h);
+    for (let r = -1; r < h / (S * .7) + 1; r++) for (let i = -2; i < w / (S * 1.2) + 2; i++) { const x = i * S * 1.2 - off + (r % 2) * S * .6, y = r * S * .7; c.fillStyle = r % 2 ? '#0e3442' : '#12404e'; c.beginPath(); c.arc(x, y, S * .62, 0, Math.PI); c.fill(); c.strokeStyle = 'rgba(230,190,80,' + (.25 + k * .6).toFixed(3) + ')'; c.lineWidth = 2 + k * 2; c.beginPath(); c.arc(x, y, S * .62, .2, Math.PI - .2); c.stroke(); }
+    c.strokeStyle = 'rgba(255,214,110,' + (.5 + k * .4).toFixed(3) + ')'; c.lineWidth = 3; c.beginPath(); for (let x = 0; x <= w; x += 8) { const y = h * .52 + Math.sin(x * .012 + t * .4) * 14; x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
+    for (let x = 20; x < w; x += 60) gl(c, x - off * .5 % 60, h * .52 + Math.sin(x * .012 + t * .4) * 14, 30 + k * 40, '#ffcc55', .6 + k);
+    const eyeCyc = 46, eu = (t % eyeCyc) / eyeCyc, ex = lerp(w * 1.6, -w * .6, eu), ey = h * .38, R = h * .2; if (ex > -R && ex < w + R) { c.fillStyle = '#062028'; c.beginPath(); c.ellipse(ex, ey, R * 1.3, R * .95, 0, 0, TAU); c.fill(); c.fillStyle = rg(c, ex, ey, 0, ex, ey, R, [[0,'#1a0e00'],[.3,'#ffd060'],[.75,'#c88a10'],[1,'#3a2800']]); c.beginPath(); c.arc(ex, ey, R, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(120,70,0,.5)'; for (let i = 1; i < 6; i++) { c.beginPath(); c.arc(ex, ey, R * i / 6, 0, TAU); c.stroke(); } c.fillStyle = '#050200'; dot(c, ex, ey, R * .28); gl(c, ex, ey, R * 1.3, '#ffcc44', .6); c.fillStyle = 'rgba(255,255,255,.55)'; dot(c, ex - R * .3, ey - R * .3, R * .08); }
+    if (k > 0) { for (const s of [-1, 1]) { c.save(); c.translate(w * .5, s < 0 ? -20 : h + 20); c.rotate(s * (-.2 + Math.sin(t * 3) * .35 * k)); c.fillStyle = 'rgba(255,210,110,' + (.28 * k).toFixed(3) + ')'; c.beginPath(); c.moveTo(-w * .2, 0); c.quadraticCurveTo(0, s * -h * .5 * k, w * .9, s * -h * .2); c.lineTo(w * .2, 0); c.fill(); c.restore(); }
+      c.fillStyle = 'rgba(255,230,150,' + (.12 * k).toFixed(3) + ')'; for (let i = 0; i < 5; i++) { const x = w * (.1 + i * .2); c.beginPath(); c.moveTo(x - 20, 0); c.lineTo(x + 20, 0); c.lineTo(x + 60, h); c.lineTo(x - 30, h); c.fill(); }
+      if (Math.random() < .6) G.parts.push({x:rand(0, w), y:h + 10, vx:rand(-10, 10), vy:rand(-160, -60), t:0, life:rand(2, 3.5), kind:'gold'}); } },
+};
+const GDUR = {dunkle:2.4, mosa:3.6, megalodon:3.2, scylla:2.8, kraken:4, charybdis:7, leviathan:3.4, kun:5};
+function giantBg(c, w, h, t){ c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#020a16'],[1,'#000206']]); c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(30,60,90,.08)'; c.beginPath(); c.moveTo(w * .35, 0); c.lineTo(w * .6, 0); c.lineTo(w * .9, h); c.lineTo(w * .05, h); c.fill(); }
+function giantFrame(c, w, h, dt, t){ const M = deepUI, D = deepS(), k = D.gcur;
+  if (!k || !GIANTS[k]) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('巨獸觀測窗目前沒有巨獸', w / 2, h * .42); c.font = '13px ' + FONT; c.fillText('潛水探測時有機會撿到巨獸的線索', w / 2, h * .42 + 22); c.fillText('集滿 3 個線索就能在「巨獸檔案」追蹤牠', w / 2, h * .42 + 42); return; }
+  if (!M.gs || M.gs.k !== k) { M.gs = {k, act:null, parts:[], shake:0, crack:0, auto:rand(18, 30), flash:0}; if (!D.gseen) D.gseen = {}; if (!D.gseen[k]) { D.gseen[k] = 1; markDirty(); deepMsg(k === 'kun' ? '北冥有魚，其名為鯤。鯤之大，不知其幾千里也。' : GIANTS[k].name + '：' + GIANTS[k].era + '・點一下畫面看牠的招牌動作'); } }
+  const G = M.gs; G.auto -= dt; if (!G.act && G.auto <= 0) { giantAct(); }
+  if (G.act) { G.act.t += dt; if (G.act.t >= G.act.dur) { G.act = null; G.auto = rand(22, 38); } }
+  GSCENE[k](c, w, h, t, G);
+  for (let i = G.parts.length - 1; i >= 0; i--) { const q = G.parts[i]; if (q.kind === 'vortex') continue; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= q.kind === 'spray' ? .96 : .97; if (q.kind === 'debris' || q.kind === 'spray') q.vy += 90 * dt; if (q.t > q.life) { G.parts.splice(i, 1); continue; } const a = 1 - q.t / q.life;
+    if (q.kind === 'ink') { c.fillStyle = 'rgba(6,2,8,' + (.6 * a).toFixed(3) + ')'; dot(c, q.x, q.y, 20 + q.t * 30); } else if (q.kind === 'gold') { c.fillStyle = 'rgba(255,220,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 2.4); gl(c, q.x, q.y, 10, '#ffcc55', a); }
+    else if (q.kind === 'spray') { c.fillStyle = 'rgba(200,230,255,' + (.7 * a).toFixed(2) + ')'; dot(c, q.x, q.y, 2); } else { c.fillStyle = q.t < .3 ? 'rgba(200,60,60,' + a.toFixed(2) + ')' : 'rgba(120,120,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 3); } }
+  if (G.shake > 0) { M.shake = Math.max(M.shake || 0, G.shake); G.shake = 0; } if (G.crack > 0) G.crack -= dt;
+  if (G.flash > 0) { c.fillStyle = 'rgba(160,230,255,' + Math.min(.5, G.flash).toFixed(3) + ')'; c.fillRect(0, 0, w, h); G.flash = Math.max(0, G.flash - dt); } }
+function giantAct(){ const M = deepUI; if (!M || !M.gs || M.gs.act) return; const k = M.gs.k; M.gs.act = {t:0, dur:GDUR[k] || 3}; M.gs.hit = 0; if (k === 'kun') deepMsg('鯤振起如翼的巨鰭——化而為鳥，其名為鵬'); }
+function giantTap(){ const D = deepS(); if (!D.gcur) { deepPanel('giants'); return; } if (deepUI.gs && !deepUI.gs.act) { giantAct(); state.stats.giantActs = (state.stats.giantActs | 0) + 1; } }
+function giantThumb(cv, k, own){ const c = cv.getContext('2d'), w = cv.width, h = cv.height; c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#06223a'],[1,'#01060e']]); c.fillRect(0, 0, w, h); c.save(); DGL = [];
+  if (k === 'megalodon') { c.translate(w * .5, h * .55); drawMeg(c, w * .95, 1, .4); } else if (k === 'mosa') { c.translate(w * .5, h * .55); drawMosa(c, w * .95, 1, .4); } else if (k === 'dunkle') { c.translate(w * .5, h * .55); drawDunk(c, w * .9, 1, .5); }
+  else if (k === 'scylla') { c.translate(w * .5, h * .55); for (let i = 0; i < 3; i++) { c.save(); c.translate((i - 1) * w * .26, (i % 2) * h * .12 - h * .05); drawGHead(c, w / 230, .6, 1, i); c.restore(); } }
+  else if (k === 'kraken') { c.fillStyle = '#d8c890'; c.beginPath(); c.ellipse(w * .5, h * .5, w * .32, h * .3, 0, 0, TAU); c.fill(); c.fillStyle = '#c89a28'; dot(c, w * .5, h * .5, h * .24); c.fillStyle = '#050302'; c.beginPath(); c.ellipse(w * .5, h * .5, w * .16, h * .05, 0, 0, TAU); c.fill(); c.strokeStyle = '#6a2a28'; c.lineWidth = h * .14; c.lineCap = 'round'; c.beginPath(); c.moveTo(0, h * .9); c.quadraticCurveTo(w * .3, h * .6, w * .45, h * .95); c.stroke(); }
+  else if (k === 'charybdis') { c.fillStyle = '#5a1a22'; c.beginPath(); c.ellipse(w * .5, h * .62, w * .42, h * .2, 0, 0, TAU); c.fill(); c.fillStyle = '#000'; c.beginPath(); c.ellipse(w * .5, h * .62, w * .32, h * .13, 0, 0, TAU); c.fill(); c.fillStyle = '#e8dcc4'; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; c.beginPath(); c.moveTo(w * .5 + Math.cos(a) * w * .38, h * .62 + Math.sin(a) * h * .18); c.lineTo(w * .5 + Math.cos(a) * w * .3, h * .62 + Math.sin(a) * h * .12); c.lineTo(w * .5 + Math.cos(a + .12) * w * .38, h * .62 + Math.sin(a + .12) * h * .18); c.fill(); } }
+  else if (k === 'leviathan') { c.strokeStyle = '#0c3442'; c.lineWidth = h * .2; c.lineCap = 'round'; c.beginPath(); c.moveTo(-10, h * .7); c.bezierCurveTo(w * .3, h * .1, w * .6, h * 1.1, w * .82, h * .4); c.stroke(); c.fillStyle = '#7af0ff'; dot(c, w * .85, h * .36, h * .04); gl(c, w * .85, h * .36, h * .2, '#7af0ff', 1); }
+  else if (k === 'kun') { c.fillStyle = '#12404e'; for (let r = 0; r < 4; r++) for (let i = 0; i < 5; i++) { c.beginPath(); c.arc(i * w * .25 + (r % 2) * w * .12, r * h * .3, h * .2, 0, Math.PI); c.fill(); c.strokeStyle = 'rgba(240,190,80,.6)'; c.lineWidth = 2; c.stroke(); } c.fillStyle = '#ffd060'; dot(c, w * .5, h * .5, h * .18); c.fillStyle = '#050200'; dot(c, w * .5, h * .5, h * .06); }
+  const gls = DGL; DGL = null; c.restore(); c.save(); c.globalCompositeOperation = 'lighter'; for (const g of gls) { const x = g.x * DPR, y = g.y * DPR, r = g.r * DPR; c.fillStyle = rg(c, x, y, 0, x, y, r, [[0,alpha(g.col, .5)],[1,alpha(g.col, 0)]]); c.fillRect(x - r, y - r, r * 2, r * 2); } c.restore();
+  if (!own) { c.save(); c.globalCompositeOperation = 'source-atop'; c.fillStyle = 'rgba(1,6,14,.9)'; c.fillRect(0, 0, w, h); c.restore(); } }
+function giantPanel(kind, ent){ const P = deepUI.el.querySelector('#deepPanel'), D = deepS(); P.innerHTML = ''; deepUI.panel = kind; const head = mk('div', 'dph'), close = mk('button', 'dx', '×'); close.setAttribute('aria-label', '關閉'); close.addEventListener('click', deepPanelClose); const add = (...n) => P.append(...n);
+  if (kind === 'gresult') { const G = GIANTS[ent.k]; head.append(mk('h3', '', ent.ok ? '捕獲成功！' : '讓牠逃走了'), close); add(head);
+    const row = mk('div', 'dinfo'), cv = document.createElement('canvas'); cv.width = 210; cv.height = 140; giantThumb(cv, ent.k, ent.ok); row.append(cv, mk('p', 'dp', ent.ok ? G.name + '被引導進了研究站外的巨獸觀測區。牠每小時會帶來 ' + G.rp + ' 點研究資料，研究所也先發了 ' + (G.rp * 4).toLocaleString('zh-TW') + ' 金幣的發現獎金。' : '潛水艇只拍到' + G.name + '一閃而過的巨大影子，牠就消失在深淵裡了。線索還在，可以再追蹤一次（成功率 ' + Math.round(GSUCC * 100) + '%）。'));
+    add(row); P.classList.add('on'); return; }
+  head.append(mk('h3', '', '巨獸檔案 ' + gOwnN() + '/' + Object.keys(GIANTS).length), close); add(head);
+  add(mk('p', 'dp dim', '巨獸太大了放不進壓力缸，只能在研究站外的觀測區看見牠們。一般的潛水探測有機會撿到線索，集滿 3 個就能派潛水艇追蹤（成功率 ' + Math.round(GSUCC * 100) + '%）。'));
+  for (const k of Object.keys(GIANTS)) { const G = GIANTS[k], own = !!(D.gown || {})[k], n = (D.gclue || {})[k] | 0, locked = G.need && gOwnN() < G.need, row = mk('div', 'item'), info = mk('div'), cv = document.createElement('canvas'); cv.className = 'thumb'; cv.width = 144; cv.height = 96; giantThumb(cv, k, own);
+    const h3 = mk('h3', '', own || n ? G.name : '？？？'); h3.appendChild(mk('span', 'tag', own ? '已捕獲' : locked ? '需先捕獲 ' + G.need + ' 隻巨獸' : '線索 ' + n + '/3'));
+    info.append(h3, mk('p', '', own ? G.era + '・研究 +' + G.rp + '/時・' + G.act : n ? '線索：' + G.clues.slice(0, n).join('、') : DZONES[G.zone].name + '深處的未知巨獸')); if (own) info.appendChild(mk('p', 'sub', G.desc));
+    let b; if (own) { b = mk('button', 'buy alt', D.gcur === k ? '觀看中' : '觀看'); b.disabled = D.gcur === k; b.addEventListener('click', () => { D.gcur = k; D.mode = 'giant'; markDirty(); deepUI.gs = null; deepBtns(); deepPanelClose(); }); }
+    else { b = mk('button', 'buy'); b.innerHTML = '追蹤 ' + coinSvg + G.cost.toLocaleString('zh-TW'); b.disabled = n < 3 || !!D.dive || state.coins < G.cost || locked;
+      b.addEventListener('click', () => { if (n < 3 || D.dive || state.coins < G.cost) return; state.coins -= G.cost; bumpCoins(); D.dive = {z:G.zone, at:Date.now() + G.mins * 6e4, done:false, g:k}; markDirty(); deepPanelClose(); deepMsg('潛水艇出發去' + DZONES[G.zone].name + '追蹤' + G.name + '，約 ' + G.mins + ' 分鐘後回來'); }); }
+    row.append(cv, info, b); add(row); }
+  P.classList.add('on'); }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
   if (S.idraw) return IDRAW[S.idraw](c, P, L, ph, ex);
