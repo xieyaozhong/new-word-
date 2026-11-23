@@ -84,6 +84,16 @@ h4.sec{margin:14px 6px 4px;font-size:14px;color:var(--kelp);font-weight:700}
 .srow div{font-size:14px;line-height:1.35}
 .srow small{display:block;font-size:12px;color:var(--mist)}
 .emap{display:block;width:100%;height:310px;border-radius:18px;margin:0 0 4px;touch-action:manipulation;cursor:pointer}
+.trmsg{margin:2px 6px 10px;padding:9px 11px;border-radius:12px;background:rgba(255,200,90,.13);border:1px solid rgba(255,200,90,.28);color:var(--foam);font-size:13px;line-height:1.5}
+.trnote{margin:6px 6px 10px;font-size:13px;line-height:1.55;color:var(--mist)}
+.trsell{margin:0 2px 12px;padding:10px 10px 12px}
+.trsell h4,.trbox h4{margin:10px 4px 4px;font-size:14px}
+.trrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.trrow .regin{margin:0;flex:1;min-width:0}
+.trcode{width:100%;min-height:84px;box-sizing:border-box;border-radius:12px;border:1px solid var(--rim);background:rgba(255,255,255,.06);color:var(--foam);font:12px/1.45 ui-monospace,Menlo,monospace;padding:8px 10px;word-break:break-all;resize:vertical}
+.trpid{font:700 24px/1.2 ui-monospace,Menlo,monospace;letter-spacing:3px;color:var(--coin)}
+.trpick{display:flex;flex-direction:column;gap:6px;padding:4px 0 8px 84px}
+.trsel{width:100%;box-sizing:border-box;padding:9px 10px;border-radius:12px;border:1px solid var(--rim);background:#123844;color:var(--foam);font:inherit;font-size:15px}
 .regin{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;border:1px solid var(--rim);background:rgba(255,255,255,.08);color:var(--foam);font:inherit;font-size:16px;margin:8px 0}
 .regin::placeholder{color:rgba(236,248,243,.45)}
 .regrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 4px 8px;font-size:14.5px}
@@ -1369,7 +1379,7 @@ function migrate(s){
       full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : clamp(+f.full || 0, 0, 100), grow:clamp(+f.grow || 0, 0, GROW_MAX), seed,
       sex:f.sex === 'm' || f.sex === 'f' ? f.sex : '', m, rare:RARES[f.rare] ? f.rare : '', gen:Math.max(1, (+f.gen || 1) | 0),
       par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
-      pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0, ms:f.ms | 0, zz:ZZ[f.zz] ? f.zz : '', friend:typeof f.friend === 'string' ? f.friend : ''};
+      pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0, ms:f.ms | 0, zz:ZZ[f.zz] ? f.zz : '', friend:typeof f.friend === 'string' ? f.friend : '', tr:f.tr ? 1 : 0};
   };
   s.fish = (Array.isArray(s.fish) ? s.fish : []).filter(f => f && SPECIES[f.sp]).map(cleanFish);
   s.region = storedRegion(s.region);
@@ -1408,7 +1418,11 @@ function migrate(s){
   s.log = (Array.isArray(s.log) ? s.log : []).filter(e => Array.isArray(e) && +e[0] && typeof e[1] === 'string').slice(-150);
   s.rep = {cons:clamp(((s.rep && s.rep.cons) | 0), -100, 100), trade:clamp(((s.rep && s.rep.trade) | 0), -100, 100), star:clamp(((s.rep && s.rep.star) | 0), -100, 100)};
   { const st0 = s.story && typeof s.story === 'object' ? s.story : {}; s.story = {}; for (const k of Object.keys(STORY)) { const q = st0[k]; if (!q) continue; s.story[k] = {ch:clamp(q.ch | 0, 0, STORY[k].ch.length), b:q.b && typeof q.b === 'object' ? q.b : {}, n:Math.max(0, q.n | 0), done:q.done ? 1 : 0, pick:Number.isInteger(q.pick) ? q.pick : -1}; } }
-  s.facGift = {cons:s.facGift && s.facGift.cons ? 1 : 0, trade:s.facGift && s.facGift.trade ? 1 : 0, star:s.facGift && s.facGift.star ? 1 : 0}; s.rush = +s.rush || 0; s.festSeen = s.festSeen && typeof s.festSeen === 'object' ? s.festSeen : {}; s.fwYear = +s.fwYear || 0;
+  s.facGift = {cons:s.facGift && s.facGift.cons ? 1 : 0, trade:s.facGift && s.facGift.trade ? 1 : 0, star:s.facGift && s.facGift.star ? 1 : 0}; s.rush = +s.rush || 0; s.festSeen = s.festSeen && typeof s.festSeen === 'object' ? s.festSeen : {};
+  s.pid = typeof s.pid === 'string' && /^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(s.pid) ? s.pid : genPid();
+  s.redeemed = Array.isArray(s.redeemed) ? s.redeemed.filter(x => typeof x === 'string').slice(-300) : [];
+  s.sentCodes = Array.isArray(s.sentCodes) ? s.sentCodes.filter(x => x && typeof x.code === 'string').slice(0, 10).map(x => ({code:x.code.slice(0, 4000), at:+x.at || 0, to:cleanStr(x.to, 9), what:cleanStr(x.what, 60)})) : [];
+  { const td = s.tradeDone && typeof s.tradeDone === 'object' ? s.tradeDone : {}; s.tradeDone = {}; for (const [k, v] of Object.entries(td)) if (+v > Date.now() - 30 * 864e5) s.tradeDone[k] = +v; } s.fwYear = +s.fwYear || 0;
   s.shrimpDay = typeof s.shrimpDay === 'string' ? s.shrimpDay : ''; s.tipDay = typeof s.tipDay === 'string' ? s.tipDay : '';
   s.catFed = clamp(s.catFed | 0, 0, 3); s.catPet = +s.catPet || 0; s.bless = +s.bless || 0; s.tailDay = typeof s.tailDay === 'string' ? s.tailDay : '';
   s.boxAuto = s.boxAuto === 0 ? 0 : 1; s.moonDay = typeof s.moonDay === 'string' ? s.moonDay : ''; s.moonTip = typeof s.moonTip === 'string' ? s.moonTip : '';
@@ -3402,7 +3416,7 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['trade1','第一筆交易','跟其他玩家完成一次交易', s => [s.stats.trades | 0, 1], 200], ['trade10','魚市大亨','跟其他玩家完成 10 次交易', s => [s.stats.trades | 0, 10], 800], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
@@ -4568,6 +4582,7 @@ function updateHud(dt){
   else if (state.dirt > 45) h = '玻璃長藻了，按「清潔」擦一擦';
   else if (rt.tempMsg) h = rt.tempMsg;
   else if (rt.fish.some(r => r.sp.livefood && r.d.full < 30) && feederStock() <= 0) h = '掠食魚餓了！沒有活餌牠會去抓小魚';
+  else if (TR.giftN) h = '有人送你生物！到「水族店 › 交易」收下';
   else if (storyNow()) h = NPCS[STORY[storyNow()].npc].name + '在水族店，可以推進〈' + STORY[storyNow()].title + '〉劇情，到「水族店 › 來客」看看';
   else if (currentVisitor() && state.seenVisit !== currentVisitor().key) { const N = NPCS[currentVisitor().npc]; h = N.role + ' ' + N.name + ' 在水族店，帶了特別的生物'; }
   else if (state.shopDay !== dayKey()) h = '水族店今天進了新貨，去看看吧';
@@ -4930,17 +4945,18 @@ function renderVisit(v){
 function renderShop(){
   $('#sheetTitle').textContent = '水族店';
   const visitor = currentVisitor(); if (shopTab === 'visit' && !visitor) shopTab = 'today';
-  setTabs([['today','今日']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['deco','造景'],['gear','設備'],['pack','禮包']]), shopTab);
+  setTabs([['today','今日']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易 ●' : '交易']]), shopTab);
   if (shopTab === 'today' && state.shopDay !== dayKey()) { state.shopDay = dayKey(); markDirty(); }
   if (shopTab === 'visit') { state.metNpc = true; if (NPCS[visitor.npc].alien) state.metAlien = true; if (state.seenVisit !== visitor.key) { state.seenVisit = visitor.key; markDirty(); } }
   const keep = sheetBody.scrollTop; sheetBody.innerHTML = '';
   const wallet = mk('div', 'wallet');
-  const extra = shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'gear' ? '設備和主題買了就一直保留' : shopTab === 'deco' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
+  const extra = shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備和主題買了就一直保留' : shopTab === 'deco' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
   wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra);
   sheetBody.appendChild(wallet);
   if (shopTab === 'today') { rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
     rs.append('今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
+  if (shopTab === 'trade') { renderTrade(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'gear') { renderGear(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'deco') { const ps = plantStats(); sheetBody.appendChild(mk('div', 'restock', '水草會慢慢長大，也可能被魚啃、水太髒而枯死。現在茂密度 ' + Math.round(ps.PM / ps.cap * 100) + '%，超過 100% 會擠掉魚的空間，記得用「佈置」點水草修剪。'));
     sheetBody.appendChild(itemRow('fert', 150, (state.fert || 0) > Date.now() ? '液肥效果還有 ' + fmtDur(state.fert - Date.now()) : '', () => { if (state.coins < 150) return; state.coins -= 150; toast(ITEMS.fert.give()); bumpCoins(); markDirty(); renderShop(); }, false)); }
@@ -5139,6 +5155,7 @@ function renderFishCard(){
     bb.addEventListener('click', () => renderPartners(d, bl));
     br.append(bt, bb, bl); box.append(br);
   }
+  { const tb = mk('button', 'btn ghost', '拿去交易（上架、送人或交換碼）'); tb.style.cssText = 'width:100%;margin:10px 0 0'; tb.addEventListener('click', () => { tradePick = d.id; tradeMode = TR.db ? 'sell' : 'code'; tradePrice = String(Math.max(10, rehomeValue(d) * 2)); tradeTab = TR.db ? 'market' : 'code'; tradeMsg = ''; shopTab = 'trade'; openSheet('shop'); }); box.append(tb); }
   const rb = mk('button', 'rehome'); const back = rehomeValue(d); let armed = 0;
   rb.textContent = '送給朋友（拿回 ' + back + ' 金幣）';
   rb.addEventListener('click', () => {
@@ -5422,7 +5439,7 @@ async function writeCloud(){
   if (writeAgain) { writeAgain = false; writeCloud(); }
 }
 function loadLocal(){ try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.v) { saveMode = 'local'; return s; } } catch (_) {} return null; }
-function finishCloud(){ if (cloudDone) return; cloudDone = true; if (pendingWelcome) { showWelcome(pendingWelcome); pendingWelcome = null; } else nextCeleb(); }
+function finishCloud(){ if (cloudDone) return; cloudDone = true; tradeConnect(); if (pendingWelcome) { showWelcome(pendingWelcome); pendingWelcome = null; } else nextCeleb(); }
 async function connectCloud(){
   const cl = window.claude;
   if (!cl || typeof cl.use !== 'function') { finishCloud(); return; }
@@ -5448,6 +5465,250 @@ async function connectCloud(){
   } catch (_) { /* keep playing on this device */ }
   finally { clearTimeout(timer); finishCloud(); }
 }
+
+/* ---------- Trading with other players ----------
+   Online market (Claude version): each seller keeps up to 5 listings in market/<their id>; the creature waits there in escrow.
+   A purchase claims deals/<listing id> while holding a short lease, after re-checking the listing still exists, so two buyers
+   can never both get it. The seller's page later reads the deal, takes the payment and removes the listing.
+   Exchange codes work anywhere (also on GitHub Pages): a one-time code made out to the receiver's player code. */
+const TR = {started:false, db:null, user:null, uid:null, readOnly:false, market:[], deals:{}, mLoaded:false, dLoaded:false, slow:false, err:'', busy:false, collecting:false, tab:uid(), wq:Promise.resolve(), seenGift:{}, giftN:0};
+let tradeTab = 'market', tradePick = '', tradeMode = 'sell', tradePrice = '', tradeWant = '', tradeTo = '', tradeFilter = 'all', tradeCode = '', tradeMsg = '', tradeCodeTo = '', tradeCodeCoins = '', tradeOpenPick = '', tradeHits = [];
+const TRADE_MAX = 5, TRADE_DAYS = 7, CODE_SALT = 'pocket-aquarium-trade-v1';
+function genPid(){ const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let x = ''; for (let i = 0; i < 8; i++) x += A[(Math.random() * A.length) | 0]; return x.slice(0, 4) + '-' + x.slice(4); }
+const tradeSp = sp => { const S = SPECIES[sp]; return !!S && !S.story && !S.myth && !S.hidden && !S.pest && sp !== 'feeder'; };
+function tradeBlock(d){ const S = SPECIES[d.sp];
+  if (!tradeSp(d.sp)) return S.story ? '劇情限定的生物不能交易' : '這種生物不能交易';
+  if (d.box) return '在隔離盒裡，先放出來'; if (d.ich) return '生病了，治好才能交易';
+  if (rt.court && (rt.court.m.d === d || rt.court.f.d === d)) return '正在約會';
+  if (state.eggs.some(e => (e.mom && e.mom.id === d.id) || (e.dad && e.dad.id === d.id))) return '還有寶寶沒孵化';
+  const r = rt.fish.find(x => x.d === d); if (r && (r.mouth || r.guard)) return '正在照顧寶寶';
+  return ''; }
+function roomFor(sp, out){ const S = SPECIES[sp], o = out && SPECIES[out.sp], same = o && o.kind === S.kind ? 1 : 0;
+  if (S.limit && countSp(sp) - (out && out.sp === sp ? 1 : 0) >= S.limit) return '一缸只能養 ' + S.limit + ' 隻' + S.name;
+  if (S.kind === 'inv' ? invCount() - same >= capI() : fishCount() + pendingBabies() - same >= capF()) return S.kind === 'inv' ? '小生物已經滿了' : '魚缸已經滿了';
+  return ''; }
+function packFish(d){ return {sp:d.sp, name:String(d.name || '').slice(0, 8), born:+d.born || Date.now(), grow:+d.grow || 0, seed:d.seed | 0, sex:d.sex === 'm' ? 'm' : 'f', m:d.m | 0, rare:d.rare || '', gen:(d.gen | 0) || 1, g:isInv(d) ? {} : cleanGenes(d.sp, d.g), pers:d.pers || '', aff:Math.round(d.aff || 0)}; }
+function unpackFish(o, own){ if (!o || typeof o !== 'object' || !tradeSp(o.sp)) return null; const S = SPECIES[o.sp];
+  const d = newCreature(o.sp, {grow:clamp(+o.grow || 0, 0, GROW_MAX), sex:o.sex === 'm' ? 'm' : 'f', m:Number.isInteger(o.m) && o.m >= 0 && o.m < PAL[o.sp].length ? o.m : 0, rare:RARES[o.rare] ? o.rare : '', gen:clamp((+o.gen || 1) | 0, 1, 999), g:S.kind === 'fish' ? cleanGenes(o.sp, o.g) : {}});
+  d.seed = (+o.seed || 1) | 0; d.name = cleanStr(o.name, 8) || d.name; d.born = clamp(+o.born || Date.now(), 0, Date.now()); if (d.pers && PERS[o.pers]) d.pers = o.pers;
+  if (own) d.aff = clamp(+o.aff || 0, 0, 100); else d.tr = 1; return d; }
+function tradeDesc(d){ const tr = traitsOf(d).map(t => geneName(t.G, t.lv)), car = carriersOf(d).length, g = growRatio(d);
+  return (isInv(d) ? '' : (d.sex === 'm' ? '公' : '母') + '・') + (g >= 1 ? '成年' : g >= .4 ? '亞成' : '幼年') + (d.gen > 1 ? '・第 ' + d.gen + ' 代' : '') + (tr.length ? '・基因：' + tr.join('、') : '') + (car ? '・帶 ' + car + ' 個隱性基因' : ''); }
+function tradeThumb(d){ const cv = document.createElement('canvas'); cv.className = 'thumb'; cv.width = 144; cv.height = 96; drawFishThumb(cv, d.sp, palOf(d, 0), 1, {puffK:0}, .8, geneFx(d), d.seed); return cv; }
+function tradeErr(e){ if (typeof e === 'string') return e; const c = e && e.code;
+  if (c === 'invalid_argument') { TR.readOnly = true; return '你目前沒有交易的權限，請魚缸的主人把你設成可以編輯的成員'; }
+  if (c === 'quota_exceeded') return '市場的空間滿了，請稍後再試'; if (c === 'resource_exhausted') return '操作太頻繁了，等一下再試';
+  return '連線不穩，交易沒有完成，請再試一次'; }
+function armBtn(b, label, act){ let armed = 0; b.textContent = label; b.addEventListener('click', () => { if (b.disabled) return; if (!armed) { armed = setTimeout(() => { armed = 0; b.textContent = label; }, 3000); b.textContent = '確定？再按一次'; return; } clearTimeout(armed); armed = 0; act(); }); return b; }
+async function copyText(t){ try { await navigator.clipboard.writeText(t); toast('已複製'); return; } catch (_) {}
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;top:-200px'; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (_) {} ta.remove(); toast(ok ? '已複製' : '沒辦法自動複製，請長按代碼手動複製'); }
+async function fillNames(root){ const els = [...root.querySelectorAll('[data-uid]')]; if (!els.length) return; let ps = {};
+  if (TR.user) try { ps = await TR.user.profiles([...new Set(els.map(e => e.dataset.uid))]); } catch (_) {}
+  for (const e of els) { const p = ps[e.dataset.uid]; e.textContent = e.dataset.uid === TR.uid ? '你' : (p && p.name) || '某位玩家'; } }
+const agoText = t => { const m = Math.max(0, (Date.now() - t) / 6e4); return m < 60 ? Math.max(1, Math.round(m)) + ' 分鐘前' : m < 1440 ? Math.round(m / 60) + ' 小時前' : Math.round(m / 1440) + ' 天前'; };
+
+async function tradeConnect(){ if (TR.started) return; TR.started = true; const cl = window.claude;
+  if (!cl || typeof cl.use !== 'function') { TR.err = 'none'; tradeRefresh(); return; }
+  try {
+    const [user, db] = await Promise.all([cl.use('user').catch(() => null), cl.use('db').catch(() => null)]);
+    if (!user || !db) { TR.err = 'none'; tradeRefresh(); return; }
+    const id = await user.id(); if (!id) { TR.err = 'noid'; tradeRefresh(); return; }
+    TR.user = user; TR.db = db; TR.uid = id; if (await user.can('data.write') === false) TR.readOnly = true;
+    const slow = setTimeout(() => { if (!TR.mLoaded || !TR.dLoaded) { TR.slow = true; tradeRefresh(); } }, 10000);
+    db.collection('market').onSnapshot(q => { TR.market = q.docs.map(x => { const v = x.data() || {}; return {seller:x.id, items:Array.isArray(v.items) ? v.items.filter(it => it && typeof it.lid === 'string' && it.f) : []}; }); TR.mLoaded = true; if (TR.dLoaded) { clearTimeout(slow); TR.slow = false; } onTradeData(); }, () => { TR.err = 'down'; tradeRefresh(); });
+    db.collection('deals').onSnapshot(q => { const o = {}; for (const x of q.docs) o[x.id] = x.data() || {}; TR.deals = o; TR.dLoaded = true; if (TR.mLoaded) { clearTimeout(slow); TR.slow = false; } onTradeData(); }, () => { TR.err = 'down'; tradeRefresh(); });
+    tradeRefresh();
+  } catch (_) { TR.err = 'down'; tradeRefresh(); } }
+const myItems = () => ((TR.market.find(M => M.seller === TR.uid) || {}).items || []);
+function tradeOpen(){ const out = [];
+  for (const M of TR.market) { if (M.seller === TR.uid) continue;
+    for (const it of M.items) { if (TR.deals[it.lid] || !tradeSp(it.f.sp) || (it.want && !tradeSp(it.want)) || (it.to && it.to !== TR.uid)) continue; out.push(Object.assign({seller:M.seller}, it)); } }
+  return out.sort((a, b) => (+b.at || 0) - (+a.at || 0)); }
+function onTradeData(){ if (!TR.mLoaded || !TR.dLoaded) return;
+  const gifts = tradeOpen().filter(L => L.to === TR.uid); TR.giftN = gifts.length;
+  for (const L of gifts) if (!TR.seenGift[L.lid]) { TR.seenGift[L.lid] = 1; if (!(sheetKind === 'shop' && shopTab === 'trade')) toast('有人送你一隻' + SPECIES[L.f.sp].name + '！到「水族店 › 交易」收下'); }
+  tradeHousekeep(); tradeRefresh(); }
+function writeMine(items){ const run = async () => { await TR.db.doc('market/' + TR.uid).set({items, upd:Date.now()}); let M = TR.market.find(x => x.seller === TR.uid); if (!M) TR.market.push(M = {seller:TR.uid, items:[]}); M.items = items; };
+  const p = TR.wq.then(run, run); TR.wq = p.catch(() => {}); return p; }
+const removeMine = lid => writeMine(myItems().filter(x => x.lid !== lid));
+const leaseOf = ref => ref.acquire({holder:TR.uid + ':' + TR.tab, ttlMs:8000});
+
+/* The seller's side: collect payments for sold listings and bring back listings that waited too long. */
+async function tradeHousekeep(){ if (TR.collecting || TR.readOnly || !TR.db) return;
+  const now = Date.now(), todo = myItems().filter(it => (TR.deals[it.lid] && TR.deals[it.lid].buyer) || now - (+it.at || 0) > TRADE_DAYS * 864e5); if (!todo.length) return;
+  TR.collecting = true; let left = 0; try { for (const it of todo) if (!await tradeSettle(it).catch(() => false)) left++; } finally { TR.collecting = false; tradeRefresh(); }
+  if (left) { clearTimeout(TR.retry); TR.retry = setTimeout(tradeHousekeep, 9000 + Math.random() * 3000); } }
+async function tradeSettle(it){ const ref = TR.db.doc('deals/' + it.lid), ls = await leaseOf(ref); if (!ls.acquired) return false;
+  const ds = await ref.get(), deal = ds.exists ? ds.data() : null, nm = SPECIES[it.f.sp] ? SPECIES[it.f.sp].name : '生物';
+  if (deal && deal.buyer) { if (deal.seller !== TR.uid) return true;
+    if (!state.tradeDone[it.lid]) { const pay = deal.pay || {}; let got = null;
+      if (pay.f) { got = unpackFish(pay.f); if (got) { const why = roomFor(got.sp); if (why) { tradeMsg = '有人用' + SPECIES[got.sp].name + '跟你換了「' + it.f.name + '」，可是' + why + '。騰出空間後會自動收下。'; return false; } } }
+      const c = clamp(pay.c | 0, 0, 1e7); if (got) addCreature(got); if (c) { state.coins += c; bumpCoins(); }
+      state.tradeDone[it.lid] = Date.now(); state.stats.trades = (state.stats.trades | 0) + 1; markDirty();
+      logEv('「' + it.f.name + '」（' + nm + '）' + (got ? '換到了 ' + got.name + '（' + SPECIES[got.sp].name + '）' : c ? '在市場賣了 ' + c + ' 金幣' : '送到新主人家了'));
+      celebrate(got ? {kind:'fish', d:got, sp:got.sp, tier:Math.max(1, tierOf(got)), head:'交易', title:'交換成功！', text:'「' + it.f.name + '」（' + nm + '）換到了 ' + labelOf(got) + '「' + got.name + '」，已經放進魚缸了。'}
+        : {kind:'coins', amount:c, tier:1, head:'交易', title:c ? '賣出去了！' : '對方收下了', text:c ? '「' + it.f.name + '」（' + nm + '）在市場賣了 ' + c.toLocaleString('zh-TW') + ' 金幣。' : '「' + it.f.name + '」（' + nm + '）已經到新主人家了。'}); }
+    await removeMine(it.lid); await ref.delete(); return true; }
+  if (!deal && Date.now() - (+it.at || 0) > TRADE_DAYS * 864e5) { const d = unpackFish(it.f, true); if (!d || roomFor(d.sp)) return false;
+    await removeMine(it.lid); addCreature(d); markDirty(); toast(d.name + ' 上架 7 天沒有成交，回到你的魚缸了'); logEv(d.name + ' 從市場回到魚缸'); }
+  return true; }
+
+async function tradePost(d){ if (TR.busy || !TR.db) return; if (TR.readOnly) { toast(tradeErr({code:'invalid_argument'})); return; }
+  const b = tradeBlock(d); if (b) { toast(b); return; } if (myItems().length >= TRADE_MAX) { toast('最多同時上架 ' + TRADE_MAX + ' 隻'); return; }
+  let price = 0, want = '', to = '';
+  if (tradeMode === 'sell') { price = Math.floor(+tradePrice || 0); if (!(price >= 1 && price <= 999999)) { toast('價格要在 1 到 999,999 金幣之間'); return; } }
+  else if (tradeMode === 'swap') { want = tradeWant; if (!tradeSp(want)) { toast('先選一種想換的生物'); return; } }
+  else { to = tradeTo; if (!to || to === TR.uid) { toast('先選一位要送的玩家'); return; } }
+  const it = {lid:uid() + uid(), f:packFish(d), price, want, to, at:Date.now()};
+  TR.busy = true; tradeRefresh();
+  try { await writeMine(myItems().concat([it])); removeCreature(d); tradePick = ''; tradeTab = 'mine'; markDirty();
+    logEv(to ? '把 ' + d.name + '（' + SPECIES[d.sp].name + '）送給其他玩家' : '把 ' + d.name + '（' + SPECIES[d.sp].name + '）放到市場' + (price ? '賣 ' + price + ' 金幣' : '換' + SPECIES[want].name));
+    toast(to ? '送出去了，等對方收下' : '上架了！成交時會通知你'); }
+  catch (e) { toast(tradeErr(e)); } finally { TR.busy = false; if (sheetKind === 'shop' && shopTab === 'trade') renderShop(); } }
+function tradeCheckBuy(L, give){
+  if (L.to) { if (L.to !== TR.uid) return '這是送給別人的'; }
+  else if (L.want) { if (!give || give.sp !== L.want || !state.fish.includes(give)) return '要用一隻' + SPECIES[L.want].name + '來換'; const b = tradeBlock(give); if (b) return give.name + '：' + b; }
+  else if (state.coins < (L.price | 0)) return '金幣不夠';
+  return roomFor(L.f.sp, L.want ? give : null); }
+async function tradeBuy(L, give){ if (TR.busy || !TR.db) return; if (TR.readOnly) { toast(tradeErr({code:'invalid_argument'})); return; }
+  const pre = tradeCheckBuy(L, give); if (pre) { toast(pre); return; }
+  TR.busy = true; tradeRefresh(); const ref = TR.db.doc('deals/' + L.lid);
+  try { const ls = await leaseOf(ref); if (!ls.acquired) throw '有人正在交易這一隻，等一下再試';
+    const ds = await ref.get(); if (ds.exists) throw '慢了一步，已經被別人換走了';
+    const ms = await TR.db.doc('market/' + L.seller).get(), cur = (((ms.exists && ms.data()) || {}).items || []).find(x => x && x.lid === L.lid);
+    if (!cur) throw '賣家已經把牠收回去了';
+    const L2 = Object.assign({seller:L.seller}, cur), pre2 = tradeCheckBuy(L2, give); if (pre2) throw pre2;
+    const d = unpackFish(cur.f); if (!d) throw '這隻生物沒辦法辨識';
+    const pay = cur.to ? {} : cur.want ? {f:packFish(give)} : {c:cur.price | 0};
+    await ref.set({lid:L.lid, seller:L.seller, buyer:TR.uid, pay, at:Date.now()});
+    TR.deals[L.lid] = {lid:L.lid, seller:L.seller, buyer:TR.uid, pay};
+    if (pay.c) { state.coins -= pay.c; bumpCoins(); } if (pay.f) removeCreature(give); addCreature(d); tradeOpenPick = '';
+    state.stats.trades = (state.stats.trades | 0) + 1; markDirty();
+    logEv((cur.to ? '收到其他玩家送的 ' : pay.f ? '用 ' + give.name + ' 換到 ' : '在市場買了 ') + d.name + '（' + SPECIES[d.sp].name + '）');
+    celebrate({kind:'fish', d, sp:d.sp, tier:Math.max(1, tierOf(d)), head:'交易', title:cur.to ? '收到禮物！' : '交易成功！', text:labelOf(d) + '「' + d.name + '」' + (isInv(d) ? '' : (d.sex === 'm' ? '・公' : '・母')) + '，已經放進魚缸了。' + (pay.c ? '付了 ' + pay.c.toLocaleString('zh-TW') + ' 金幣。' : '')}); }
+  catch (e) { toast(tradeErr(e)); } finally { TR.busy = false; TR.giftN = tradeOpen().filter(x => x.to === TR.uid).length; tradeRefresh(); } }
+async function tradeCancel(it){ if (TR.busy || !TR.db) return; const d = unpackFish(it.f, true); if (!d) return;
+  const why = roomFor(d.sp); if (why) { toast(why + '，先騰出空間再收回'); return; }
+  TR.busy = true; tradeRefresh(); const ref = TR.db.doc('deals/' + it.lid); let sold = false;
+  try { const ls = await leaseOf(ref); if (!ls.acquired) throw '有人正在交易這一隻，等一下再試';
+    const ds = await ref.get(); if (ds.exists && (ds.data() || {}).buyer) { TR.deals[it.lid] = ds.data(); sold = true; throw '牠剛剛成交了！正在結算'; }
+    await removeMine(it.lid); addCreature(d); markDirty(); toast(d.name + ' 回到你的魚缸了'); logEv(d.name + ' 從市場收回'); }
+  catch (e) { toast(tradeErr(e)); } finally { TR.busy = false; tradeRefresh(); if (sold) setTimeout(tradeHousekeep, 200); } }
+
+/* Exchange codes: AQ1.<base64url JSON>.<check>. Made out to one player code and redeemable once. */
+const b64e = t => { let bin = ''; for (const x of new TextEncoder().encode(t)) bin += String.fromCharCode(x); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const b64d = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const bin = atob(t), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); };
+function makeCode(o){ const body = b64e(JSON.stringify(o)); return 'AQ1.' + body + '.' + hashStr(body + CODE_SALT).toString(36); }
+function readCode(t){ const m = String(t || '').replace(/\s+/g, '').match(/AQ1\.([A-Za-z0-9_-]+)\.([a-z0-9]+)/); if (!m || hashStr(m[1] + CODE_SALT).toString(36) !== m[2]) return null; try { const o = JSON.parse(b64d(m[1])); return o && typeof o === 'object' ? o : null; } catch (_) { return null; } }
+const normPid = t => { const x = String(t || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return x.length === 8 ? x.slice(0, 4) + '-' + x.slice(4) : ''; };
+function sendCode(d){ const to = normPid(tradeCodeTo), coins = Math.max(0, Math.floor(+tradeCodeCoins || 0));
+  if (!to) return '請輸入對方的 8 碼玩家碼'; if (to === state.pid) return '不能送給自己';
+  if (coins > state.coins) return '金幣不夠'; if (d) { const b = tradeBlock(d); if (b) return b; } if (!d && !coins) return '選一隻生物，或輸入要送的金幣';
+  const o = {v:1, id:uid() + uid(), from:state.pid, to, f:d ? packFish(d) : null, c:coins, at:Date.now()}, code = makeCode(o);
+  const what = (d ? d.name + '（' + SPECIES[d.sp].name + '）' : '') + (coins ? (d ? '＋' : '') + coins + ' 金幣' : '');
+  if (d) removeCreature(d); if (coins) { state.coins -= coins; bumpCoins(); }
+  state.sentCodes.unshift({code, at:o.at, to, what}); state.sentCodes = state.sentCodes.slice(0, 10); tradePick = ''; tradeCode = code; tradeCodeCoins = '';
+  logEv('產生交換碼，把' + what + '送給玩家 ' + to); markDirty(); return ''; }
+function redeemCode(t){ const o = readCode(t);
+  if (!o || o.v !== 1 || typeof o.id !== 'string') return '這不是有效的交換碼，可能少複製了一段';
+  if (o.to !== state.pid) return '這組交換碼是給玩家碼 ' + cleanStr(String(o.to), 9) + ' 的，你的玩家碼是 ' + state.pid;
+  if (state.redeemed.includes(o.id)) return '這組交換碼已經收過了'; if (o.from === state.pid) return '不能收自己送出的交換碼';
+  let d = null; if (o.f) { d = unpackFish(o.f); if (!d) return '交換碼裡的生物沒辦法辨識'; const why = roomFor(d.sp); if (why) return why + '，先騰出空間再收'; }
+  const c = clamp(o.c | 0, 0, 1e7); if (!d && !c) return '這組交換碼是空的';
+  state.redeemed.push(o.id); state.redeemed = state.redeemed.slice(-300); if (d) addCreature(d); if (c) { state.coins += c; bumpCoins(); }
+  state.stats.trades = (state.stats.trades | 0) + 1; markDirty();
+  logEv('用交換碼收到' + (d ? ' ' + d.name + '（' + SPECIES[d.sp].name + '）' : '') + (c ? (d ? ' 和 ' : ' ') + c + ' 金幣' : ''));
+  celebrate(d ? {kind:'fish', d, sp:d.sp, tier:Math.max(1, tierOf(d)), head:'交換碼', title:'收到了！', text:labelOf(d) + '「' + d.name + '」已經放進魚缸了。' + (c ? '還附上 ' + c.toLocaleString('zh-TW') + ' 金幣。' : '')} : {kind:'coins', amount:c, tier:1, head:'交換碼', title:c.toLocaleString('zh-TW') + ' 金幣', text:'朋友送你的金幣已經放進錢包了。'});
+  return ''; }
+
+/* ----- trade UI (水族店 › 交易) ----- */
+function renderTrade(){ if (!TR.started) tradeConnect();
+  const seg = mk('div', 'opick'); for (const [k, n] of [['market', '線上市場' + (TR.giftN ? ' ●' : '')], ['mine', '我的上架'], ['code', '交換碼']]) { const b = mk('button', 'chipbtn' + (tradeTab === k ? ' on' : ''), n); b.addEventListener('click', () => { tradeTab = k; tradeMsg = ''; tradeCode = ''; renderShop(); }); seg.appendChild(b); }
+  sheetBody.appendChild(seg); if (tradeMsg) sheetBody.appendChild(mk('p', 'trmsg', tradeMsg));
+  const d = tradePick ? state.fish.find(f => f.id === tradePick) : null; if (tradePick && !d) tradePick = '';
+  if (d && tradeTab !== 'code') renderSellForm(d);
+  const box = mk('div', 'trbox'); box.id = 'trBox'; sheetBody.appendChild(box); fillTradeBox(box); }
+function tradeRefresh(){ if (sheetKind !== 'shop' || shopTab !== 'trade') return; const box = document.getElementById('trBox'); if (box) fillTradeBox(box);
+  const sb = document.getElementById('trPost'); if (sb) sb.disabled = TR.busy || TR.readOnly; }
+function fillTradeBox(box){ box.innerHTML = ''; if (tradeTab === 'code') renderCodeTab(box); else if (!TR.db) box.appendChild(mk('p', 'trnote', tradeOfflineText())); else { if (TR.readOnly) box.appendChild(mk('p', 'trmsg', '你目前只有檢視的權限，可以逛市場，但不能上架或交易。請魚缸的主人在分享設定裡把你設成可以編輯的成員。')); if (tradeTab === 'mine') renderMine(box); else renderMarket(box); } fillNames(box); }
+function tradeOfflineText(){ return !TR.started || (!TR.err && !TR.db) ? '正在連線到市場…' : TR.err === 'noid' ? '要登入 Claude 才能用線上市場。現在可以先用「交換碼」跟朋友交易。' : TR.err === 'down' ? '暫時連不上市場，等一下再試。現在可以先用「交換碼」跟朋友交易。' : '線上市場要在 Claude 上打開這個遊戲才能用。在這裡可以用「交換碼」跟朋友交易：把你的玩家碼給朋友，或輸入朋友的玩家碼送東西給他。'; }
+function renderSellForm(d){ const w = mk('div', 'req trsell'), S = SPECIES[d.sp];
+  const row = mk('div', 'item'); row.style.borderTop = '0'; const info = mk('div'), h3 = mk('h3', '', d.name); h3.appendChild(mk('span', 'tag', S.name)); info.append(h3, mk('p', '', tradeDesc(d)));
+  const x = mk('button', 'chipbtn', '先不要'); x.addEventListener('click', () => { tradePick = ''; renderShop(); }); row.append(tradeThumb(d), info, x); w.appendChild(row);
+  const bl = tradeBlock(d); if (bl) { w.appendChild(mk('p', 'trnote', '這隻現在不能交易：' + bl)); sheetBody.appendChild(w); return; }
+  if (!TR.db) { w.appendChild(mk('p', 'trnote', '線上市場要在 Claude 上打開才能用，可以改用交換碼送給朋友。')); const cb = mk('button', 'btn', '用交換碼送出'); cb.addEventListener('click', () => { tradeTab = 'code'; renderShop(); }); w.appendChild(cb); sheetBody.appendChild(w); return; }
+  const modes = mk('div', 'opick'); modes.style.padding = '4px 0 6px';
+  for (const [k, n] of [['sell', '賣金幣'], ['swap', '換一隻'], ['gift', '送給玩家']]) { const b = mk('button', 'chipbtn' + (tradeMode === k ? ' on' : ''), n); b.addEventListener('click', () => { tradeMode = k; renderShop(); }); modes.appendChild(b); }
+  w.appendChild(modes);
+  if (tradeMode === 'sell') { const r = mk('div', 'trrow'), inp = document.createElement('input'); inp.className = 'regin'; inp.type = 'number'; inp.inputMode = 'numeric'; inp.min = '1'; inp.max = '999999'; inp.value = tradePrice; inp.setAttribute('aria-label', '價格'); inp.addEventListener('input', () => { tradePrice = inp.value; });
+    r.append(inp, mk('span', '', '金幣')); w.append(r, mk('p', 'trnote', '參考：送給朋友只能拿回 ' + rehomeValue(d) + ' 金幣。基因越多、越稀有，其他玩家越願意出高價。')); }
+  else if (tradeMode === 'swap') { const sel = document.createElement('select'); sel.className = 'trsel'; sel.setAttribute('aria-label', '想換的生物'); sel.appendChild(new Option('選一種想換的生物', ''));
+    const ks = Object.keys(SPECIES).filter(k => tradeSp(k) && (state.dex[k] || !SPECIES[k].alien)).sort((a, b) => SPECIES[a].name.localeCompare(SPECIES[b].name, 'zh-Hant'));
+    for (const k of ks) sel.appendChild(new Option(SPECIES[k].name + (SPECIES[k].kind === 'inv' ? '（小生物）' : ''), k)); sel.value = tradeWant; sel.addEventListener('change', () => { tradeWant = sel.value; });
+    w.append(sel, mk('p', 'trnote', '對方要拿一隻這個品種的生物來換，公母、大小和基因都不限。')); }
+  else { const r = mk('div', 'trrow'), inp = document.createElement('input'); inp.className = 'regin'; inp.placeholder = '輸入名字搜尋同事'; inp.setAttribute('aria-label', '搜尋玩家'); const hits = mk('div', 'opick'); hits.style.padding = '2px 0 4px';
+    const people = () => { const ids = [...new Set(TR.market.map(M => M.seller).concat(Object.values(TR.deals).map(x => x.buyer)).filter(id => id && id !== TR.uid))]; return ids; };
+    const draw = () => { hits.innerHTML = ''; const ids = [...new Set(tradeHits.concat(people()))].slice(0, 12);
+      for (const id of ids) { const b = mk('button', 'chipbtn' + (tradeTo === id ? ' on' : '')), sp = mk('span'); sp.dataset.uid = id; b.appendChild(sp); b.addEventListener('click', () => { tradeTo = id; draw(); }); hits.appendChild(b); }
+      if (!ids.length) hits.appendChild(mk('span', 'trnote', '還沒有找到其他玩家。也可以改用「交換碼」送。')); fillNames(hits); };
+    const search = async q => { if (!TR.user || !TR.user.search) return; try { const res = await TR.user.search(q); tradeHits = res.filter(p => p && p.id && p.id !== TR.uid).map(p => p.id); } catch (_) { tradeHits = []; } draw(); };
+    inp.addEventListener('focus', () => search(inp.value.trim())); inp.addEventListener('input', () => search(inp.value.trim()));
+    r.appendChild(inp); w.append(r, hits, mk('p', 'trnote', '對方下次打開遊戲，在「交易」就會看到你送的禮物。對方收下前，你都可以收回。')); draw(); }
+  const pb = mk('button', 'btn', tradeMode === 'gift' ? '送出' : '上架'); pb.id = 'trPost'; pb.style.cssText = 'width:100%;margin-top:6px'; pb.disabled = TR.busy || TR.readOnly; pb.addEventListener('click', () => tradePost(d));
+  w.append(pb, mk('p', 'trnote', '上架後牠會先離開魚缸，由市場保管。沒成交前隨時可以收回，7 天沒成交會自動回來。'));
+  sheetBody.appendChild(w); }
+function tradeRow(L, box){ const d = unpackFish(L.f), S = SPECIES[L.f.sp]; if (!d) return; d.name = L.f.name || d.name;
+  const row = mk('div', 'item'), info = mk('div'), h3 = mk('h3', '', d.name); h3.appendChild(mk('span', 'tag', S.name)); if (d.rare) h3.appendChild(mk('span', 'tag sale', RARES[d.rare].name));
+  const who = mk('span'); who.dataset.uid = L.seller; const sub = mk('p', 'sub'); sub.append(L.to ? '來自 ' : '賣家：', who, '・' + agoText(+L.at || Date.now()));
+  info.append(h3, mk('p', '', tradeDesc(d)), sub);
+  const btn = mk('button', 'buy'); const pre = TR.busy || TR.readOnly;
+  if (L.to) { armBtn(btn, '收下', () => tradeBuy(L, null)); btn.disabled = pre || !!roomFor(L.f.sp); }
+  else if (L.want) { btn.textContent = '用' + SPECIES[L.want].name + '換'; btn.disabled = pre; btn.addEventListener('click', () => { tradeOpenPick = tradeOpenPick === L.lid ? '' : L.lid; tradeRefresh(); }); }
+  else { armBtn(btn, (L.price | 0).toLocaleString('zh-TW') + ' 金幣', () => tradeBuy(L, null)); btn.disabled = pre || state.coins < (L.price | 0) || !!roomFor(L.f.sp); }
+  row.append(tradeThumb(d), info, btn); box.appendChild(row);
+  const why = L.want ? '' : roomFor(L.f.sp); if (why && !pre) info.appendChild(mk('p', 'sub', why));
+  if (L.want && tradeOpenPick === L.lid) { const pk = mk('div', 'trpick'), mine = state.fish.filter(f => f.sp === L.want);
+    if (!mine.length) pk.appendChild(mk('p', 'trnote', '你的缸裡沒有' + SPECIES[L.want].name + '。'));
+    for (const f of mine) { const b = mk('button', 'chipbtn'), bl = tradeBlock(f) || roomFor(L.f.sp, f); b.disabled = !!bl || TR.busy; armBtn(b, '交出 ' + f.name + '（' + (isInv(f) ? '' : (f.sex === 'm' ? '公・' : '母・')) + (growRatio(f) >= 1 ? '成年' : '未成年') + (traitsOf(f).length ? '・' + traitsOf(f).map(t => geneName(t.G, t.lv)).join('、') : '') + '）' + (bl ? '：' + bl : ''), () => tradeBuy(L, f)); pk.appendChild(b); }
+    box.appendChild(pk); } }
+function renderMarket(box){
+  if (!TR.mLoaded || !TR.dLoaded) { box.appendChild(mk('p', 'trnote', TR.slow ? '暫時連不上市場，可能是網路不穩，等一下再看看。' : '正在讀取市場…')); return; }
+  const all = tradeOpen(), gifts = all.filter(L => L.to), f = mk('div', 'opick');
+  for (const [k, n] of [['all', '全部'], ['fish', '魚'], ['inv', '小生物'], ['gene', '有基因・稀有色'], ['swap', '想交換']]) { const b = mk('button', 'chipbtn' + (tradeFilter === k ? ' on' : ''), n); b.addEventListener('click', () => { tradeFilter = k; tradeRefresh(); }); f.appendChild(b); }
+  if (gifts.length) { box.appendChild(mk('h4', 'sec', '送給你的（' + gifts.length + '）')); for (const L of gifts) tradeRow(L, box); }
+  const ok = L => { const S = SPECIES[L.f.sp]; return tradeFilter === 'all' || (tradeFilter === 'fish' && S.kind === 'fish') || (tradeFilter === 'inv' && S.kind === 'inv') || (tradeFilter === 'swap' && !!L.want) || (tradeFilter === 'gene' && (!!L.f.rare || Object.keys(L.f.g || {}).length > 0)); };
+  const rest = all.filter(L => !L.to && ok(L)); box.appendChild(mk('h4', 'sec', '市場上的生物（' + all.filter(L => !L.to).length + '）')); box.appendChild(f);
+  if (!rest.length) box.appendChild(mk('p', 'trnote', all.filter(L => !L.to).length ? '這個分類現在沒有東西。' : '市場上還沒有東西。到「我的魚兒」點一隻魚，按「拿去交易」就能上架，讓其他玩家來買或交換。'));
+  for (const L of rest.slice(0, 60)) tradeRow(L, box);
+  box.appendChild(mk('p', 'trnote', '按價格買下或交換時要按兩次確認。交易成功後，賣家下次打開遊戲就會自動收到金幣或交換的生物。')); }
+function renderMine(box){ const mine = myItems();
+  box.appendChild(mk('h4', 'sec', '我的上架（' + mine.length + ' / ' + TRADE_MAX + '）'));
+  if (!mine.length) box.appendChild(mk('p', 'trnote', '你還沒有上架任何生物。到「我的魚兒」點一隻魚，按「拿去交易」。'));
+  for (const it of mine.slice().sort((a, b) => (+b.at || 0) - (+a.at || 0))) { const d = unpackFish(it.f, true); if (!d) continue; d.name = it.f.name || d.name;
+    const row = mk('div', 'item'), info = mk('div'), h3 = mk('h3', '', d.name), dl = TR.deals[it.lid]; h3.appendChild(mk('span', 'tag', SPECIES[d.sp].name));
+    const what = it.to ? (() => { const s2 = mk('p', 'sub'), u = mk('span'); u.dataset.uid = it.to; s2.append('送給 ', u, '，等對方收下'); return s2; })() : mk('p', 'sub', it.want ? '想換一隻' + SPECIES[it.want].name : '售價 ' + (it.price | 0).toLocaleString('zh-TW') + ' 金幣');
+    const left = Math.max(0, TRADE_DAYS * 864e5 - (Date.now() - (+it.at || 0)));
+    info.append(h3, mk('p', '', tradeDesc(d)), what, mk('p', 'sub', dl && dl.buyer ? '已經成交，正在結算…' : '還會上架 ' + fmtDur(left)));
+    const b = mk('button', 'buy'); if (dl && dl.buyer) { b.textContent = '結算中'; b.disabled = true; } else { armBtn(b, '收回', () => tradeCancel(it)); b.disabled = TR.busy || TR.readOnly; }
+    row.append(tradeThumb(d), info, b); box.appendChild(row); } }
+function renderCodeTab(box){
+  box.appendChild(mk('h4', 'sec', '我的玩家碼')); const pr = mk('div', 'trrow'), pid = mk('span', 'trpid', state.pid), cp = mk('button', 'chipbtn', '複製'); cp.addEventListener('click', () => copyText(state.pid)); pr.append(pid, cp); box.appendChild(pr);
+  box.appendChild(mk('p', 'trnote', '把玩家碼給朋友，朋友就能用交換碼送你生物或金幣。交換碼在 Claude 版和網頁版都能用，每組只能收一次，也只有指定的玩家能收。'));
+  box.appendChild(mk('h4', 'sec', '送東西給朋友')); const d = tradePick ? state.fish.find(f => f.id === tradePick) : null;
+  if (tradeCode) { box.appendChild(mk('p', 'trnote', '交換碼做好了！把整段複製傳給朋友，他在「交易 › 交換碼」貼上就能收到。')); const ta = document.createElement('textarea'); ta.className = 'trcode'; ta.readOnly = true; ta.value = tradeCode; ta.addEventListener('focus', () => ta.select());
+    const cb = mk('button', 'btn', '複製交換碼'); cb.style.cssText = 'width:100%;margin:6px 0'; cb.addEventListener('click', () => copyText(tradeCode)); box.append(ta, cb); }
+  else {
+    if (d) { const row = mk('div', 'item'), info = mk('div'), h3 = mk('h3', '', d.name); h3.appendChild(mk('span', 'tag', SPECIES[d.sp].name)); info.append(h3, mk('p', '', tradeDesc(d))); const x = mk('button', 'chipbtn', '不送這隻'); x.addEventListener('click', () => { tradePick = ''; renderShop(); }); row.append(tradeThumb(d), info, x); box.appendChild(row);
+      const bl = tradeBlock(d); if (bl) box.appendChild(mk('p', 'trmsg', '這隻現在不能送：' + bl)); }
+    else box.appendChild(mk('p', 'trnote', '要送生物的話，先到「我的魚兒」點一隻，按「拿去交易」。也可以只送金幣。'));
+    const r1 = mk('div', 'trrow'), to = document.createElement('input'); to.className = 'regin'; to.placeholder = '朋友的玩家碼（例如 AB12-CD34）'; to.maxLength = 12; to.autocapitalize = 'characters'; to.value = tradeCodeTo; to.setAttribute('aria-label', '朋友的玩家碼'); to.addEventListener('input', () => { tradeCodeTo = to.value; }); r1.appendChild(to);
+    const r2 = mk('div', 'trrow'), cn = document.createElement('input'); cn.className = 'regin'; cn.type = 'number'; cn.inputMode = 'numeric'; cn.min = '0'; cn.placeholder = '附上金幣（可以不填）'; cn.value = tradeCodeCoins; cn.setAttribute('aria-label', '附上的金幣'); cn.addEventListener('input', () => { tradeCodeCoins = cn.value; }); r2.append(cn, mk('span', '', '金幣'));
+    const go = mk('button', 'btn'); go.id = 'trGo'; go.style.cssText = 'width:100%;margin:6px 0'; armBtn(go, '產生交換碼', () => { const err = sendCode(d); if (err) toast(err); else toast('交換碼做好了，記得複製給朋友'); renderShop(); });
+    box.append(r1, r2, go, mk('p', 'trnote', '產生交換碼後，生物和金幣會先離開你的魚缸。最近 10 組交換碼會留在下面，弄丟了可以再複製。')); }
+  box.appendChild(mk('h4', 'sec', '收取交換碼')); const ta2 = document.createElement('textarea'); ta2.className = 'trcode'; ta2.placeholder = '把朋友傳來的交換碼整段貼在這裡'; ta2.setAttribute('aria-label', '交換碼');
+  const rb = mk('button', 'btn', '收取'); rb.style.cssText = 'width:100%;margin:6px 0'; rb.addEventListener('click', () => { const err = redeemCode(ta2.value); if (err) toast(err); else { ta2.value = ''; renderShop(); } }); box.append(ta2, rb);
+  if (state.sentCodes.length) { box.appendChild(mk('h4', 'sec', '最近產生的交換碼'));
+    for (const x of state.sentCodes) { const r = mk('div', 'trrow'), t = mk('p', 'trnote', x.what + ' → ' + x.to + '・' + agoText(x.at)); t.style.cssText = 'margin:0;flex:1'; const c = mk('button', 'chipbtn', '複製'); c.addEventListener('click', () => copyText(x.code)); r.append(t, c); box.appendChild(r); } } }
 
 /* ---------- Boot ---------- */
 function initRuntime(){
