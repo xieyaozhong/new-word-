@@ -4510,7 +4510,7 @@ function fbConfig(){ let c = null; try { c = JSON.parse(localStorage.getItem('aq
   return c && DB_URL_RE.test(c.databaseURL || '') ? Object.assign({}, base, {databaseURL:c.databaseURL}) : base; }
 function dbCandidates(cfg){ const p = cfg.projectId, g = p ? ['asia-southeast1.firebasedatabase.app', 'firebaseio.com', 'europe-west1.firebasedatabase.app'].map(h => 'https://' + p + '-default-rtdb.' + h) : [];
   let cached = ''; try { cached = localStorage.getItem('aq-fb-url') || ''; } catch (e) {} return [...new Set([cached, cfg.databaseURL, ...g])].filter(u => u && DB_URL_RE.test(u)); }
-const FB_ERR = {nodb:'找不到線上資料庫，可能還沒建立', rules:'線上資料庫的安全規則還沒發布', 'auth/operation-not-allowed':'Firebase 還沒開啟匿名登入', 'auth/admin-restricted-operation':'Firebase 還沒開啟匿名登入', 'auth/network-request-failed':'網路連不上'};
+const FB_ERR = {nodb:'找不到線上資料庫，可能還沒建立', rules:'線上資料庫的安全規則還沒發布', 'auth/operation-not-allowed':'Firebase 還沒開啟匿名登入', 'auth/configuration-not-found':'Firebase 的 Authentication 還沒啟用（要按「開始使用」並開啟匿名登入）', 'auth/admin-restricted-operation':'Firebase 還沒開啟匿名登入', 'auth/network-request-failed':'網路連不上'};
 function parseDbUrl(t){ const m = String(t || '').match(/https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebasedatabase\.app|firebaseio\.com)/i); return m ? m[0].toLowerCase() : ''; }
 function parseFbConfig(t){ const a = String(t || '').indexOf('{'), b = String(t || '').lastIndexOf('}'); if (a < 0 || b <= a) return null;
   const js = t.slice(a, b + 1).replace(/(^|\s)\/\/[^\n]*/g, '$1').replace(/'/g, '"').replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":').replace(/,\s*}/g, '}');
