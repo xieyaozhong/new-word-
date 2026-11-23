@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "bottles": {
+      ".read": "auth != null",
+      ".indexOn": ["r", "t"],
+      "$id": {
+        ".write": "auth != null && (!newData.exists() || (!data.exists() && newData.child('uid').val() === auth.uid))",
+        ".validate": "!newData.exists() || (newData.hasChildren(['uid', 'nick', 'msg', 't', 'r']) && newData.child('msg').isString() && newData.child('msg').val().length <= 80 && newData.child('nick').isString() && newData.child('nick').val().length <= 12 && newData.child('r').isNumber())"
+      }
+    },
+    "replies": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".write": "auth != null && ((!data.exists() && newData.child('fuid').val() === auth.uid) || (auth.uid === $uid && !newData.exists()))",
+          ".validate": "!newData.exists() || (newData.child('msg').isString() && newData.child('msg').val().length <= 80)"
+        }
+      }
+    },
+    "auctions": {
+      ".read": "auth != null",
+      ".indexOn": ["ends"],
+      "$id": {
+        ".write": "auth != null && (!data.exists() ? newData.child('seller').val() === auth.uid : (newData.exists() ? (newData.child('seller').val() === data.child('seller').val() && newData.child('bid').val() >= data.child('bid').val() && newData.child('start').val() === data.child('start').val()) : (data.child('seller').val() === auth.uid || data.child('bidder').val() === auth.uid)))",
+        ".validate": "!newData.exists() || (newData.hasChildren(['seller', 'fish', 'start', 'bid', 'ends']) && newData.child('bid').isNumber() && newData.child('ends').isNumber())"
+      }
+    },
+    "reports": {
+      "$id": {
+        ".write": "auth != null && !data.exists() && newData.child('by').val() === auth.uid"
+      }
+    }
+  }
+}

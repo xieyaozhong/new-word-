@@ -66,6 +66,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--coin);outline-o
 .mtip{position:absolute;left:24px;right:24px;bottom:calc(env(safe-area-inset-bottom) + 28px);text-align:center;color:rgba(255,255,255,.92);font-size:14.5px;line-height:1.5;transition:opacity .4s;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .evcard{margin:0 4px 10px;padding:11px 13px;border-radius:16px;background:rgba(111,195,255,.1);border:1px solid rgba(111,195,255,.28)}
 .evcard.fest{background:rgba(255,139,116,.12);border-color:rgba(255,139,116,.35)}
+.bnote{margin:8px 2px 10px;padding:13px 14px 10px;border-radius:14px;background:linear-gradient(#f6eed8,#e6d8b4);color:#4a3a22;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.bnote .bfrom{font-size:12.5px;color:#86704c;margin-bottom:4px}.bnote .bmsg{font-size:16px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.bnote .bgift{margin-top:6px;font-size:13px;color:#7a4a1a}.bnote .trbtns{justify-content:flex-start;margin-top:8px}
+.bnote .chipbtn{background:rgba(74,58,34,.1);color:#4a3a22;border-color:rgba(74,58,34,.3)}.bnote .regin{background:rgba(255,255,255,.6);color:#3a2a14;border-color:rgba(74,58,34,.3)}
+.bnote.sent{background:linear-gradient(#e2eef0,#cfe0e4);color:#22404a}.bnote.mail{background:linear-gradient(#eef0e0,#dfe4c8)}
+.bnote .borig{font-size:12.5px;color:#7a6a4a;border-left:3px solid rgba(122,106,74,.4);padding-left:8px;margin:4px 0 6px}
+textarea.regin{min-height:86px;resize:vertical;line-height:1.6}
+.aucst{font-size:12px;color:var(--coin)}
 .evcard.hurt{background:rgba(255,110,100,.1);border-color:rgba(255,110,100,.38)}
 .qpill.inj{display:block;margin-top:5px;border-color:rgba(255,110,100,.65);color:#ffb4a8}
 .qpill.inj[hidden]{display:none}
@@ -1587,6 +1595,10 @@ function migrate(s){
   s.catFed = clamp(s.catFed | 0, 0, 3); s.catPet = +s.catPet || 0; s.bless = +s.bless || 0; s.tailDay = typeof s.tailDay === 'string' ? s.tailDay : '';
   s.boxAuto = s.boxAuto === 0 ? 0 : 1; s.moonDay = typeof s.moonDay === 'string' ? s.moonDay : ''; s.moonTip = typeof s.moonTip === 'string' ? s.moonTip : '';
   s.food = FOODS[s.food] ? s.food : 'pellet'; s.tset = [20, 23, 26, 28].includes(+s.tset) ? +s.tset : 26; s.waferT = +s.waferT || 0;
+  s.nick = cleanStr(s.nick, 10); s.bottle = s.bottle && typeof s.bottle.day === 'string' ? {day:s.bottle.day, thrown:s.bottle.thrown | 0, picked:s.bottle.picked | 0} : null;
+  { const okM = m => m && typeof m.msg === 'string'; s.bottles = Array.isArray(s.bottles) ? s.bottles.filter(okM).slice(-20) : []; s.mail = Array.isArray(s.mail) ? s.mail.filter(okM).slice(-40) : []; s.sent = Array.isArray(s.sent) ? s.sent.filter(okM).slice(-20) : []; }
+  s.bids = s.bids && typeof s.bids === 'object' && !Array.isArray(s.bids) ? Object.fromEntries(Object.entries(s.bids).filter(([k, v]) => k && +v > 0).map(([k, v]) => [k, Math.floor(+v)])) : {};
+  s.myAuc = Array.isArray(s.myAuc) ? s.myAuc.filter(x => typeof x === 'string').slice(-10) : []; s.blocked = Array.isArray(s.blocked) ? s.blocked.filter(x => typeof x === 'string').slice(-100) : [];
   s.tools = Object.fromEntries(TOOLS.filter(k => s.tools && s.tools[k]).map(k => [k, 1]));
   s.fridge = Array.isArray(s.fridge) ? s.fridge.map(cleanIng).filter(B => B && B.steps.length).slice(0, FRIDGE_MAX) : []; s.board = cleanIng(s.board); if (s.board && !s.board.steps.length) s.board = null; s.boardSel = typeof s.boardSel === 'string' ? s.boardSel : '';
   s.inj = s.inj && INJ[s.inj.k] && +s.inj.until > 0 ? {k:s.inj.k, at:+s.inj.at || Date.now(), until:+s.inj.until, sp:SPECIES[s.inj.sp] ? s.inj.sp : 'tilapia', cause:String(s.inj.cause || '')} : null;
@@ -3931,6 +3943,7 @@ const ACHS = [
   ['bgoal1','育種新手','完成一個育種協會目標', s => [s.stats.bgoal | 0, 1], 150], ['bgold','育種名家','完成一次金級育種目標', s => [s.stats.bgGold | 0, 1], 1000], ['bgoal10','育種協會會員','完成 10 個育種協會目標', s => [s.stats.bgoal | 0, 10], 800],
   ['chef1','初次下廚','親手處理一份食材放進冰箱', s => [s.stats.cooked | 0, 1], 200], ['chef20','刀工了得','處理 20 份食材', s => [s.stats.cooked | 0, 20], 1500], ['fugu','河豚師傅','成功完成一次河豚去毒', s => [s.stats.fugu | 0, 1], 1000],
   ['alienchef','宇宙辦桌','處理一份外星食材', s => [s.stats.alienCook | 0, 1], 1200], ['scar','傷痕累累','在廚房受傷 5 次', s => [s.stats.injuries | 0, 5], 300], ['revive','死裡逃生','死掉又活過來', s => [s.stats.deaths | 0, 1], 500],
+  ['bottle1','瓶中信','丟出第一個漂流瓶', s => [s.stats.bottleThrow | 0, 1], 100], ['bottle10','海邊拾荒者','撈到 10 個漂流瓶', s => [s.stats.bottlePick | 0, 10], 500], ['auc1','得標','在線上拍賣標到一隻生物', s => [s.stats.aucWon | 0, 1], 300], ['auc5','拍賣達人','在線上拍賣賣出 5 件', s => [s.stats.aucSold | 0, 5], 1000],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
 function achCheck(){ for (const [id, name, , fn, rw] of ACHS) { if (state.ach[id]) continue; const [v, g] = fn(state); if (v >= g) { state.ach[id] = Date.now(); state.coins += rw; bumpCoins(); markDirty(); toast('🏆 成就達成：' + name + '（+' + rw + ' 金幣）'); logEv('達成成就「' + name + '」'); return; } } }
@@ -4482,6 +4495,219 @@ function renderKitchen(){ const I = injNow(), B = state.board, v = chefHere();
   sheetBody.appendChild(grid);
   sheetBody.appendChild(mk('p', 'foot', '防割手套、絕緣手套、河豚證照和外星防護衣可以大幅降低受傷機率。媽祖保佑期間（媽祖平安符）就算遇到致命意外，也能撿回一命。'));
 }
+
+/* ---------- Online play over Firebase Realtime Database: drift bottles and live auctions ----------
+   To switch it on for every player: paste the web app's firebaseConfig (it must include databaseURL) into FIREBASE_CONFIG,
+   turn on Anonymous sign-in and Realtime Database in the Firebase console, and publish database.rules.json. */
+const FIREBASE_CONFIG = null;
+const FB_VER = '10.12.2', FB = {st:'off', err:'', db:null, api:null, uid:'', p:null, auc:[], aucT:0, prev:new Map(), view:{}, busy:false, settling:false, loading:false, syncT:0, msg:'', armed:''};
+const BOTTLE_DAYS = 7, BOTTLE_THROW = 3, BOTTLE_PICK = 5, AUC_MAX = 3, AUC_FEE = .05, AUC_DUR = [1, 4, 12, 24];
+const BAD_WORDS = ['幹你', '靠北', '靠杯', '智障', '白癡', '去死', '操你', '王八蛋', 'fuck', 'shit'];
+function fbConfig(){ if (FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL) return FIREBASE_CONFIG; try { const c = JSON.parse(localStorage.getItem('aq-firebase') || 'null'); return c && c.apiKey && c.databaseURL ? c : null; } catch (e) { return null; } }
+function parseFbConfig(t){ const a = String(t || '').indexOf('{'), b = String(t || '').lastIndexOf('}'); if (a < 0 || b <= a) return null;
+  const js = t.slice(a, b + 1).replace(/(^|\s)\/\/[^\n]*/g, '$1').replace(/'/g, '"').replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":').replace(/,\s*}/g, '}');
+  try { const c = JSON.parse(js); return c && c.apiKey && c.databaseURL ? c : null; } catch (e) { return null; } }
+function fbStart(){ if (FB.db) return Promise.resolve(FB); if (FB.p) return FB.p; const cfg = fbConfig(); if (!cfg) { FB.st = 'nocfg'; return Promise.resolve(null); }
+  FB.st = 'connecting'; const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/firebase-';
+  FB.p = (async () => { try { const [A, U, D] = await Promise.all(['app', 'auth', 'database'].map(n => import(base + n + '.js')));
+      const app = A.getApps().find(a => a.name === 'aquarium') || A.initializeApp(cfg, 'aquarium'), cred = await U.signInAnonymously(U.getAuth(app));
+      FB.uid = cred.user.uid; FB.db = D.getDatabase(app); FB.api = D; FB.st = 'on'; FB.err = ''; setTimeout(() => fbSync(true), 50); return FB; }
+    catch (e) { FB.st = 'err'; FB.err = String((e && (e.code || e.message)) || e).slice(0, 140); FB.p = null; return null; }
+    finally { fbRerender(); } })();
+  return FB.p; }
+function fbRerender(){ if (sheetKind === 'sea') renderSea(); else if (sheetKind === 'shop' && shopTab === 'auction') renderShop(); else if (sheetKind === 'today') renderToday(); }
+const fbRef = p => FB.api.ref(FB.db, p);
+async function fbGet(p){ const x = await FB.api.get(fbRef(p)); return x.exists() ? x.val() : null; }
+async function fbPush(p, v){ const r = FB.api.push(fbRef(p)); await FB.api.set(r, v); return r.key; }
+const fbSet = (p, v) => FB.api.set(fbRef(p), v);
+async function fbList(p, child, o){ const D = FB.api, cs = [D.orderByChild(child)]; if (o.start != null) cs.push(D.startAt(o.start)); if (o.end != null) cs.push(D.endAt(o.end)); if (o.first) cs.push(D.limitToFirst(o.first)); if (o.last) cs.push(D.limitToLast(o.last));
+  const x = await D.get(D.query(fbRef(p), ...cs)), out = []; x.forEach(ch => { out.push([ch.key, ch.val()]); }); return out; }
+async function fbTx(p, fn){ try { return await FB.api.runTransaction(fbRef(p), fn); } catch (e) { return {committed:false, snapshot:{exists:() => false, val:() => null}, error:e}; } }
+const myNick = () => cleanStr(state.nick, 10) || '魚友' + state.pid.slice(0, 4);
+function fbText(x, n){ let t = cleanStr(String(x == null ? '' : x), n); for (const w of BAD_WORDS) t = t.split(w).join('＊'.repeat(w.length)); return t.replace(/(https?:\/\/|www\.)\S*/gi, '（連結）'); }
+const fbBlocked = u => !!u && state.blocked.includes(u);
+function fbFail(e, what){ FB.msg = what + '失敗了：' + String((e && (e.code || e.message)) || e).slice(0, 80) + '。請稍後再試。'; }
+function fbSync(quiet){ if (!FB.db) return; FB.syncT = Date.now(); fetchMail(quiet).catch(() => {}); aucSettle(quiet).catch(() => {}); }
+function fbTick(){ if (FB.db) { if (Date.now() - FB.syncT > 90e3) fbSync(true); if (sheetKind === 'shop' && shopTab === 'auction' && aucTab === 'live' && Date.now() - FB.aucT > 20e3) aucLoad(); }
+  else if (FB.st === 'off' && fbConfig() && (state.sent.length || state.myAuc.length || Object.keys(state.bids).length)) fbStart(); }
+function nickRow(){ const r = mk('div', 'trrow'), i = document.createElement('input'); i.className = 'regin'; i.maxLength = 10; i.value = myNick(); i.setAttribute('aria-label', '線上暱稱');
+  i.addEventListener('change', () => { state.nick = fbText(i.value, 10); i.value = myNick(); markDirty(); toast('暱稱改成「' + myNick() + '」'); }); r.append(mk('span', 'sub', '線上暱稱'), i); return r; }
+function fbStatusBox(what){ if (FB.db) return false; const c = mk('div', 'req');
+  if (FB.st === 'err') { c.appendChild(mk('p', 'trmsg', '連不上線上資料庫（' + FB.err + '）。Claude 版可能不允許連到外部網站，可以改用網頁版。')); const b = mk('button', 'btn', '重新連線'); b.addEventListener('click', () => { FB.st = 'off'; fbStart(); fbRerender(); }); c.appendChild(b); }
+  else if (!fbConfig()) { c.appendChild(mk('p', 'trnote', what + '要連上 Firebase 線上資料庫才能玩，遊戲作者還沒設定好。'));
+    const det = document.createElement('details'), sm = document.createElement('summary'); sm.textContent = '我是遊戲作者：貼上 firebaseConfig 試用'; det.appendChild(sm);
+    const ta = document.createElement('textarea'); ta.className = 'regin'; ta.placeholder = 'const firebaseConfig = { apiKey: "…", databaseURL: "https://…firebasedatabase.app", … };'; const sb = mk('button', 'btn', '儲存並連線');
+    sb.addEventListener('click', () => { const cfg = parseFbConfig(ta.value); if (!cfg) { toast('看不懂這段設定，要包含 apiKey 和 databaseURL'); return; } localStorage.setItem('aq-firebase', JSON.stringify(cfg)); FB.st = 'off'; fbStart(); fbRerender(); });
+    det.append(ta, sb, mk('p', 'trnote', '這裡貼的設定只存在這台裝置。要讓所有玩家都能用，要把設定寫進 index.html 的 FIREBASE_CONFIG。')); c.appendChild(det); }
+  else { if (FB.st !== 'connecting') fbStart(); c.appendChild(mk('p', 'trnote', '正在連線到線上大海……')); }
+  sheetBody.appendChild(c); return true; }
+
+/* Drift bottles: a short note (optionally with coins or a fish) thrown into a shared sea and picked at random by another player. */
+let seaTab = 'pick', seaDraft = '', seaGift = '', seaCoins = 50, seaReply = '', seaReplyTxt = '';
+function bottleDay(){ const k = dayKey(); if (!state.bottle || state.bottle.day !== k) state.bottle = {day:k, thrown:0, picked:0}; return state.bottle; }
+const mailUnread = () => state.mail.filter(m => !m.r).length;
+const giftText = g => !g ? '' : g.coins ? g.coins + ' 金幣' : g.fish && SPECIES[g.fish.sp] ? '一隻' + SPECIES[g.fish.sp].name + '（' + fbText(g.fish.name, 8) + '）' : '';
+async function throwBottle(){ const B = bottleDay(), msg = fbText(seaDraft, 80); if (FB.busy) return;
+  if (!msg) { toast('先寫點什麼吧'); return; } if (B.thrown >= BOTTLE_THROW) { toast('今天的瓶子丟完了，明天再來'); return; }
+  let gift = null, d = null;
+  if (seaGift === 'coins') { if (state.coins < seaCoins) { toast('金幣不夠'); return; } gift = {coins:seaCoins}; }
+  else if (seaGift.startsWith('f:')) { d = state.fish.find(f => f.id === seaGift.slice(2)); if (!d) { seaGift = ''; renderSea(); return; } const bl = tradeBlock(d); if (bl) { toast(bl); return; } const pf = packFish(d); delete pf.aff; gift = {fish:pf}; }
+  FB.busy = true; FB.msg = ''; renderSea();
+  try { if (!await fbStart()) throw new Error(FB.err || '沒有連線');
+    const rec = {uid:FB.uid, nick:myNick(), msg, t:Date.now(), r:Math.random(), hop:0}; if (gift) rec.gift = gift; const id = await fbPush('bottles', rec);
+    if (gift && gift.coins) { state.coins -= gift.coins; bumpCoins(); } if (d) removeCreature(d);
+    B.thrown++; state.stats.bottleThrow = (state.stats.bottleThrow | 0) + 1; state.sent.push({id, msg, t:rec.t, gift:giftText(gift)}); state.sent = state.sent.slice(-20); seaDraft = ''; seaGift = '';
+    logEv('丟出一個漂流瓶：「' + msg.slice(0, 24) + '」' + (gift ? '，裡面放了' + giftText(gift) : '')); toast('瓶子噗通一聲，漂向大海了……'); markDirty(); }
+  catch (e) { fbFail(e, '丟瓶子'); }
+  finally { FB.busy = false; renderSea(); } }
+async function pickBottle(){ const B = bottleDay(); if (FB.busy) return; if (B.picked >= BOTTLE_PICK) { toast('今天撈夠了，明天再來'); return; }
+  FB.busy = true; FB.msg = ''; renderSea(); let got = null, gid = '';
+  try { if (!await fbStart()) throw new Error(FB.err || '沒有連線');
+    for (let tries = 0; tries < 4 && !got; tries++) { const x = Math.random(), now = Date.now(); let list = await fbList('bottles', 'r', {start:x, first:6}); if (list.length < 6) list = list.concat(await fbList('bottles', 'r', {end:x, last:6}));
+      const mine = v => v.uid === FB.uid || v.ouid === FB.uid || fbBlocked(v.uid) || fbBlocked(v.ouid), cand = [];
+      for (const [k, v] of list) { if (!v || cand.some(c => c[0] === k)) continue; if (now - (+v.t || 0) > BOTTLE_DAYS * 864e5) { fbTx('bottles/' + k, () => null); continue; } if (!mine(v)) cand.push([k, v]); }
+      if (!cand.length) break; const [k] = cand[(Math.random() * cand.length) | 0]; let taken = null;
+      const r = await fbTx('bottles/' + k, cur => { taken = cur || null; return null; }); if (r.committed && taken) { got = taken; gid = k; } }
+    if (got) { B.picked++; state.stats.bottlePick = (state.stats.bottlePick | 0) + 1;
+      const b = {id:gid, from:fbText(got.onick || got.nick, 10) || '無名氏', fuid:String(got.ouid || got.uid || ''), msg:fbText(got.msg, 80), t:+got.t || Date.now(), hop:(got.hop | 0), gift:got.gift && (got.gift.coins > 0 || got.gift.fish) ? {coins:Math.min(500, got.gift.coins | 0) || undefined, fish:got.gift.fish || undefined} : null, taken:false, replied:false};
+      state.bottles.push(b); state.bottles = state.bottles.slice(-20); logEv('撈到 ' + b.from + ' 的漂流瓶：「' + b.msg.slice(0, 24) + '」'); markDirty(); toast('撈到一個瓶子！' + (b.gift ? '裡面好像還裝著東西……' : '')); }
+    else toast('海面上空蕩蕩的，什麼也沒撈到。過一陣子再來看看'); }
+  catch (e) { fbFail(e, '撈瓶子'); }
+  finally { FB.busy = false; renderSea(); } }
+function takeGift(b){ if (!b.gift || b.taken) return; if (b.gift.fish) { const d = unpackFish(b.gift.fish, false); if (!d) { b.taken = true; markDirty(); renderSea(); return; } const why = roomFor(d.sp); if (why) { toast(why); return; } addCreature(d); toast(d.name + '（' + SPECIES[d.sp].name + '）從瓶子裡游進了魚缸！'); logEv('從漂流瓶裡收到 ' + d.name); }
+  else if (b.gift.coins) { state.coins += b.gift.coins; bumpCoins(); toast('瓶子裡有 ' + b.gift.coins + ' 金幣！'); }
+  b.taken = true; markDirty(); renderSea(); }
+async function replyBottle(b){ const msg = fbText(seaReplyTxt, 80); if (!msg || b.replied || !b.fuid || FB.busy) return; FB.busy = true;
+  try { if (!await fbStart()) throw new Error(FB.err); await fbPush('replies/' + b.fuid, {from:myNick(), fuid:FB.uid, msg, orig:b.msg.slice(0, 40), t:Date.now()}); b.replied = true; seaReply = ''; seaReplyTxt = ''; markDirty(); toast('回信寄出去了'); }
+  catch (e) { fbFail(e, '回信'); } finally { FB.busy = false; renderSea(); } }
+async function rethrowBottle(b){ if (FB.busy) return; FB.busy = true;
+  try { if (!await fbStart()) throw new Error(FB.err); const rec = {uid:FB.uid, nick:myNick(), onick:b.from, ouid:b.fuid, msg:b.msg, t:Date.now(), r:Math.random(), hop:(b.hop | 0) + 1}; if (b.gift && !b.taken) rec.gift = b.gift;
+    await fbPush('bottles', rec); state.bottles = state.bottles.filter(x => x !== b); markDirty(); toast('你把瓶子丟回海裡，它又漂走了'); }
+  catch (e) { fbFail(e, '丟回海裡'); } finally { FB.busy = false; renderSea(); } }
+function blockBottle(b){ if (b.fuid && !state.blocked.includes(b.fuid)) state.blocked.push(b.fuid); if (FB.db) fbPush('reports', {by:FB.uid, who:b.fuid, msg:b.msg, t:Date.now()}).catch(() => {});
+  state.bottles = state.bottles.filter(x => x.fuid !== b.fuid); state.mail = state.mail.filter(x => x.fuid !== b.fuid); markDirty(); toast('已經封鎖並檢舉，以後不會再撈到這個人的瓶子'); renderSea(); }
+async function fetchMail(quiet){ if (!FB.db) return 0; const v = await fbGet('replies/' + FB.uid); if (!v) return 0; let n = 0;
+  for (const [k, m] of Object.entries(v)) { if (m && !state.mail.some(x => x.id === k) && !fbBlocked(m.fuid)) { state.mail.push({id:k, from:fbText(m.from, 10) || '無名氏', fuid:String(m.fuid || ''), msg:fbText(m.msg, 80), orig:fbText(m.orig, 40), t:+m.t || Date.now(), r:0}); n++; } fbSet('replies/' + FB.uid + '/' + k, null).catch(() => {}); }
+  state.mail = state.mail.slice(-40); if (n) { markDirty(); logEv('漂流瓶收到 ' + n + ' 封回信'); if (!quiet || sheetKind !== 'sea') toast('🍾 漂流瓶收到 ' + n + ' 封回信！'); fbRerender(); } return n; }
+function bottleNote(b){ const n = mk('div', 'bnote'); n.append(mk('div', 'bfrom', '來自「' + b.from + '」・' + agoText(b.t) + (b.hop ? '・漂流了 ' + b.hop + ' 次' : '')), mk('div', 'bmsg', b.msg));
+  if (b.gift) n.appendChild(mk('div', 'bgift', b.taken ? '（瓶子裡的' + giftText(b.gift) + '已經收下了）' : '瓶子裡還裝著：' + giftText(b.gift)));
+  const bt = mk('div', 'trbtns'); const add = (t, fn, dis) => { const x = mk('button', 'chipbtn', t); x.disabled = !!dis; x.addEventListener('click', fn); bt.appendChild(x); };
+  if (b.gift && !b.taken) add('收下', () => takeGift(b)); if (!b.replied && b.fuid) add(seaReply === b.id ? '取消回信' : '回信', () => { seaReply = seaReply === b.id ? '' : b.id; seaReplyTxt = ''; renderSea(); }); else if (b.replied) add('已回信', () => {}, true);
+  add('丟回海裡', () => rethrowBottle(b), FB.busy); add('封鎖', () => { if (confirmArm('blk' + b.id)) blockBottle(b); else renderSea(); }); add('收起', () => { state.bottles = state.bottles.filter(x => x !== b); markDirty(); renderSea(); });
+  n.appendChild(bt);
+  if (seaReply === b.id) { const ta = document.createElement('textarea'); ta.className = 'regin'; ta.maxLength = 80; ta.placeholder = '寫給「' + b.from + '」的回信（80 字以內）'; ta.value = seaReplyTxt; ta.addEventListener('input', () => { seaReplyTxt = ta.value; });
+    const sb = mk('button', 'chipbtn', '寄出回信'); sb.addEventListener('click', () => replyBottle(b)); n.append(ta, sb); }
+  return n; }
+let armedKey = '', armedT = 0;
+function confirmArm(k){ if (armedKey === k && Date.now() - armedT < 4000) { armedKey = ''; return true; } armedKey = k; armedT = Date.now(); toast('再按一次確定'); return false; }
+function renderSea(){ $('#sheetTitle').textContent = '漂流瓶'; setTabs([['pick', '撈瓶子'], ['throw', '丟瓶子'], ['mail', '信箱' + (mailUnread() ? ' ●' : '')]], seaTab);
+  const keep = sheetBody.scrollTop, B = bottleDay(); sheetBody.innerHTML = '';
+  sheetBody.appendChild(mk('div', 'restock', '把心裡話裝進瓶子丟進大海，會隨機漂到其他玩家手上。今天還能丟 ' + Math.max(0, BOTTLE_THROW - B.thrown) + ' 個、撈 ' + Math.max(0, BOTTLE_PICK - B.picked) + ' 個。瓶子在海上漂 ' + BOTTLE_DAYS + ' 天沒人撈就會沉下去。'));
+  sheetBody.appendChild(nickRow()); if (FB.msg) sheetBody.appendChild(mk('p', 'trmsg', FB.msg));
+  if (fbStatusBox('漂流瓶')) { sheetBody.scrollTop = keep; return; }
+  if (seaTab === 'pick') { const b = mk('button', 'btn', FB.busy ? '在海邊找瓶子……' : B.picked >= BOTTLE_PICK ? '今天撈夠了' : '到海邊撈一個瓶子'); b.disabled = FB.busy || B.picked >= BOTTLE_PICK; b.addEventListener('click', pickBottle); sheetBody.appendChild(b);
+    if (!state.bottles.length) sheetBody.appendChild(mk('p', 'foot', '還沒撈到瓶子。瓶子裡偶爾會有別人送的金幣或小魚。'));
+    for (const x of [...state.bottles].reverse()) sheetBody.appendChild(bottleNote(x)); }
+  else if (seaTab === 'throw') { const ta = document.createElement('textarea'); ta.className = 'regin'; ta.maxLength = 80; ta.placeholder = '想對陌生的魚友說什麼？（80 字以內，不能放連結）'; ta.value = seaDraft; ta.addEventListener('input', () => { seaDraft = ta.value; }); sheetBody.appendChild(ta);
+    const gp = mk('div', 'opick'); for (const [k, n] of [['', '不放東西'], ['coins', '放金幣'], ['fish', '放一隻生物']]) { const on = k === 'fish' ? seaGift.startsWith('f:') || seaGift === 'fish' : seaGift === k, x = mk('button', 'chipbtn' + (on ? ' on' : ''), n); x.addEventListener('click', () => { seaGift = k; renderSea(); }); gp.appendChild(x); } sheetBody.appendChild(gp);
+    if (seaGift === 'coins') { const cp = mk('div', 'opick'); for (const v of [20, 50, 100, 200]) { const x = mk('button', 'chipbtn' + (seaCoins === v ? ' on' : ''), v + ' 金幣'); x.disabled = state.coins < v; x.addEventListener('click', () => { seaCoins = v; renderSea(); }); cp.appendChild(x); } sheetBody.appendChild(cp); }
+    if (seaGift === 'fish' || seaGift.startsWith('f:')) { const list = state.fish.filter(d => !tradeBlock(d)), fp = mk('div', 'opick'); if (!list.length) sheetBody.appendChild(mk('p', 'trnote', '現在沒有可以裝進瓶子的生物。'));
+      for (const d of list) { const x = mk('button', 'chipbtn' + (seaGift === 'f:' + d.id ? ' on' : ''), d.name + '・' + SPECIES[d.sp].name); x.addEventListener('click', () => { seaGift = 'f:' + d.id; renderSea(); }); fp.appendChild(x); } sheetBody.appendChild(fp); }
+    const tb = mk('button', 'btn', FB.busy ? '丟出去了……' : B.thrown >= BOTTLE_THROW ? '今天丟完了' : '裝進瓶子，丟進大海'); tb.disabled = FB.busy || B.thrown >= BOTTLE_THROW || seaGift === 'fish'; tb.addEventListener('click', throwBottle); sheetBody.appendChild(tb);
+    if (state.sent.length) { sheetBody.appendChild(mk('h4', 'sec', '我丟出去的瓶子')); for (const m of [...state.sent].reverse().slice(0, 8)) { const n = mk('div', 'bnote sent'); n.append(mk('div', 'bfrom', agoText(m.t) + (m.gift ? '・裡面放了' + m.gift : '')), mk('div', 'bmsg', m.msg)); sheetBody.appendChild(n); } } }
+  else { const rb = mk('button', 'chipbtn', '收信'); rb.addEventListener('click', () => fetchMail(false).then(n => { if (!n) toast('信箱裡沒有新的回信'); renderSea(); }).catch(e => { fbFail(e, '收信'); renderSea(); })); sheetBody.appendChild(rb);
+    if (!state.mail.length) sheetBody.appendChild(mk('p', 'foot', '還沒有人回信。別人撈到你的瓶子並回信時，信會寄到這裡。'));
+    for (const m of [...state.mail].reverse()) { const n = mk('div', 'bnote mail'); n.append(mk('div', 'bfrom', (m.r ? '' : '🆕 ') + '「' + m.from + '」的回信・' + agoText(m.t))); if (m.orig) n.appendChild(mk('div', 'borig', '你的瓶子：' + m.orig)); n.appendChild(mk('div', 'bmsg', m.msg)); sheetBody.appendChild(n); }
+    if (state.mail.some(m => !m.r)) { for (const m of state.mail) m.r = 1; markDirty(); } }
+  sheetBody.scrollTop = keep; }
+
+/* Live auctions: the fish is held in the auction record, bids hold the bidder's coins until they are outbid, and each side settles their own end when the timer runs out. */
+let aucTab = 'live', aucPick = '', aucStart = '', aucHours = 4, aucOpen = '';
+const minBid = A => (A.n | 0) ? A.bid + Math.max(10, Math.ceil(A.bid * .05)) : A.start;
+function aucPrev(id, A){ if (!FB.prev.has(id)) FB.prev.set(id, unpackFish(A.fish, false)); return FB.prev.get(id); }
+async function aucLoad(){ if (!FB.db || FB.loading) return; FB.loading = true;
+  try { FB.auc = (await fbList('auctions', 'ends', {start:Date.now(), first:40})).filter(([k, A]) => A && A.fish && !fbBlocked(A.seller)); }
+  catch (e) { fbFail(e, '讀取拍賣'); }
+  finally { FB.loading = false; FB.aucT = Date.now(); if (sheetKind === 'shop' && shopTab === 'auction') renderShop(); } }
+async function aucCreate(){ const d = state.fish.find(f => f.id === aucPick), start = Math.floor(+aucStart); if (!d || FB.busy) return; const bl = tradeBlock(d); if (bl) { toast(bl); return; }
+  if (!(start >= 10 && start <= 999999)) { toast('起標價要在 10 到 999,999 金幣之間'); return; } if (state.myAuc.length >= AUC_MAX) { toast('同時最多拍賣 ' + AUC_MAX + ' 件'); return; }
+  FB.busy = true; FB.msg = ''; renderShop();
+  try { if (!await fbStart()) throw new Error(FB.err); const pf = packFish(d); delete pf.aff; const now = Date.now(), rec = {seller:FB.uid, sname:myNick(), fish:pf, start, bid:0, bidder:'', bname:'', n:0, t0:now, ends:now + aucHours * 3.6e6, got:false, paid:false, back:false};
+    const id = await fbPush('auctions', rec); removeCreature(d); state.myAuc.push(id); FB.view[id] = rec; aucPick = ''; aucStart = ''; aucTab = 'mine'; FB.aucT = 0; markDirty();
+    logEv('把 ' + d.name + '（' + SPECIES[d.sp].name + '）送上線上拍賣，起標 ' + start + ' 金幣'); toast(d.name + ' 上架拍賣了，' + aucHours + ' 小時後結標'); }
+  catch (e) { fbFail(e, '上架拍賣'); } finally { FB.busy = false; renderShop(); } }
+async function aucBid(id, amt){ if (FB.busy) return; if (state.coins < amt) { toast('金幣不夠'); return; } FB.busy = true; FB.msg = ''; renderShop(); let why = '';
+  try { if (!await fbStart()) throw new Error(FB.err); await aucSettle(true);
+    if (state.coins < amt) { toast('金幣不夠'); return; }
+    const r = await fbTx('auctions/' + id, A => { if (!A) return A; why = ''; const now = Date.now();
+      if (A.ends <= now) why = '拍賣已經結束了'; else if (A.seller === FB.uid) why = '不能標自己的拍賣'; else if (A.bidder === FB.uid) why = '你已經是最高出價了'; else if (amt < minBid(A)) why = '有人出更高了，現在最少要 ' + minBid(A) + ' 金幣';
+      if (why) return; A.bid = amt; A.bidder = FB.uid; A.bname = myNick(); A.n = (A.n | 0) + 1; if (A.ends - now < 120e3) A.ends = now + 120e3; return A; });
+    const A = r.committed && r.snapshot.exists() ? r.snapshot.val() : null;
+    if (!A || A.bidder !== FB.uid || A.bid !== amt) { toast(why || '出價沒有成功，請再試一次'); FB.aucT = 0; return; }
+    state.coins -= amt; state.bids[id] = amt; FB.view[id] = A; aucOpen = ''; bumpCoins(); markDirty(); logEv('在線上拍賣出價 ' + amt + ' 金幣標 ' + fbText(A.fish.name, 8)); toast('出價成功！被超過時金幣會自動退回'); FB.auc = FB.auc.map(([k, v]) => k === id ? [k, A] : [k, v]); }
+  catch (e) { fbFail(e, '出價'); } finally { FB.busy = false; renderShop(); } }
+async function aucCancel(id){ if (FB.busy) return; FB.busy = true; let back = null;
+  try { const r = await fbTx('auctions/' + id, A => { back = null; if (!A) return A; if (A.seller !== FB.uid || (A.n | 0) > 0 || A.ends <= Date.now()) return; back = A; return null; });
+    if (r.committed && back) { const d = unpackFish(back.fish, true); state.myAuc = state.myAuc.filter(x => x !== id); delete FB.view[id]; if (d) { addCreature(d); toast(d.name + ' 下架回到魚缸了'); } markDirty(); FB.aucT = 0; }
+    else toast('已經有人出價，不能下架了'); }
+  catch (e) { fbFail(e, '下架'); } finally { FB.busy = false; renderShop(); } }
+async function aucSettle(quiet){ if (!FB.db || FB.settling) return; FB.settling = true; let changed = false;
+  try { const now = Date.now();
+    for (const id of Object.keys(state.bids)) { const amt = state.bids[id], A = await fbGet('auctions/' + id); FB.view[id] = A;
+      if (!A || A.bidder !== FB.uid) { delete state.bids[id]; state.coins += amt; changed = true; toast(A ? '「' + fbText(A.fish && A.fish.name, 8) + '」被別人出更高價了，退回 ' + amt + ' 金幣' : '拍賣取消了，退回 ' + amt + ' 金幣'); continue; }
+      if (A.ends > now) continue;
+      if (A.got) { delete state.bids[id]; changed = true; continue; }
+      const d = unpackFish(A.fish, false); if (!d) { delete state.bids[id]; state.coins += amt; changed = true; continue; }
+      if (roomFor(d.sp)) { FB.wait = id; continue; } let ok = false;
+      const r = await fbTx('auctions/' + id, X => { ok = false; if (!X) return X; if (X.got || X.bidder !== FB.uid || X.ends > Date.now()) return; X.got = true; ok = true; return X; });
+      if (r.committed && ok) { addCreature(d); delete state.bids[id]; changed = true; state.stats.aucWon = (state.stats.aucWon | 0) + 1; logEv('線上拍賣得標：用 ' + A.bid + ' 金幣標到 ' + fbText(A.sname, 10) + ' 的 ' + d.name);
+        celebrate({kind:'fish', d, sp:d.sp, tier:2, head:'線上拍賣', title:'得標了！', text:'你用 ' + A.bid.toLocaleString('zh-TW') + ' 金幣標到「' + fbText(A.sname, 10) + '」的 ' + d.name + '（' + labelOf(d) + '），已經游進你的魚缸。'});
+        const X = r.snapshot.val(); if (X && X.paid) fbSet('auctions/' + id, null).catch(() => {}); } }
+    for (const id of [...state.myAuc]) { const A = await fbGet('auctions/' + id); FB.view[id] = A;
+      if (!A) { state.myAuc = state.myAuc.filter(x => x !== id); changed = true; continue; } if (A.ends > now) continue;
+      if ((A.n | 0) > 0) { let ok = false; const r = await fbTx('auctions/' + id, X => { ok = false; if (!X) return X; if (X.paid) return; X.paid = true; ok = true; return X; });
+        if (r.committed && ok) { const net = Math.floor(A.bid * (1 - AUC_FEE)); state.coins += net; state.stats.aucSold = (state.stats.aucSold | 0) + 1; logEv('線上拍賣成交：' + fbText(A.fish.name, 8) + ' 被 ' + fbText(A.bname, 10) + ' 用 ' + A.bid + ' 金幣標走，實拿 ' + net + ' 金幣');
+          celebrate({kind:'coins', amount:net, tier:1, head:'線上拍賣', title:'成交！', text:fbText(A.fish.name, 8) + ' 被「' + fbText(A.bname, 10) + '」用 ' + A.bid.toLocaleString('zh-TW') + ' 金幣標走，扣掉 5% 手續費，拿到 ' + net.toLocaleString('zh-TW') + ' 金幣。'});
+          const X = r.snapshot.val(); if (X && X.got) fbSet('auctions/' + id, null).catch(() => {}); }
+        if (r.committed || A.paid) { state.myAuc = state.myAuc.filter(x => x !== id); changed = true; } }
+      else { const d = unpackFish(A.fish, true); if (d && roomFor(d.sp)) continue; let ok = false;
+        const r = await fbTx('auctions/' + id, X => { ok = false; if (!X) return X; if (X.back || (X.n | 0) > 0) return; ok = true; return null; });
+        if (r.committed && ok) { if (d) { addCreature(d); toast('沒有人出價，' + d.name + ' 回到你的魚缸了'); } state.myAuc = state.myAuc.filter(x => x !== id); changed = true; } } } }
+  finally { FB.settling = false; if (changed) { bumpCoins(); markDirty(); if (!quiet) fbRerender(); else if (sheetKind === 'shop' && shopTab === 'auction') renderShop(); } } }
+function aucRow(id, A){ const d = aucPrev(id, A); if (!d) return null; const wrap = mk('div'), row = mk('div', 'item'), info = mk('div'), h3 = mk('h3', '', d.name), left = A.ends - Date.now(), mine = A.seller === FB.uid, top = A.bidder === FB.uid;
+  h3.appendChild(mk('span', 'tag', SPECIES[d.sp].name)); if (d.rare) h3.appendChild(rareTag(d.rare));
+  info.append(h3, mk('p', '', tradeDesc(d)), mk('p', 'sub', '賣家「' + fbText(A.sname, 10) + '」・' + ((A.n | 0) ? '目前 ' + A.bid.toLocaleString('zh-TW') + ' 金幣（' + A.n + ' 次出價' + (top ? '，你最高' : '') + '）' : '起標 ' + A.start.toLocaleString('zh-TW') + ' 金幣') + '・' + (left > 0 ? '剩 ' + fmtDur(left) : '已結標')));
+  const btn = mk('button', 'buy');
+  if (mine) { btn.textContent = '我的'; btn.disabled = true; } else if (top) { btn.textContent = '領先中'; btn.disabled = true; } else if (left <= 0) { btn.textContent = '已結標'; btn.disabled = true; }
+  else { btn.textContent = aucOpen === id ? '收起' : '出價'; btn.addEventListener('click', () => { aucOpen = aucOpen === id ? '' : id; FB.armed = ''; renderShop(); }); }
+  row.append(tradeThumb(d), info, btn); wrap.appendChild(row);
+  if (aucOpen === id && !mine && !top && left > 0) { const m = minBid(A), pk = mk('div', 'opick'); for (const v of [...new Set([m, Math.ceil(m * 1.1 / 10) * 10, Math.ceil(m * 1.25 / 10) * 10])].filter(v => v >= m)) { const key = id + ':' + v, b = mk('button', 'chipbtn' + (FB.armed === key ? ' on' : ''), (FB.armed === key ? '確定出 ' : '出 ') + v.toLocaleString('zh-TW'));
+      b.disabled = state.coins < v || FB.busy; b.addEventListener('click', () => { if (FB.armed !== key) { FB.armed = key; renderShop(); return; } FB.armed = ''; aucBid(id, v); }); pk.appendChild(b); }
+    wrap.appendChild(pk); wrap.appendChild(mk('p', 'trnote', '出價後金幣會先扣住；被別人超過會自動退回。最後 2 分鐘內有人出價，會延長 2 分鐘。')); }
+  return wrap; }
+function renderAuction(){ sheetBody.appendChild(nickRow()); if (FB.msg) sheetBody.appendChild(mk('p', 'trmsg', FB.msg));
+  if (fbStatusBox('線上拍賣')) return;
+  const seg = mk('div', 'opick'); for (const [k, n] of [['live', '競標中'], ['mine', '我的拍賣・出價' + (state.myAuc.length + Object.keys(state.bids).length ? '（' + (state.myAuc.length + Object.keys(state.bids).length) + '）' : '')], ['sell', '我要拍賣']]) { const b = mk('button', 'chipbtn' + (aucTab === k ? ' on' : ''), n); b.addEventListener('click', () => { aucTab = k; FB.msg = ''; if (k === 'mine') aucSettle(false); renderShop(); }); seg.appendChild(b); } sheetBody.appendChild(seg);
+  if (aucTab === 'live') { if (Date.now() - FB.aucT > 20e3 && !FB.loading) aucLoad();
+    const rb = mk('button', 'chipbtn', FB.loading ? '更新中…' : '重新整理'); rb.addEventListener('click', () => { FB.aucT = 0; aucLoad(); }); sheetBody.appendChild(rb);
+    const list = FB.auc.filter(([k, A]) => A.ends > Date.now()); if (!list.length) sheetBody.appendChild(mk('p', 'foot', FB.loading ? '正在讀取拍賣……' : '現在沒有拍賣品。你可以到「我要拍賣」把自己養的魚送上拍賣台。'));
+    for (const [k, A] of list) { const r = aucRow(k, A); if (r) sheetBody.appendChild(r); }
+    sheetBody.appendChild(mk('p', 'foot', '所有玩家一起競標。結標時出價最高的人得到生物，賣家拿到成交價扣 5% 手續費。結標後打開遊戲就會自動結算。')); }
+  else if (aucTab === 'mine') { sheetBody.appendChild(mk('h4', 'sec', '我的拍賣（同時最多 ' + AUC_MAX + ' 件）'));
+    if (!state.myAuc.length) sheetBody.appendChild(mk('p', 'foot', '目前沒有拍賣中的生物。'));
+    for (const id of state.myAuc) { const A = FB.view[id]; if (!A) { sheetBody.appendChild(mk('p', 'trnote', '讀取中…')); continue; } const r = aucRow(id, A); if (!r) continue; const st = A.ends > Date.now() ? ((A.n | 0) ? '競標中' : '還沒有人出價') : (A.n | 0) ? '已成交，正在結算' : '流標，等魚缸有空位就會回來';
+      r.appendChild(mk('p', 'aucst', '狀態：' + st)); if (!(A.n | 0) && A.ends > Date.now()) { const cb = mk('button', 'chipbtn', '下架'); cb.addEventListener('click', () => { if (confirmArm('cancel' + id)) aucCancel(id); }); r.appendChild(cb); } sheetBody.appendChild(r); }
+    sheetBody.appendChild(mk('h4', 'sec', '我的出價'));
+    const ids = Object.keys(state.bids); if (!ids.length) sheetBody.appendChild(mk('p', 'foot', '目前沒有出價中的拍賣。'));
+    for (const id of ids) { const A = FB.view[id]; if (!A) continue; const r = aucRow(id, A); if (!r) continue; r.appendChild(mk('p', 'aucst', '你出了 ' + state.bids[id].toLocaleString('zh-TW') + ' 金幣（已先扣住）' + (A.ends <= Date.now() ? (FB.wait === id ? '・得標了，但魚缸滿了，騰出空位就會送來' : '・得標了，正在結算') : ''))); sheetBody.appendChild(r); } }
+  else { const list = state.fish.filter(d => !tradeBlock(d)), d = state.fish.find(f => f.id === aucPick);
+    sheetBody.appendChild(mk('p', 'trnote', '選一隻要拍賣的生物。上架後牠會先離開魚缸，結標時交給出價最高的人；沒人出價就會回來。'));
+    const pk = mk('div', 'opick'); for (const f of list) { const b = mk('button', 'chipbtn' + (f === d ? ' on' : ''), f.name + '・' + SPECIES[f.sp].name); b.addEventListener('click', () => { aucPick = f === d ? '' : f.id; renderShop(); }); pk.appendChild(b); } sheetBody.appendChild(pk);
+    if (d) { const row = mk('div', 'item'), info = mk('div'), h3 = mk('h3', '', d.name); h3.appendChild(mk('span', 'tag', SPECIES[d.sp].name)); info.append(h3, mk('p', '', tradeDesc(d))); row.append(tradeThumb(d), info, mk('span')); sheetBody.appendChild(row);
+      const pr = mk('div', 'trrow'), inp = document.createElement('input'); inp.className = 'regin'; inp.inputMode = 'numeric'; inp.placeholder = '起標價（建議 ' + Math.max(10, Math.round(SPECIES[d.sp].price * .6 / 10) * 10) + '）'; inp.value = aucStart; inp.addEventListener('input', () => { aucStart = inp.value.replace(/[^\d]/g, ''); }); pr.append(mk('span', 'sub', '起標價'), inp); sheetBody.appendChild(pr);
+      const dp = mk('div', 'opick'); for (const h of AUC_DUR) { const b = mk('button', 'chipbtn' + (aucHours === h ? ' on' : ''), h + ' 小時'); b.addEventListener('click', () => { aucHours = h; renderShop(); }); dp.appendChild(b); } sheetBody.appendChild(dp);
+      const go = mk('button', 'btn', FB.busy ? '上架中……' : '送上拍賣台'); go.disabled = FB.busy || state.myAuc.length >= AUC_MAX; go.addEventListener('click', aucCreate); sheetBody.appendChild(go); }
+    sheetBody.appendChild(mk('p', 'foot', '同時最多拍賣 ' + AUC_MAX + ' 件。成交收 5% 手續費，流標不收錢。')); } }
 
 /* Fish milestones (Taiwanese baby customs) and friendships. */
 const MILES = [[7, '滿一週', 20], [30, '滿月', 100], [100, '百日', 300], [365, '週歲', 800]];
@@ -5559,7 +5785,7 @@ function updateHud(dt){
   if (rt.tempMsg && !state.hints.temp) { state.hints.temp = 1; markDirty(); toast(rt.tempMsg); }
   renderFoodBtn();
   if ((rt.achT = (rt.achT || 0) - .4) <= 0) { rt.achT = 2; achCheck(); }
-  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady() || state.tipDay !== dayKey(); if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready); injHud();
+  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady() || state.tipDay !== dayKey() || mailUnread() > 0; if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready); injHud(); fbTick();
   if (sheetKind === 'today' && todayKey() !== rendered.today) renderToday();
   if (sheetKind === 'expo') updateTripRows();
   if (state.evSeen !== dayKey()) { state.evSeen = dayKey(); const ev = todayEv(); if (ev) setTimeout(() => toast('今日事件：' + DAY_EVENTS[ev].name + '・' + DAY_EVENTS[ev].desc), 3200); markDirty(); }
@@ -5609,7 +5835,7 @@ let sheetKind = null, sheetArg = null, shopTab = 'today', listTab = 'mine';
 const sheet = $('#sheet'), scrim = $('#scrim'), sheetBody = $('#sheetBody');
 function openSheet(kind, arg){ sheetKind = kind; sheetArg = arg; sheetBody.scrollTop = 0; renderSheet(); sheet.classList.add('on'); scrim.classList.add('on'); sheet.setAttribute('aria-hidden', 'false'); }
 function closeSheet(){ if (document.activeElement && sheet.contains(document.activeElement)) document.activeElement.blur(); sheet.classList.remove('on'); scrim.classList.remove('on'); sheet.setAttribute('aria-hidden', 'true'); sheetKind = null; }
-function renderSheet(){ if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'fish') renderFishCard(); else if (sheetKind === 'list') renderList(); else if (sheetKind === 'today') renderToday(); else if (sheetKind === 'expo') renderExpo(); }
+function renderSheet(){ if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'fish') renderFishCard(); else if (sheetKind === 'list') renderList(); else if (sheetKind === 'today') renderToday(); else if (sheetKind === 'expo') renderExpo(); else if (sheetKind === 'sea') renderSea(); }
 function ensureQuest(){
   const k = dayKey(); if (state.quest && state.quest.day === k) return state.quest;
   const R = rng(hashStr('q-' + k)), pool = Object.keys(QUESTS).filter(q => q !== 'stars' || todayEv() === 'meteor'), list = [];
@@ -5636,6 +5862,8 @@ function renderToday(){
     b.append(mk('small', '', '第 ' + (i + 1) + ' 天'), mk('b', '', rw[0] === 'coins' ? rw[1] + '' : rw[0] === 'charm' ? '秘方' : '禮包')); days.appendChild(b); });
   lc.appendChild(days); const lb = mk('button', 'btn', ls.done ? '今天簽到過了' : '簽到領獎勵'); lb.disabled = ls.done; lb.addEventListener('click', claimLogin); lc.appendChild(lb); sheetBody.appendChild(lc);
   sheetBody.appendChild(miniCard('scoop')); sheetBody.appendChild(miniCard('shrimp'));
+  { const c = mk('div', 'evcard'), B = bottleDay(), un = mailUnread(); c.append(mk('h3', '', '🍾 漂流瓶' + (un ? '・' + un + ' 封新回信' : '')), mk('p', '', '寫一句話裝進瓶子丟進大海，會隨機漂到其他玩家那裡；也可以撈別人丟的瓶子，裡面偶爾有金幣或小魚。'), mk('p', 'sub', '今天還能丟 ' + Math.max(0, BOTTLE_THROW - B.thrown) + ' 個、撈 ' + Math.max(0, BOTTLE_PICK - B.picked) + ' 個。'));
+    const row = mk('div', 'trbtns'); for (const [k, n] of [['pick', '撈瓶子'], ['throw', '丟瓶子'], ['mail', un ? '信箱 ●' : '信箱']]) { const b = mk('button', 'chipbtn', n); b.addEventListener('click', () => { seaTab = k; openSheet('sea'); }); row.appendChild(b); } row.style.justifyContent = 'flex-start'; c.appendChild(row); sheetBody.appendChild(c); }
   { const T = tankRating(), tip = tipAmount(T), got = state.tipDay === dayKey(), rc = mk('div', 'evcard');
     rc.append(mk('h3', '', '魚缸人氣：' + T.rank + ' 級（' + T.score + ' 分）'), mk('p', '', '今天大約有 ' + Math.max(1, Math.round(T.score * 1.6)) + ' 位客人來參觀魚缸。' + (got ? '今天的小費已經收下了。' : '他們留下了 ' + tip + ' 金幣小費' + (state.deco.some(dc => dc.k === 'shrine') ? '（土地公保佑，多 20%）' : '') + '。')));
     const bars = mk('div', 'rbars'); for (const [n, v, mx] of T.parts) { const row = mk('div', 'rbar'), tr = mk('i'), fl = mk('i'); fl.style.width = Math.round(v / mx * 100) + '%'; tr.appendChild(fl); row.append(mk('span', '', n), tr, mk('b', '', Math.round(v) + '/' + mx)); bars.appendChild(row); }
@@ -6014,12 +6242,12 @@ function renderAfterShop(v){ const list = npcAfter(v.npc), N = NPCS[v.npc]; if (
 function renderShop(){
   $('#sheetTitle').textContent = '水族店';
   const visitor = currentVisitor(); if (shopTab === 'visit' && !visitor) shopTab = 'today';
-  setTabs([['today','今日']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易 ●' : '交易']]), shopTab);
+  setTabs([['today','今日']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['auction','拍賣'],['trade', TR.giftN ? '交易 ●' : '交易']]), shopTab);
   if (shopTab === 'today' && state.shopDay !== dayKey()) { state.shopDay = dayKey(); markDirty(); }
   if (shopTab === 'visit') { state.metNpc = true; if (NPCS[visitor.npc].alien) state.metAlien = true; if (state.seenVisit !== visitor.key) { state.seenVisit = visitor.key; markDirty(); } }
   const keep = sheetBody.scrollTop; sheetBody.innerHTML = '';
   const wallet = mk('div', 'wallet');
-  const extra = shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備和主題買了就一直保留' : shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
+  const extra = shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備和主題買了就一直保留' : shopTab === 'auction' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
   wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra);
   sheetBody.appendChild(wallet);
   if (shopTab === 'today') { rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
@@ -6027,6 +6255,7 @@ function renderShop(){
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'trade') { renderTrade(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'gear') { renderGear(); sheetBody.scrollTop = keep; return; }
+  if (shopTab === 'auction') { renderAuction(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'plant') { renderPlantShop(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'inv') { sheetBody.appendChild(feederRow(5, 30, '', () => buyFeeder(5, 30), false)); sheetBody.appendChild(itemRow('med1', 120, '現在有 ' + state.items.med + ' 瓶', buyMed, false)); }
   if (shopTab === 'pack') {
@@ -6483,7 +6712,7 @@ $('#photoDl').addEventListener('click', savePhoto);
 $('#photo').addEventListener('click', e => { if (e.target.id === 'photo') $('#photo').classList.remove('on'); });
 $('#lamp').addEventListener('click', () => { if (outageOn()) { toast('停電中，燈打不開。按住水面可以當手電筒'); return; } const on = !lightOn(); state.light = {on, until:nextBoundary()}; rt.hudT = 0; markDirty(); toast(on ? '開燈了，魚兒醒來囉' : '關燈了，魚兒準備睡覺'); });
 $('#sheetClose').addEventListener('click', closeSheet); scrim.addEventListener('click', closeSheet);
-$('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (!t) return; if (sheetKind === 'shop') shopTab = t.dataset.tab; else if (sheetKind === 'list') listTab = t.dataset.tab; sheetBody.scrollTop = 0; renderSheet(); });
+$('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (!t) return; if (sheetKind === 'shop') shopTab = t.dataset.tab; else if (sheetKind === 'list') listTab = t.dataset.tab; else if (sheetKind === 'sea') { seaTab = t.dataset.tab; FB.msg = ''; } sheetBody.scrollTop = 0; renderSheet(); });
 $('#mOk').addEventListener('click', () => { $('#modal').classList.remove('on'); bumpCoins(); setTimeout(nextCeleb, 250); });
 giftCv.addEventListener('click', revealGift);
 $('#gOk').addEventListener('click', closeGift);
