@@ -4505,8 +4505,12 @@ const FB_VER = '10.12.2', FB = {st:'off', err:'', db:null, api:null, uid:'', p:n
 const BOTTLE_DAYS = 7, BOTTLE_THROW = 3, BOTTLE_PICK = 5, AUC_MAX = 3, AUC_FEE = .05, AUC_DUR = [1, 4, 12, 24];
 const BAD_WORDS = ['幹你', '靠北', '靠杯', '智障', '白癡', '去死', '操你', '王八蛋', 'fuck', 'shit'];
 const DB_URL_RE = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebasedatabase\.app|firebaseio\.com)$/;
-function fbConfig(){ const base = FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey ? FIREBASE_CONFIG : null; if (base && base.databaseURL) return base; let c = null; try { c = JSON.parse(localStorage.getItem('aq-firebase') || 'null'); } catch (e) {}
-  if (c && c.apiKey && c.databaseURL) return c; if (base && c && DB_URL_RE.test(c.databaseURL || '')) return Object.assign({}, base, {databaseURL:c.databaseURL}); return null; }
+function fbConfig(){ let c = null; try { c = JSON.parse(localStorage.getItem('aq-firebase') || 'null'); } catch (e) {} if (c && c.apiKey && c.databaseURL) return c;
+  const base = FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId ? FIREBASE_CONFIG : null; if (!base) return null;
+  return c && DB_URL_RE.test(c.databaseURL || '') ? Object.assign({}, base, {databaseURL:c.databaseURL}) : base; }
+function dbCandidates(cfg){ const p = cfg.projectId, g = p ? ['asia-southeast1.firebasedatabase.app', 'firebaseio.com', 'europe-west1.firebasedatabase.app'].map(h => 'https://' + p + '-default-rtdb.' + h) : [];
+  let cached = ''; try { cached = localStorage.getItem('aq-fb-url') || ''; } catch (e) {} return [...new Set([cached, cfg.databaseURL, ...g])].filter(u => u && DB_URL_RE.test(u)); }
+const FB_ERR = {nodb:'找不到線上資料庫，可能還沒建立', rules:'線上資料庫的安全規則還沒發布', 'auth/operation-not-allowed':'Firebase 還沒開啟匿名登入', 'auth/admin-restricted-operation':'Firebase 還沒開啟匿名登入', 'auth/network-request-failed':'網路連不上'};
 function parseDbUrl(t){ const m = String(t || '').match(/https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.(firebasedatabase\.app|firebaseio\.com)/i); return m ? m[0].toLowerCase() : ''; }
 function parseFbConfig(t){ const a = String(t || '').indexOf('{'), b = String(t || '').lastIndexOf('}'); if (a < 0 || b <= a) return null;
   const js = t.slice(a, b + 1).replace(/(^|\s)\/\/[^\n]*/g, '$1').replace(/'/g, '"').replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":').replace(/,\s*}/g, '}');
@@ -4515,7 +4519,12 @@ function fbStart(){ if (FB.db) return Promise.resolve(FB); if (FB.p) return FB.p
   FB.st = 'connecting'; const base = 'https://www.gstatic.com/firebasejs/' + FB_VER + '/firebase-';
   FB.p = (async () => { try { const [A, U, D] = await Promise.all(['app', 'auth', 'database'].map(n => import(base + n + '.js')));
       const app = A.getApps().find(a => a.name === 'aquarium') || A.initializeApp(cfg, 'aquarium'), cred = await U.signInAnonymously(U.getAuth(app));
-      FB.uid = cred.user.uid; FB.db = D.getDatabase(app); FB.api = D; FB.st = 'on'; FB.err = ''; setTimeout(() => fbSync(true), 50); return FB; }
+      FB.uid = cred.user.uid; FB.api = D; let found = null, denied = false;
+      for (const u of dbCandidates(cfg)) { const db = D.getDatabase(app, u);
+        try { await Promise.race([D.get(D.query(D.ref(db, 'bottles'), D.limitToFirst(1))), new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 7000))]); found = [db, u]; break; }
+        catch (e) { if (/permission/i.test(String(e && (e.code || e.message)))) denied = true; try { D.goOffline(db); } catch (x) {} } }
+      if (!found) throw new Error(denied ? 'rules' : 'nodb');
+      FB.db = found[0]; try { localStorage.setItem('aq-fb-url', found[1]); } catch (e) {} FB.st = 'on'; FB.err = ''; setTimeout(() => fbSync(true), 50); return FB; }
     catch (e) { FB.st = 'err'; FB.err = String((e && (e.code || e.message)) || e).slice(0, 140); FB.p = null; return null; }
     finally { fbRerender(); } })();
   return FB.p; }
@@ -4537,7 +4546,7 @@ function fbTick(){ if (FB.db) { if (Date.now() - FB.syncT > 90e3) fbSync(true); 
 function nickRow(){ const r = mk('div', 'trrow'), i = document.createElement('input'); i.className = 'regin'; i.maxLength = 10; i.value = myNick(); i.setAttribute('aria-label', '線上暱稱');
   i.addEventListener('change', () => { state.nick = fbText(i.value, 10); i.value = myNick(); markDirty(); toast('暱稱改成「' + myNick() + '」'); }); r.append(mk('span', 'sub', '線上暱稱'), i); return r; }
 function fbStatusBox(what){ if (FB.db) return false; const c = mk('div', 'req');
-  if (FB.st === 'err') { c.appendChild(mk('p', 'trmsg', '連不上線上資料庫（' + FB.err + '）。Claude 版可能不允許連到外部網站，可以改用網頁版。')); const b = mk('button', 'btn', '重新連線'); b.addEventListener('click', () => { FB.st = 'off'; fbStart(); fbRerender(); }); c.appendChild(b); }
+  if (FB.st === 'err') { c.appendChild(mk('p', 'trmsg', FB_ERR[FB.err] ? what + '暫時不能用：' + FB_ERR[FB.err] + '。遊戲作者設定好之後按「重新連線」就行了。' : '連不上線上資料庫（' + FB.err + '）。Claude 版可能不允許連到外部網站，可以改用網頁版。')); const b = mk('button', 'btn', '重新連線'); b.addEventListener('click', () => { FB.st = 'off'; fbStart(); fbRerender(); }); c.appendChild(b); }
   else if (!fbConfig()) { const half = !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey); c.appendChild(mk('p', 'trnote', half ? what + '的線上資料庫還在建置中，很快就能玩了！' : what + '要連上 Firebase 線上資料庫才能玩，遊戲作者還沒設定好。'));
     const det = document.createElement('details'), sm = document.createElement('summary'); sm.textContent = half ? '我是遊戲作者：貼上 Realtime Database 網址試用' : '我是遊戲作者：貼上 firebaseConfig 試用'; det.appendChild(sm);
     const ta = document.createElement('textarea'); ta.className = 'regin'; ta.placeholder = half ? 'https://newworld-4b2ff-default-rtdb.asia-southeast1.firebasedatabase.app' : 'const firebaseConfig = { apiKey: "…", databaseURL: "https://…firebasedatabase.app", … };'; const sb = mk('button', 'btn', '儲存並連線');
