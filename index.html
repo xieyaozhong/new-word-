@@ -534,6 +534,8 @@ const SPECIES = {
   turtle:  {name:'麝香龜', kind:'inv', turtle:true, eats:true, price:450, len:52, interval:70, value:6, zone:'frog', speed:.4, rests:true, scav:true, tags:['兩棲','要餵食'], morphs:['原生'], desc:'小型水龜，會在沙上散步，時不時游上水面換氣。要吃飼料。'},
   tadpole: {name:'蝌蚪', kind:'inv', tadpole:true, eats:true, price:25, len:22, interval:120, value:1, zone:'bottom', speed:.5, scav:true, tags:['會長大'], morphs:['原生'], desc:'吃飽長大後會長出腳，變成侏儒爪蟾。'},
   horned:  {name:'角螺', kind:'inv', snail:true, price:60, len:20, interval:90, value:1, zone:'glass', speed:.1, rests:true, algae:.35, tags:['貼玻璃','吃藻'], morphs:['角螺'], desc:'殼上長著小角的迷你螺，也很會吃藻。'},
+  garra:{name:'親親魚', kind:'fish', story:'chang', draw:'redtail', price:3000, len:52, interval:50, value:10, zone:'bottom', speed:.85, cleaner:true, tags:['清潔魚','劇情限定'], traits:['會游到其他魚身邊，輕輕啄掉牠們身上的髒東西','被清潔過的魚心情會變好，生病的魚有機會直接痊癒'], morphs:['原色'], desc:'在溫泉魚療裡幫人去角質的小魚。牠們也很喜歡幫別的魚「做 SPA」。'},
+  chronojelly:{name:'時光水母', kind:'fish', story:'zorb', alien:true, draw:'jellyA', price:20000, len:62, interval:45, value:80, zone:'jelly', speed:.2, limit:1, nofeed:true, flat:true, tags:['外星生物','不用餵','劇情限定'], traits:['不用吃東西','每隔十分鐘左右，會讓一隻剛當完爸媽的魚的休息時間倒轉歸零'], morphs:['時光'], desc:'從時空裂縫漂出來的水母，傘緣的光像時鐘指針一樣慢慢轉。'},
   pararasbora:{name:'台灣副細鯽', kind:'fish', story:'lin', draw:'tetra', price:6000, len:44, interval:45, value:14, zone:'mid', speed:.9, school:true, picky:true, tags:['台灣特有','瀕臨絕種','劇情限定'], traits:['快要消失的台灣特有魚，對水質非常敏感','喜歡成群在乾淨的緩流裡游'], morphs:['原生'], desc:'曾經遍布台灣中北部的小溪，現在只剩零星的族群。身體細長，側面有一條深色的縱帶。'},
   goldprawn:{name:'黃金泰國蝦', kind:'inv', shrimp:true, story:'hsiung', eats:true, price:5000, len:64, interval:45, value:30, zone:'bottom', speed:.45, rests:true, scav:true, tags:['鎮場之寶','劇情限定'], traits:['全身金黃的泰國蝦，是阿雄釣蝦場的鎮場之寶','掉的金幣很多'], morphs:['黃金'], desc:'阿雄養了好幾年的金色泰國蝦，鉗子又長又亮。'},
   galaxybetta:{name:'銀河鬥魚', kind:'fish', story:'an', draw:'betta', price:6000, len:74, interval:50, value:22, zone:'top', speed:.62, limit:1, nest:true, tags:['育種名品','劇情限定'], traits:['小安的阿公培育的鬥魚，鰭像銀河一樣閃著藍紫色的光','一缸只能養一隻'], morphs:['銀河'], desc:'深藍到紫色的漸層，鰭緣像星光一樣發亮，是鬥魚育種家的得意之作。'},
@@ -917,10 +919,15 @@ const DAY_EVENTS = {
 };
 let evCache = {k:'', v:''};
 function todayEv(){ const k = dayKey(); if (evCache.k !== k) { const R = rng(hashStr('ev-' + k)), ks = Object.keys(DAY_EVENTS); evCache = {k, v:R() < .35 ? '' : ks[(R() * ks.length) | 0]}; } return evCache.v; }
-function festival(){ const d = new Date(), n = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-  if (d.getMonth() === 11) return {k:'xmas', name:'聖誕節', deco:'xmas'};
-  if ((n >= 20270129 && n <= 20270214) || (n >= 20280119 && n <= 20280209)) return {k:'cny', name:'農曆新年', deco:'lantern'};
-  return null; }
+const FESTS = [
+  {k:'dongzhi', name:'冬至', deco:'tangyuan', greet:'冬至吃湯圓，又長大一歲了！', d:[[20261221, 20261222], [20271221, 20271222], [20281220, 20281221]]},
+  {k:'newyear', name:'跨年', deco:'clock', greet:'新的一年也要一起好好養魚！', md:[[1231, 1231], [101, 101]]},
+  {k:'cny', name:'農曆新年', deco:'lantern', greet:'新年快樂，恭喜發財！', d:[[20270129, 20270214], [20280119, 20280209]]},
+  {k:'duanwu', name:'端午節', deco:'dragonboat', greet:'端午節快樂！記得吃粽子。', d:[[20270607, 20270609], [20280526, 20280528]]},
+  {k:'zhongqiu', name:'中秋節', deco:'moonrabbit', greet:'中秋節快樂！今晚記得賞月。', d:[[20270913, 20270915], [20281001, 20281003]]},
+  {k:'xmas', name:'聖誕節', deco:'xmas', greet:'聖誕快樂！', m:12}];
+function festival(){ const d = new Date(), md = (d.getMonth() + 1) * 100 + d.getDate(), n = d.getFullYear() * 10000 + md;
+  return FESTS.find(F => (F.d && F.d.some(([a, b]) => n >= a && n <= b)) || (F.md && F.md.some(([a, b]) => md >= a && md <= b)) || (F.m && d.getMonth() + 1 === F.m)) || null; }
 const CONDS = {
   cave:   {text:'缸裡要有陶罐或沉木當洞穴', ok:() => state.deco.some(d => d.k === 'pot' || d.k === 'wood'), pen:.4},
   dark:   {text:'怕光，燈關著才自在', ok:() => !lightOn(), pen:.65},
@@ -988,6 +995,10 @@ const DECOS = {
   diver:{name:'潛水員', price:350, comfort:12, w:44, h:74, desc:'戴著銅頭盔的老派潛水員，頭盔會冒出一串串氣泡。'},
   tower101:{name:'台北 101 模型', price:900, comfort:14, w:40, h:168, desc:'台北地標的迷你模型，晚上會點燈。'},
   lantern:{name:'紅燈籠', price:200, comfort:12, w:44, h:76, fest:'cny', desc:'新春限定。寫著「福」字的紅燈籠，晚上會亮。'},
+  tangyuan:{name:'湯圓碗', price:200, comfort:12, w:48, h:34, fest:'dongzhi', desc:'冬至限定。一碗紅白湯圓，吃了就長大一歲。'},
+  clock:{name:'跨年時鐘', price:200, comfort:12, w:46, h:80, fest:'newyear', desc:'跨年限定。指針跟著現在的時間走，上面寫著新的一年。'},
+  dragonboat:{name:'龍舟', price:200, comfort:14, w:150, h:52, fest:'duanwu', desc:'端午限定。有龍頭、龍尾和大鼓的小龍舟。'},
+  moonrabbit:{name:'玉兔燈', price:200, comfort:12, w:52, h:60, fest:'zhongqiu', desc:'中秋限定。白兔造型的花燈，晚上會發出暖暖的光。'},
   trophy: {name:'品評會獎盃', price:0, comfort:15, w:40, h:58, award:true, desc:'在品評會得到金獎的證明。'},
 };
 const PACKS = {
@@ -1010,6 +1021,7 @@ const UPG = {
   feeder:{name:'自動餵食器', lv:['沒有','定時','智慧','全自動'], price:[1200, 3500, 8000], eff:l => l ? '魚平均飽足低於 ' + FEED_AT[l] + '% 自動餵・不在時多撐 ' + FEED_H[l] + ' 小時' : '要自己餵'},
   heater:{name:'加熱棒', lv:['沒有','加熱棒','恆溫控制器'], price:[600, 2400], eff:l => ['水溫跟著季節和天氣變化', '冬天也不會低於 25°C', '可以自己設定 20–28°C，夏天也會降溫'][l]},
   box:{name:'隔離盒', lv:['沒有','隔離盒'], price:[500], eff:l => l ? '可以放 3 隻小魚或病魚：不會被吃、不會被傳染' : '保護剛出生的小魚和生病的魚'},
+  ups:{name:'不斷電系統', lv:['沒有','不斷電系統'], price:[1800], eff:l => l ? '颱風停電時，過濾器、加熱棒和燈都照常運作' : '颱風天停電時，過濾、加熱和燈都會停'},
   lid:{name:'魚缸蓋', lv:['沒有','魚缸蓋'], price:[800], eff:l => l ? '貓咪伸不進來，澤蟹也爬不出去' : '小心家裡的貓，還有很會爬的小生物'},
   led:{name:'LED 燈具', lv:['基本燈','高亮燈','水草燈','專業燈'], price:[1000, 3000, 7000], eff:l => '開燈時金幣 +' + Math.round((LED_K[l] - 1) * 100) + '%'},
 };
@@ -1176,6 +1188,8 @@ Object.assign(PAL, {
   sawacrab:[{b1:'#b8301a',b2:'#f07a4a',leg:'rgba(190,60,30,.9)'},{b1:'#6a3a8a',b2:'#b088d0',leg:'rgba(110,60,140,.9)'}],
   loong:[{b1:'#c8901a',b2:'#ffe27a',belly:'#fff2c0',fin:'#e8602a',mane:'#ff8a3a',horn:'#f6ead0',whisker:'rgba(255,240,200,.9)',scale:'rgba(140,80,0,.35)',legF:'#a8700e',pearl:'#d8f2ff'}]});
 Object.assign(PAL, {
+  garra:[{b1:'#5c605c',b2:'#d6d6ca',tail:'#80847c',tip:'#80847c',pec:'rgba(215,205,185,.5)',parr:'rgba(25,25,25,.26)'}],
+  chronojelly:[{bell:'rgba(30,80,100,.72)',rim:'rgba(255,222,140,.95)',gonad:'rgba(255,200,100,.8)',tent:'rgba(150,232,220,.6)',aura:'#ffd480',starsIn:1}],
   pararasbora:[{b1:'#7e8e6e',b2:'#eef0e2',lat:'rgba(35,45,35,.62)',fin:'rgba(225,205,150,.45)',H:.26}],
   goldprawn:[{b1:'rgba(222,168,52,.88)',b2:'rgba(255,226,140,.72)',leg:'rgba(232,180,80,.78)',claws:2,claw:'#f0b020',dot:'rgba(140,90,20,.45)'}],
   galaxybetta:[{b1:'#1c1c4a',b2:'#5a48c8',f1:'#3a2a8a',f2:'#9a8aff',edge:'rgba(225,240,255,.9)'}],
@@ -1368,7 +1382,7 @@ function migrate(s){
   s.log = (Array.isArray(s.log) ? s.log : []).filter(e => Array.isArray(e) && +e[0] && typeof e[1] === 'string').slice(-150);
   s.rep = {cons:clamp(((s.rep && s.rep.cons) | 0), -100, 100), trade:clamp(((s.rep && s.rep.trade) | 0), -100, 100), star:clamp(((s.rep && s.rep.star) | 0), -100, 100)};
   { const st0 = s.story && typeof s.story === 'object' ? s.story : {}; s.story = {}; for (const k of Object.keys(STORY)) { const q = st0[k]; if (!q) continue; s.story[k] = {ch:clamp(q.ch | 0, 0, STORY[k].ch.length), b:q.b && typeof q.b === 'object' ? q.b : {}, n:Math.max(0, q.n | 0), done:q.done ? 1 : 0, pick:Number.isInteger(q.pick) ? q.pick : -1}; } }
-  s.facGift = {cons:s.facGift && s.facGift.cons ? 1 : 0, trade:s.facGift && s.facGift.trade ? 1 : 0, star:s.facGift && s.facGift.star ? 1 : 0}; s.rush = +s.rush || 0;
+  s.facGift = {cons:s.facGift && s.facGift.cons ? 1 : 0, trade:s.facGift && s.facGift.trade ? 1 : 0, star:s.facGift && s.facGift.star ? 1 : 0}; s.rush = +s.rush || 0; s.festSeen = s.festSeen && typeof s.festSeen === 'object' ? s.festSeen : {}; s.fwYear = +s.fwYear || 0;
   s.shrimpDay = typeof s.shrimpDay === 'string' ? s.shrimpDay : ''; s.tipDay = typeof s.tipDay === 'string' ? s.tipDay : '';
   s.catFed = clamp(s.catFed | 0, 0, 3); s.catPet = +s.catPet || 0; s.bless = +s.bless || 0; s.tailDay = typeof s.tailDay === 'string' ? s.tailDay : '';
   s.boxAuto = s.boxAuto === 0 ? 0 : 1; s.moonDay = typeof s.moonDay === 'string' ? s.moonDay : ''; s.moonTip = typeof s.moonTip === 'string' ? s.moonTip : '';
@@ -1438,14 +1452,15 @@ function happinessWith(d, full, dirt){
   const shy = d.pers === 'shy' ? (state.deco.filter(x => DECOS[x.k].plant).length >= 2 ? .06 : -.06) : 0;
   let cs = 1 - dirt / 100 * .85; if (SPECIES[d.sp].picky && dirt > 30) cs *= .55;
   const cm = .4 + comfort() / 100 * .6;
-  return clamp((fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)) * (d.zz === 'plant' ? 1.08 : 1) * (friendOf(d) ? 1.06 : 1) * (hasDeco('consbadge') && isTwNative(d) ? 1.1 : 1), 0, 1);
+  return clamp((fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)) * (d.zz === 'plant' ? 1.08 : 1) * (friendOf(d) ? 1.06 : 1) * (hasDeco('consbadge') && isTwNative(d) ? 1.1 : 1) * ((d.clnAt || 0) > Date.now() - 36e5 ? 1.05 : 1), 0, 1);
 }
 const happiness = d => happinessWith(d, d.full, state.dirt);
 function countCache(){ let a = 0, nf = 0, ni = 0; for (const f of state.fish) { a += SPECIES[f.sp].algae || 0; if (isInv(f)) ni++; else nf++; } rt.algaeRate = a; rt.nFish = nf; rt.nInv = ni; rt.hive = state.fish.some(f => f.sp === 'hivemind'); }
-const dirtRate = () => FILTER_K[state.up.filter | 0] * Math.max(.4, 2.4 + rt.nFish * .12 + rt.nInv * .04 - rt.algaeRate - Math.min(1.2, (rt.plantMass || 0) * .08) + (rt.deadPlants || 0) * .5) * (todayEv() === 'bloom' ? 1.5 : 1) * (rt.hive ? 0 : 1);
+const dirtRate = () => FILTER_K[outageOn() ? 0 : state.up.filter | 0] * Math.max(.4, 2.4 + rt.nFish * .12 + rt.nInv * .04 - rt.algaeRate - Math.min(1.2, (rt.plantMass || 0) * .08) + (rt.deadPlants || 0) * .5) * (todayEv() === 'bloom' ? 1.5 : 1) * (rt.hive ? 0 : 1);
 function rehomeValue(d){ const S = SPECIES[d.sp]; const st = isInv(d) ? 1 : [.5, .75, 1][growRatio(d) >= 1 ? 2 : growRatio(d) >= .4 ? 1 : 0]; return Math.max(1, Math.floor(S.price * .4 * st * (1 + .5 * traitsOf(d).length) * (d.rare ? (RARES[d.rare].tier === 2 ? 8 : 3) : 1))); }
 function clockNight(){ const h = new Date().getHours(); return h >= 19 || h < 6; }
-function lightOn(){ const o = state.light; if (o && Date.now() < o.until) return o.on; return !clockNight(); }
+const outageOn = () => !!(typeof rt !== 'undefined' && rt.outage);
+function lightOn(){ if (outageOn()) return false; const o = state.light; if (o && Date.now() < o.until) return o.on; return !clockNight(); }
 function nextBoundary(){ const d = new Date(), h = d.getHours(), b = new Date(d);
   if (h < 6) b.setHours(6,0,0,0); else if (h < 19) b.setHours(19,0,0,0); else { b.setDate(b.getDate()+1); b.setHours(6,0,0,0); }
   return b.getTime(); }
@@ -2462,7 +2477,7 @@ const EXT = {guppy:[1.5,.75,.18], neon:[1.12,.45,.05], zebra:[1.25,.55,.08], pla
   bamboo:[1.5,.75,-.2,.13], assassin:[1.1,.9,-.1,.38], clam:[1.1,.6,0,.12], pestsnail:[1.1,.85,-.1,.38], nymph:[1.3,.6,0,.05],
   cavefish:[1.12,.55,.05], bichir:[1.15,.45,.05], archer:[1.12,.8,.05], tigerfish:[1.12,.95,.05], eel:[1.05,.32,0], piranha:[1.12,.8,.05], prawn:[1.8,.75,-.35,.13], feeder:[1.12,.55,.05],
   ghost:[1.5,.75,-.2,.13], cherry:[1.5,.75,-.2,.13], amano:[1.5,.75,-.2,.13], crystal:[1.5,.75,-.2,.13], apple:[1.1,.85,-.1,.38], nerite:[1.1,.8,-.1,.35], horned:[1.1,.9,-.1,.38], moonjelly:[.75,1.15,0,-.22], paradise:[1.2,1.1,.06,-.1], bitterling:[1.12,.85,.05], sawacrab:[1.3,.7,0,.15], loong:[1.22,.5,.05,-.02]};
-Object.assign(EXT, {pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
+Object.assign(EXT, {garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
 function drawFishThumb(cnv, sp, P, ph, ex, fit, fx, seed){
   const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height, e = EXT[sp] || [1.3,1,0,0];
   c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
@@ -2624,6 +2639,45 @@ function drawDecoShape(c, dc, t){
       for (let i = 0; i < 10; i++) { c.fillStyle = ['#ff4040','#ffd040','#40c0ff','#ff80d0'][i % 4]; dot(c, Math.sin(i * 2.3) * (24 - i * 2), -16 - i * 7, 2.6); }
       c.fillStyle = '#ffd040'; dot(c, 0, -94, 5);
       break;
+    case 'tangyuan': {
+      c.fillStyle = 'rgba(0,0,0,.18)'; c.beginPath(); c.ellipse(0, 0, 22, 4, 0, 0, TAU); c.fill(); c.fillStyle = '#e8e0cc'; c.fillRect(-7, -3, 14, 3);
+      c.fillStyle = '#f6f3ea'; c.beginPath(); c.moveTo(-23, -22); c.quadraticCurveTo(-21, -2, 0, -2); c.quadraticCurveTo(21, -2, 23, -22); c.closePath(); c.fill();
+      c.strokeStyle = '#3a6ab8'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(-20, -15); c.quadraticCurveTo(0, -9, 20, -15); c.stroke(); c.fillStyle = '#3a6ab8'; for (const x of [-12, -4, 4, 12]) dot(c, x, -11 + Math.abs(x) * .08, 1.2);
+      c.fillStyle = 'rgba(242,228,196,.95)'; c.beginPath(); c.ellipse(0, -22, 23, 4.5, 0, 0, TAU); c.fill();
+      for (const [x, y, col] of [[-12, -24, '#fbf8f4'], [-4, -26, '#f4a4b6'], [5, -24, '#fbf8f4'], [13, -25, '#f4a4b6'], [1, -29, '#fbf8f4']]) { c.fillStyle = col; dot(c, x, y, 4.6); c.fillStyle = 'rgba(255,255,255,.75)'; dot(c, x - 1.4, y - 1.6, 1.3); }
+      break; }
+    case 'clock': {
+      const nd = new Date(), hh = nd.getHours() % 12, mi = nd.getMinutes(), se = nd.getSeconds() + nd.getMilliseconds() / 1000, yr = nd.getMonth() === 11 ? nd.getFullYear() + 1 : nd.getFullYear();
+      c.save(); if (dc.flip) c.scale(-1, 1);
+      c.fillStyle = '#6a4a2a'; c.fillRect(-3.5, -26, 7, 26); c.fillRect(-14, -4, 28, 4);
+      c.fillStyle = '#c8962a'; dot(c, 0, -46, 21); c.fillStyle = '#fbf6e8'; dot(c, 0, -46, 17);
+      c.fillStyle = '#3a2a1a'; for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; dot(c, Math.sin(a) * 14, -46 - Math.cos(a) * 14, i % 3 ? .9 : 1.6); }
+      const hand = (a, len, lw, col) => { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); c.moveTo(0, -46); c.lineTo(Math.sin(a) * len, -46 - Math.cos(a) * len); c.stroke(); };
+      hand((hh + mi / 60) / 12 * TAU, 8, 2.4, '#2a1e14'); hand((mi + se / 60) / 60 * TAU, 12.5, 1.6, '#2a1e14'); hand(se / 60 * TAU, 13.5, .8, '#d83a2a'); c.fillStyle = '#c8962a'; dot(c, 0, -46, 1.8);
+      c.fillStyle = '#d8402a'; rr(c, -17, -79, 34, 12, 3); c.fill(); c.fillStyle = '#ffe6a0'; c.font = '700 9px sans-serif'; c.textAlign = 'center'; c.fillText(String(yr), 0, -69.5);
+      c.restore(); break; }
+    case 'dragonboat': {
+      c.fillStyle = lg(c, 0, -22, 0, 0, [[0,'#d0442c'],[1,'#7a1e12']]); c.beginPath(); c.moveTo(-54, -20); c.quadraticCurveTo(-40, 0, 0, 0); c.quadraticCurveTo(40, 0, 52, -18); c.quadraticCurveTo(0, -13, -54, -20); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(255,214,96,.75)'; c.lineWidth = 1.1; for (let i = -40; i <= 40; i += 8) { c.beginPath(); c.arc(i, -9, 4, Math.PI * .1, Math.PI * .9); c.stroke(); }
+      c.strokeStyle = '#f2c040'; c.lineWidth = 2; c.beginPath(); c.moveTo(-52, -18); c.quadraticCurveTo(0, -12, 50, -17); c.stroke();
+      c.fillStyle = '#d8402a'; c.beginPath(); c.moveTo(47, -18); c.quadraticCurveTo(52, -34, 60, -40); c.quadraticCurveTo(70, -43, 73, -36); c.quadraticCurveTo(66, -34, 64, -30); c.quadraticCurveTo(60, -23, 55, -16); c.closePath(); c.fill();
+      c.fillStyle = '#f2c040'; c.beginPath(); c.moveTo(58, -41); c.lineTo(53, -51); c.lineTo(62, -43); c.closePath(); c.fill(); c.fillStyle = '#fff'; dot(c, 64, -38, 2.2); c.fillStyle = '#111'; dot(c, 64.6, -38, 1.1);
+      c.strokeStyle = '#f2c040'; c.lineWidth = 1; c.beginPath(); c.moveTo(71, -35); c.quadraticCurveTo(77, -33 + Math.sin(t * 2) * 2, 79, -27); c.stroke();
+      c.fillStyle = '#2a8a5a'; c.beginPath(); c.moveTo(-52, -19); c.quadraticCurveTo(-60, -30, -66, -40); c.quadraticCurveTo(-60, -32, -55, -35); c.quadraticCurveTo(-57, -26, -47, -18); c.closePath(); c.fill();
+      c.fillStyle = '#a8301e'; c.fillRect(-6, -27, 12, 9); c.fillStyle = '#f2e0b0'; c.beginPath(); c.ellipse(0, -27, 6, 2, 0, 0, TAU); c.fill();
+      c.strokeStyle = '#7a5030'; c.lineWidth = 1.6; for (const x of [-36, -22, 16, 30]) { const sw = Math.sin(t * 2 + x) * 2; c.beginPath(); c.moveTo(x, -16); c.lineTo(x - 8 + sw, -2); c.stroke(); }
+      break; }
+    case 'moonrabbit': {
+      const night = rt.lightK < .5;
+      if (night) { c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, 0, -26, 0, 0, -26, 42, [[0,'rgba(255,222,160,.5)'],[1,'rgba(255,222,160,0)']]); c.fillRect(-44, -70, 88, 88); c.restore(); }
+      c.fillStyle = '#6a4a2a'; c.fillRect(-17, -5, 34, 4); c.fillStyle = '#c8402a'; dot(c, -11, -3, 4); dot(c, 11, -3, 4); c.fillStyle = '#f2c040'; dot(c, -11, -3, 1.5); dot(c, 11, -3, 1.5);
+      const wh = night ? '#fff4dc' : '#f8f6f0'; c.fillStyle = wh; c.beginPath(); c.ellipse(0, -20, 17, 13, 0, 0, TAU); c.fill(); dot(c, -17, -23, 4.2);
+      c.beginPath(); c.ellipse(13, -34, 9, 8, 0, 0, TAU); c.fill(); c.beginPath(); c.ellipse(9, -50, 3.2, 10, -.15, 0, TAU); c.fill(); c.beginPath(); c.ellipse(16, -49, 3.2, 10, .2, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(240,140,150,.6)'; c.beginPath(); c.ellipse(9, -50, 1.5, 7, -.15, 0, TAU); c.fill(); c.beginPath(); c.ellipse(16, -49, 1.5, 7, .2, 0, TAU); c.fill();
+      c.fillStyle = '#d82a2a'; dot(c, 16, -35, 1.6); c.fillStyle = 'rgba(240,140,150,.7)'; dot(c, 21, -32, 1);
+      c.fillStyle = '#c8402a'; c.beginPath(); c.ellipse(-2, -20, 9, 5, 0, 0, TAU); c.fill(); c.fillStyle = '#f2c040'; dot(c, -2, -20, 2);
+      c.strokeStyle = 'rgba(160,120,80,.35)'; c.lineWidth = .8; for (const x of [-10, 0, 10]) { c.beginPath(); c.moveTo(x, -32); c.quadraticCurveTo(x * 1.2, -20, x, -8); c.stroke(); }
+      break; }
     case 'consbadge': {
       c.fillStyle = '#6a4a2a'; c.fillRect(-3, -40, 6, 40); c.fillStyle = '#a8784a'; rr(c, -22, -62, 44, 26, 4); c.fill(); c.strokeStyle = '#6a4a2a'; c.lineWidth = 2; c.stroke();
       c.fillStyle = '#4aa86a'; c.beginPath(); c.ellipse(-12, -49, 6, 3.2, -.5, 0, TAU); c.fill(); c.strokeStyle = '#2a6a3a'; c.lineWidth = 1; c.beginPath(); c.moveTo(-17, -46); c.lineTo(-7, -52); c.stroke();
@@ -2996,7 +3050,7 @@ function update(dt){
     if (ct <= 0) { ct = rand(180, 320); spawnCoin(b.x + rand(-8, 8) * s2, b.y - 34 * s2, 3 + ((Math.random() * 6) | 0)); }
     rt.chest.set(dc.id, ct);
   }
-  for (const dc of state.deco) if (dc.k === 'bubbler') {
+  for (const dc of state.deco) if (dc.k === 'bubbler' && !outageOn()) {
     let e = (rt.emit.get(dc.id) || 0) - dt;
     if (e <= 0 && rt.bubbles.length < 90) { const b = decoBase(dc), s = decoScale(dc); rt.bubbles.push({x:b.x + rand(-4, 4) * s, y:b.y - 14 * s, r:rand(1.4, 3.8) * U, vy:rand(46, 80) * U, ph:rand(6)}); e = rand(.08, .2); }
     rt.emit.set(dc.id, e);
@@ -3009,6 +3063,10 @@ function update(dt){
 }
 /* Movement styles: clams stay put on the sand, crawlers sink and walk, shrimp tail-flip backwards, jellies pulse, hoppers dart between rests. */
 const GULP = new Set(['betta','galaxybetta','gourami','bluegourami','dwarfgourami','paradise','cory','pandacory','bichir','arapaima','snakehead','axolotl']);
+function cleanDone(r, q){ r.cln = null; r.clnN = 0; const d = q.d; d.clnAt = Date.now(); state.stats.cleaned = (state.stats.cleaned | 0) + 1; rt.emotes.push({type:'heart', x:q.x, y:q.y - fishLen(q) * .4, t:0, life:1.2});
+  if (d.ich && Math.random() < .4) { d.ich = 0; state.stats.cured = (state.stats.cured | 0) + 1; toast(r.d.name + '（親親魚）幫 ' + d.name + ' 把白點啄乾淨了！'); logEv('親親魚 ' + r.d.name + ' 治好了 ' + d.name + ' 的白點病'); }
+  else if (!rt.warnedClean) { rt.warnedClean = true; toast(r.d.name + '（親親魚）在幫 ' + d.name + ' 做 SPA，' + d.name + ' 看起來很舒服'); }
+  markDirty(); }
 function moveMode(sp){ if (sp.clam) return 'sessile'; if (sp.zone === 'glass') return 'swim'; if (sp.jelly || (sp.zone === 'jelly' && !sp.swarm)) return 'jelly';
   if (sp.shrimp) return 'shrimp'; if (sp.kind === 'inv' && (sp.snail || sp.crab || sp.nymph)) return 'crawl'; if (sp.hop) return 'hop'; return 'swim'; }
 function shrimpFlip(r, L, dt){
@@ -3066,6 +3124,9 @@ function updateFish(r, dt, sleep){
       if (hit) { if (!rt.warnedShock) { rt.warnedShock = true; toast(d.name + '（電鰻）放電了！附近的魚被電得發麻'); } markDirty(); } } }
   if (sp.spit && rt.lightK > .5) { r.spitT = (r.spitT == null ? rand(8, 16) : r.spitT) - dt;
     if (r.spitT <= 0) { r.spitT = rand(15, 30); const mx = r.x + r.face * L * .5; rt.jets.push({x:mx, y:r.y - L * .1, x2:clamp(mx + r.face * 26 * U, 10, W - 10), t:0}); } }
+  if (sp.cleaner && !sleep && !r.cln && !busy) { r.clnCd = (r.clnCd == null ? rand(10, 25) : r.clnCd) - dt;
+    if (r.clnCd <= 0) { r.clnCd = rand(25, 50); const ok = o => o !== r && !o.d.box && !isInv(o.d) && !o.sp.alien && o.sp !== sp, sick = rt.fish.filter(o => ok(o) && o.d.ich), pool = sick.length ? sick : rt.fish.filter(o => ok(o) && fishLen(o) > L * 1.1);
+      if (pool.length) { r.cln = pickArr(pool); r.clnT = 14; r.clnN = 0; } } }
   if (GULP.has(d.sp) && !sleep && !r.gulp) { r.gulpT = (r.gulpT == null ? rand(15, 50) : r.gulpT) - dt; if (r.gulpT <= 0) r.gulp = 1; }
   const C = rt.court, wants = r.mouth ? false : sp.livefood ? d.full < 92 && rt.food.some(q => q.kind === 'worm') : nf ? sp.scav : d.full < 92;
   let food = null, chasing = busy;
@@ -3083,6 +3144,9 @@ function updateFish(r, dt, sleep){
   } else if (r.bur) { r.tx = r.x; r.ty = sandY(r.x) + L * .03; spd = Math.min(spd, 10 * U);
   } else if (r.plk && rt.plank.includes(r.plk) && !sleep) { r.tx = r.plk.x - r.face * L * .4; r.ty = r.plk.y; spd = Math.max(spd, 46 * U * sp.speed);
   } else if (rt.lure && !sleep && !inv && !sp.alien && (d.aff || 0) >= 50) { r.tx = rt.lure.x - r.face * L * .45 + r.off.x * .35; r.ty = rt.lure.y + r.off.y * .35; spd = Math.max(spd, 72 * U * Math.max(.6, sp.speed)); r.lured = 1;
+  } else if (r.cln && !sleep && rt.fish.includes(r.cln)) { const q = r.cln, ql = fishLen(q); r.tx = clamp(q.x - q.face * ql * .05, L, W - L); r.ty = q.y + ql * .14; spd = Math.max(spd, 90 * U * Math.max(.6, sp.speed)); chasing = true; r.clnT -= dt;
+    if (Math.hypot(r.tx - r.x, r.ty - r.y) < Math.max(12 * U, L * .5)) { r.clnN += dt; if (Math.random() < dt * 4) rt.fx.push({type:'spark', x:r.x + r.face * L * .45, y:r.y - 2 * U, vx:rand(-15, 15) * U, vy:rand(-28, -6) * U, t:0, life:.5, col:'#d8f4ff'}); if (r.clnN > 2.4) cleanDone(r, q); }
+    else if (r.clnT <= 0) { r.cln = null; }
   } else if (r.gulp && !sleep) { r.tx = clamp(r.x + r.face * 24 * U, L, W - L); r.ty = surfaceY + L * .3; spd = Math.max(spd, 240 * U * Math.max(.6, sp.speed)); chasing = true;
     if (r.y < surfaceY + L * .5) { r.gulp = 0; r.gulpT = rand(35, 90); rt.ripples.push({x:r.x, t:0}); for (let i = 0; i < 3; i++) if (rt.bubbles.length < 90) rt.bubbles.push({x:r.x + r.face * L * .4 + rand(-3, 3) * U, y:r.y + 6 * U, r:rand(1.2, 2.4) * U, vy:rand(20, 40) * U, ph:rand(6)}); pickTarget(r, false); }
   } else if (r.guard && !sleep && state.eggs.includes(r.guard)) { r.tx = r.guard.x * W + Math.sin(rt.t * .6) * 16 * U; r.ty = nestY() + 24 * U; spd = Math.min(spd, 28 * U);
@@ -3284,7 +3348,7 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 7 段劇情', s => [s.stats.stories | 0, 7], 3000], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 9 段劇情', s => [s.stats.stories | 0, 9], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
@@ -3448,6 +3512,19 @@ const STORY = {
     {name:'第一隻魚', say:'「水養好了！我想要一隻你家生的寶寶，這樣我們的魚就是兄弟姊妹了。」', goal:'交給小安 1 隻在你家出生的魚', type:'give', n:1, pred:d => !!d.par && SPECIES[d.sp].kind === 'fish' && !SPECIES[d.sp].story && !SPECIES[d.sp].alien, rw:{coins:100}, after:'小安每天放學都會跟你報告牠又長大了一點。'},
     {name:'水草森林', say:'「我的魚好像有點無聊。老師說種水草魚會比較開心，你的魚缸可以給我當範本嗎？」', goal:'魚缸裡有 3 種以上不同的水草', type:'check', prog:() => [new Set(state.deco.filter(dc => DECOS[dc.k].plant && !dc.dead).map(dc => dc.k)).size, 3], rw:{coins:150}, after:'小安照著你的魚缸種了一小片水草，還幫每一株取了名字。'},
     {name:'自然課發表', say:'「我要在自然課報告我的魚缸！可以拍你的魚缸當範例嗎？要很漂亮喔！」', goal:'魚缸人氣達到 B 級以上', type:'check', prog:() => [tankRating().score >= 55 ? 1 : 0, 1], rw:{coins:300}, after:'小安的報告拿到全班第一名！他的阿公是鬥魚育種家，聽說你一直在幫小安，特地送你一條他培育的銀河鬥魚。'}]},
+  chang:{npc:'chang', fac:'cons', title:'魚醫生的診所', unlock:['garra', 2], ch:[
+    {name:'藥箱見底', say:'「最近白點病流行，診所的藥都用光了。你那邊有多的白點藥嗎？先借我兩瓶救急。」', goal:'捐 2 瓶白點藥給張醫師（張醫師或水族店「小生物」分頁有賣）', type:'pay', cost:0, btn:'交出 2 瓶白點藥', req:() => state.items.med >= 2, reqText:'先準備 2 瓶白點藥', take:() => { state.items.med -= 2; }, rw:{coins:300, rep:{cons:10}}, after:'張醫師鬆了一口氣：「這兩瓶可以救好幾缸魚。」他硬是塞了一點錢給你。'},
+    {name:'預防勝於治療', say:'「與其等魚生病再治，不如讓水一直保持健康。你的魚缸有好一點的設備嗎？」', goal:'裝 UV 殺菌燈，或把過濾器升級到「外掛過濾」以上', type:'check', prog:() => [(state.up.uv | 0) >= 1 || (state.up.filter | 0) >= 2 ? 1 : 0, 1], rw:{coins:200, rep:{cons:10}}, after:'張醫師看了看你的設備：「很好，這樣白點病很難找上門。」'},
+    {name:'公園義診', say:'「這個週末，我想在台中公園辦免費的魚醫生義診，幫小朋友看他們的魚。可以贊助一點藥品錢嗎？」', goal:'贊助義診 800 金幣', type:'pay', cost:800, rw:{rep:{cons:15, trade:-10}}, after:'義診排了好長的隊。黃老闆路過嘀咕了一句：「都免費看，我們賣藥的怎麼做生意？」'},
+    {name:'健康檢查', say:'「最後，讓我幫你的魚做一次健康檢查。全部都要健健康康、吃得飽飽的喔！」', goal:'缸裡有 8 隻以上的魚，全部沒有生病，而且飽足都在 60 以上', type:'check', prog:() => { const F = state.fish.filter(d => !isInv(d) && !d.box && !SPECIES[d.sp].nofeed); return [F.length >= 8 && F.every(d => !d.ich && d.full >= 60) ? 1 : 0, 1]; }, rw:{coins:400, rep:{cons:15}}, after:'張醫師在病歷上蓋了「健康優良」的章，還從診所帶來一對親親魚：「牠們會幫其他魚清潔身體，生病的魚也會好得比較快。」'}]},
+  zorb:{npc:'zorb', fac:'star', title:'時空裂縫', unlock:['chronojelly', 1], ch:[
+    {name:'奇怪的訊號', say:'「嗶——我們的儀器在你的魚缸附近收到奇怪的時間訊號。先讓我看看你養了哪些外星生物。」', goal:'缸裡同時養 2 種不同的外星生物', type:'check', prog:() => [new Set(state.fish.filter(d => SPECIES[d.sp].alien && !SPECIES[d.sp].story).map(d => d.sp)).size, 2], rw:{coins:300, rep:{star:10}}, after:'佐爾博士的觸角抖了抖：「訊號變強了，果然跟牠們有關。」'},
+    {name:'時間的痕跡', say:'「養得越久的魚，身上留下的時間痕跡越多。你有一起生活很久的魚嗎？」', goal:'缸裡有一隻養了 7 天以上的地球魚', type:'check', prog:() => [state.fish.some(d => !SPECIES[d.sp].alien && Date.now() - (d.born || Date.now()) >= 7 * 864e5) ? 1 : 0, 1], rw:{coins:300, rep:{star:10}}, after:'佐爾博士對著那隻魚掃描了好久：「這就是地球的時間……好溫暖。」'},
+    {name:'能量水晶', say:'「要穩住裂縫，需要一顆能量水晶。地球的金幣剛好可以換。」', goal:'付 2000 金幣買能量水晶', type:'pay', cost:2000, rw:{rep:{star:15}}, after:'水晶在魚缸上方嗡嗡作響，水面浮出一道細細的裂縫。'},
+    {name:'裂縫', say:'「裂縫穩定了。我們可以打開它看看另一邊……也可以把它封起來。地球的朋友，你決定吧。」', goal:'做出選擇', type:'choice', choices:[
+      {label:'打開裂縫看看', cost:500, rep:{star:20, cons:-15}, after:'裂縫那頭是一千年前的台灣溪流，水裡滿滿都是魚。林博士聽說以後很擔心：「亂動時間，會出事的。」'},
+      {label:'把裂縫封起來', cost:500, rep:{cons:10, star:5}, after:'佐爾博士有點失望，但還是點點頭：「也許有些門，還是關著比較好。」'}],
+     rw:{}, endText:'裂縫合上前，一隻小小的水母從裡面漂了出來，傘緣的光像時鐘指針一樣一圈圈轉，是時光水母。'}]},
   ade:{npc:'ade', fac:'', title:'放生法會', unlock:['oldturtle', 1], ch:[
     {name:'廟埕的魚池', say:'「廟口那個魚池好久沒整理，水都綠了。少年仔，可以幫個忙嗎？」', goal:'捐 500 金幣整理廟埕魚池', type:'pay', cost:500, rw:{bless:1}, after:'魚池變得乾乾淨淨，阿德伯幫你向媽祖祈福：接下來 24 小時有保佑。'},
     {name:'香客的心願', say:'「有個香客想在魚池放幾隻漂亮的金魚還願。你那邊有長大的金魚嗎？」', goal:'交給阿德伯 2 隻成年的金魚類（金魚、蘭壽、珍珠鱗、獅頭、水泡眼）', type:'give', n:2, pred:d => GOLDFAM.includes(d.sp) && adultOf(d), rw:{coins:400}, after:'香客很感動，包了一個紅包給你。'},
@@ -3470,7 +3547,7 @@ const storyHere = k => { const v = currentVisitor(); return !!v && v.npc === STO
 function advanceStory(k, choice){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch]; if (s.done || storyLocked(k) || !storyHere(k)) return;
   let after = C.after || '', rp = Object.assign({}, (C.rw && C.rw.rep) || {});
   if (C.type === 'check') { const [a, b] = C.prog(s.b); if (a < b) return; }
-  else if (C.type === 'pay') { if (state.coins < C.cost || (C.req && !C.req())) return; state.coins -= C.cost; }
+  else if (C.type === 'pay') { if (state.coins < C.cost || (C.req && !C.req())) return; state.coins -= C.cost; if (C.take) C.take(); }
   else if (C.type === 'choice') { const o = C.choices[choice]; if (!o || state.coins < o.cost) return; state.coins -= o.cost; s.pick = choice; after = o.after; Object.assign(rp, o.rep); }
   else return;
   finishChapter(k, after, rp); }
@@ -3508,7 +3585,7 @@ function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.np
   if (!act) { const here = storyHere(k); card.appendChild(mk('p', 'when' + (here ? ' now' : ''), (here ? '🛎 ' : '🕒 ') + nextVisitText(Q.npc)));
     if (here) { const b = mk('button', 'btn', '到水族店找' + N.name); b.addEventListener('click', () => { shopTab = 'visit'; openSheet('shop'); }); card.appendChild(b); }
     return card; }
-  if (C.type === 'check' || C.type === 'pay') { const b = mk('button', 'btn', C.type === 'pay' ? (C.req && !C.req() ? C.reqText : '付 ' + C.cost.toLocaleString('zh-TW') + ' 金幣') : ready ? '完成這一章' : '還沒達成'); b.disabled = !ready; b.addEventListener('click', () => advanceStory(k)); card.appendChild(b); }
+  if (C.type === 'check' || C.type === 'pay') { const b = mk('button', 'btn', C.type === 'pay' ? (C.req && !C.req() ? C.reqText : C.btn || '付 ' + C.cost.toLocaleString('zh-TW') + ' 金幣') : ready ? '完成這一章' : '還沒達成'); b.disabled = !ready; b.addEventListener('click', () => advanceStory(k)); card.appendChild(b); }
   else if (C.type === 'choice') { C.choices.forEach((o, i) => { const b = mk('button', 'btn' + (i ? ' ghost' : ''), o.label + '（' + o.cost + ' 金幣）'); b.disabled = state.coins < o.cost; b.addEventListener('click', () => { if (b.dataset.ok) advanceStory(k, i); else { b.dataset.ok = '1'; b.textContent = '確定「' + o.label + '」？再按一次'; } }); card.appendChild(b); }); card.appendChild(mk('p', 'sub', '兩個選擇都會完結這段劇情，但不同派系的反應會完全不同。')); }
   else { const ms = state.fish.filter(C.pred); if (!ms.length) card.appendChild(mk('p', 'sub', '現在缸裡沒有符合的魚。'));
     else { const pk = mk('div', 'opick'); for (const d of ms) { const b = mk('button', 'chipbtn' + (rt.stPick === d.id ? ' on' : ''), rt.stPick === d.id ? '確定交出 ' + d.name + '？' : d.name + '・' + labelOf(d)); b.addEventListener('click', () => { if (rt.stPick === d.id) giveStory(k, d); else { rt.stPick = d.id; reStory(); } }); pk.appendChild(b); } card.appendChild(pk); } }
@@ -3680,12 +3757,13 @@ const LETTERS = ['「給撿到這封信的人：我家的孔雀魚昨天生了 3
 function eventTick(dt){
   if (rt.quake > 0) { rt.quake -= dt; const k = Math.min(1, rt.quake) * 7; cv.style.transform = rt.quake > 0 ? 'translate(' + rand(-k, k).toFixed(1) + 'px,' + rand(-k, k).toFixed(1) + 'px)' : ''; }
   if (rt.flash > 0) rt.flash = Math.max(0, rt.flash - dt * 2.5);
+  typhoonTick(dt); fireworkTick(dt); chronoTick(dt);
   if (rt.storm) { const S2 = rt.storm; S2.next -= dt; if (S2.next <= 0) { if (S2.n <= 0) { rt.storm = null; state.rush = Date.now() + 30 * 6e4; markDirty(); toast('雷雨過後，魚兒進入產卵潮！接下來 30 分鐘配對完不用休息'); logEv('雷雨過後，魚兒進入產卵潮'); } else { S2.n--; S2.next = rand(2.5, 5); rt.flash = 1; for (const r of rt.fish) if (!r.d.box && !isInv(r.d) && Math.random() < .5) { r.vx += rand(-90, 90) * U; rt.emotes.push({type:'bang', x:r.x, y:r.y - fishLen(r) * .4, t:0, life:.8}); } } } }
   const B = rt.bottle; if (B) { B.t += dt; B.y = Math.min(B.y + 10 * U * dt, sandY(B.x) - 10 * U); if (B.t > 45) { rt.bottle = null; toast('漂流瓶被水流帶走了'); } }
   if (rt.mode !== 'play') return;
   rt.evT = (rt.evT == null ? rand(240, 480) : rt.evT) - dt; if (rt.evT > 0) return;
-  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini || rt.cat || rt.storm || rt.bottle) { rt.evT = 30; return; }
-  rt.evT = rand(420, 900); const night = rt.lightK < .5, opts = [['larva', 3], ['bottle', 2.5], ['quake', 1], ['storm', night ? 2.5 : 0]];
+  if (sheet.classList.contains('on') || $('#modal').classList.contains('on') || giftEl.classList.contains('on') || $('#photo').classList.contains('on') || mini || rt.cat || rt.storm || rt.bottle || rt.typhoon || rt.outage) { rt.evT = 30; return; }
+  rt.evT = rand(420, 900); const night = rt.lightK < .5, mo = new Date().getMonth(), opts = [['larva', 3], ['bottle', 2.5], ['quake', 1], ['storm', night ? 2.5 : 0], ['typhoon', mo >= 5 && mo <= 9 ? 1.6 : .45]];
   let x = Math.random() * opts.reduce((a, o) => a + o[1], 0), ev = 'larva'; for (const [k, w] of opts) { if ((x -= w) < 0) { ev = k; break; } }
   if (ev === 'larva') { const n = 10 + ((Math.random() * 7) | 0); for (let i = 0; i < n; i++) rt.plank.push({type:'larva', x:rand(.1, .9) * W, y:safeT + rand(120, 220) * U, vx:rand(-6, 6) * U, vy:0, t:-i * .15, life:rand(50, 75), ph:rand(6)});
     toast('窗邊飛進來的蚊子在水裡產了一群孑孓，魚兒搶著吃！'); logEv('一群孑孓跑進魚缸，變成魚兒的點心'); }
@@ -3693,8 +3771,38 @@ function eventTick(dt){
   else if (ev === 'quake') { rt.quake = 2.6; for (const r of rt.fish) if (!r.d.box) { r.vx += rand(-120, 120) * U; r.vy += rand(-50, 50) * U; } for (const r of rt.fish.slice(0, 8)) rt.emotes.push({type:'bang', x:r.x, y:r.y - fishLen(r) * .4, t:0, life:1});
     for (const dc of state.deco) dc.x = clamp(dc.x + rand(-.02, .02), .04, .96); for (let i = 0; i < 5; i++) { const sx = rand(.1, .9) * W; spawnCoin(sx, sandY(sx) - 6 * U, 3); }
     state.stats.quake = (state.stats.quake | 0) + 1; markDirty(); toast('地震！魚兒嚇了一跳，造景被晃歪了一點，沙子裡還震出幾枚金幣'); logEv('發生地震，魚缸搖了好一陣子'); }
+  else if (ev === 'typhoon') startTyphoon();
   else { rt.storm = {next:1.2, n:4 + ((Math.random() * 3) | 0)}; toast('窗外下起雷雨，閃電把魚缸照得一亮一亮的'); logEv('雷雨夜，閃電把魚兒嚇得到處躲'); }
 }
+function startTyphoon(){ rt.typhoon = {t:0, dur:rand(36, 50), out:rand(7, 13), next:rand(2, 4), dir:Math.random() < .5 ? -1 : 1, rain:Array.from({length:46}, () => [Math.random(), Math.random(), rand(.6, 1.4)])};
+  toast('颱風來了！窗外風雨好大，樹被吹得東倒西歪'); logEv('颱風來襲，窗外風雨交加'); }
+function typhoonTick(dt){ const T = rt.typhoon;
+  if (T) { T.t += dt; T.next -= dt; if (T.next <= 0) { T.next = rand(3, 7); rt.flash = .8; }
+    for (const r of rt.fish) if (!r.d.box && moveMode(r.sp) === 'swim' && !r.sp.alien) r.vx += T.dir * (T.t < T.dur - 6 ? 28 : 10) * U * dt;
+    if (T.out != null && T.t >= T.out) { T.out = null;
+      if (state.up.ups | 0) { toast('啪！停電了……還好有不斷電系統，魚缸照常運作'); logEv('颱風造成停電，不斷電系統撐住了魚缸'); state.stats.outage = (state.stats.outage | 0) + 1; markDirty(); }
+      else { rt.outage = {t:rand(100, 160)}; rt.hudT = 0; toast('啪！停電了！過濾器和加熱棒都停了。按住水面可以當手電筒'); logEv('颱風造成停電，魚缸一片漆黑'); } }
+    if (T.t >= T.dur) { rt.typhoon = null; toast('颱風慢慢走遠了'); } }
+  const O = rt.outage; if (O) { O.t -= dt; if (O.t <= 0) { rt.outage = null; rt.hudT = 0; state.stats.outage = (state.stats.outage | 0) + 1; const a = 120; state.coins += a; bumpCoins(); markDirty();
+      toast('復電了！大家都平安。鄰居送來一點慰問金：+' + a); logEv('復電了，魚缸恢復正常'); } } }
+function drawWeather(c){ const T = rt.typhoon;
+  if (T) { const a = Math.min(1, T.t / 3, (T.dur - T.t) / 4); c.save(); c.globalAlpha = Math.max(0, a) * .22; c.strokeStyle = '#dfeaf2'; c.lineWidth = 1.2 * U; c.beginPath();
+    for (const [px, py, sp] of T.rain) { const y = ((py + rt.t * .9 * sp) % 1) * H, x = ((px + rt.t * .25 * sp * T.dir) % 1 + 1) % 1 * W; c.moveTo(x, y); c.lineTo(x + T.dir * 10 * U, y + 26 * U * sp); } c.stroke(); c.restore(); }
+  if (rt.outage && rt.ptr && rt.mode === 'play') { const p = rt.ptr, R = 115 * U; c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, p.x, p.y, 0, p.x, p.y, R, [[0,'rgba(255,240,205,.42)'],[.45,'rgba(255,240,205,.14)'],[1,'rgba(255,240,205,0)']]); c.fillRect(p.x - R, p.y - R, R * 2, R * 2); c.restore(); } }
+function fireworkTick(dt){ const nd = new Date();
+  if (nd.getMonth() === 0 && nd.getDate() === 1 && nd.getHours() === 0 && nd.getMinutes() < 15 && state.fwYear !== nd.getFullYear() && rt.mode === 'play' && !mini) {
+    state.fwYear = nd.getFullYear(); rt.fw = {n:16, next:.3}; const a = nd.getFullYear(); state.coins += a; bumpCoins(); markDirty(); logEv('跨年夜！一起看了魚缸裡的煙火');
+    setTimeout(() => celebrate({kind:'coins', amount:a, tier:2, head:'跨年', title:'新年快樂！', text:'魚缸裡也放起了煙火。新的一年送你 ' + a.toLocaleString('zh-TW') + ' 金幣！'}), 4000); }
+  const F = rt.fw; if (!F) return; F.next -= dt; if (F.next > 0) return;
+  F.next = rand(.35, .8); F.n--; const x = rand(.15, .85) * W, y = safeT + rand(70, 230) * U, col = pickArr(['#ff6a5a','#ffd24a','#6ae0ff','#c08aff','#7aff9a','#ffffff']);
+  for (let i = 0; i < 28; i++) { const a = i / 28 * TAU, v = rand(60, 95) * U; rt.fx.push({type:'spark', x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, t:0, life:rand(.9, 1.3), col, r:2.4}); }
+  rt.flash = Math.max(rt.flash, .15); if (F.n <= 0) rt.fw = null; }
+function chronoTick(dt){ const j = rt.fish.find(r => r.d.sp === 'chronojelly'); if (!j) return;
+  rt.chronoT = (rt.chronoT == null ? rand(300, 540) : rt.chronoT) - dt; if (rt.chronoT > 0) return; rt.chronoT = rand(480, 780);
+  for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, v = 70 * U; rt.fx.push({type:'spark', x:j.x, y:j.y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, t:0, life:1.1, col:'#ffd480', r:2.2}); }
+  const now = Date.now(), tired = state.fish.filter(d => d.cd > now && !isInv(d)); if (!tired.length) return;
+  const d = pickArr(tired); d.cd = now; state.stats.chrono = (state.stats.chrono | 0) + 1; markDirty();
+  toast('時光水母的光圈一閃，' + d.name + ' 的休息時間被倒轉了，又可以配對了！'); logEv('時光水母倒轉了 ' + d.name + ' 的時間'); }
 function bottleHit(x, y){ const B = rt.bottle; return !!B && Math.hypot(x - B.x, y - B.y) < 32 * U; }
 function openBottle(){ rt.bottle = null; state.stats.bottles = (state.stats.bottles | 0) + 1; const x = Math.random(), letter = pickArr(LETTERS); let txt, amt = 0;
   if (x < .6) { amt = 80 + Math.round(Math.random() * 18) * 10; state.coins += amt; txt = '瓶子裡還塞了 ' + amt + ' 金幣。'; }
@@ -3707,7 +3815,7 @@ function drawEvents(c){
   const B = rt.bottle; if (B) { const a = Math.min(1, B.t / .6, (45 - B.t) / 2); c.save(); c.globalAlpha = Math.max(0, a); c.translate(B.x, B.y); c.rotate(B.rot + Math.sin(rt.t * 1.3) * .08);
     c.fillStyle = 'rgba(120,190,150,.45)'; rr(c, -16 * U, -7 * U, 26 * U, 14 * U, 6 * U); c.fill(); c.fillRect(8 * U, -4 * U, 8 * U, 8 * U); c.strokeStyle = 'rgba(220,255,235,.7)'; c.lineWidth = U; rr(c, -16 * U, -7 * U, 26 * U, 14 * U, 6 * U); c.stroke();
     c.fillStyle = '#a8784a'; c.fillRect(15 * U, -3.5 * U, 5 * U, 7 * U); c.fillStyle = '#f2e6c8'; c.fillRect(-10 * U, -3 * U, 16 * U, 6 * U); c.strokeStyle = '#c0402a'; c.beginPath(); c.moveTo(-2 * U, -3 * U); c.lineTo(-2 * U, 3 * U); c.stroke(); c.restore(); }
-  drawTail(c);
+  drawTail(c); drawWeather(c);
   if (rt.flash > 0) { c.fillStyle = 'rgba(235,242,255,' + (rt.flash * .55).toFixed(3) + ')'; c.fillRect(0, 0, W, H); }
 }
 
@@ -3797,7 +3905,7 @@ function renderDiary(){
 
 /* Water temperature: follows the season at the player's latitude unless a heater/controller holds it. */
 const TEMP = {goldfish:[10,27], ranchu:[12,27], pearlscale:[12,27], oranda:[12,27], bubbleeye:[12,27], koi:[6,28], whitecloud:[14,25], medaka:[8,30], axolotl:[12,23], zebra:[18,28],
-  discus:[27,32], altum:[27,31], pararasbora:[14,26], sakura:[8,20], redarowana:[24,31], goby:[12,27], ram:[26,31], arapaima:[25,32], stingray:[25,31], cardinal:[24,30], angel:[24,30], loach:[24,30], tilapia:[16,35], crystal:[18,25], cherry:[16,29], neocaridina:[16,29], frog:[20,28], slider:[16,32], turtle:[18,30]};
+  discus:[27,32], altum:[27,31], pararasbora:[14,26], garra:[18,34], sakura:[8,20], redarowana:[24,31], goby:[12,27], ram:[26,31], arapaima:[25,32], stingray:[25,31], cardinal:[24,30], angel:[24,30], loach:[24,30], tilapia:[16,35], crystal:[18,25], cherry:[16,29], neocaridina:[16,29], frog:[20,28], slider:[16,32], turtle:[18,30]};
 function tempRange(k){ const S = SPECIES[k]; if (!S || S.alien || S.myth || S.pest || k === 'feeder') return null; if (TEMP[k]) return TEMP[k]; if (S.kind === 'inv') return [15, 30];
   if (S.wild || (S.tags || []).some(t => t.includes('原生'))) return [12, 31]; return [22, 30]; }
 function ambientTemp(now){ const d = new Date(now), lat = HOME ? HOME.lat : 24, al = Math.abs(lat), doy = (d - new Date(d.getFullYear(), 0, 1)) / 864e5;
@@ -3806,7 +3914,8 @@ function ambientTemp(now){ const d = new Date(now), lat = HOME ? HOME.lat : 24, 
 function waterTemp(){ const now = Date.now(), h = state.up.heater | 0; if (h >= 2) return (state.tset || 26) + Math.sin(now / 9e5) * .2;
   const t = ambientTemp(now) + (lightOn() ? .2 : -.1); return h >= 1 ? Math.max(t, 25 + Math.sin(now / 9e5) * .15) : t; }
 function tStress(d){ const R = tempRange(d.sp); if (!R) return 0; if (rt.temp == null) rt.temp = waterTemp(); const t = rt.temp; return t < R[0] ? R[0] - t : t > R[1] ? t - R[1] : 0; }
-function tempTick(dt){ if ((rt.tempT = (rt.tempT || 0) - dt) <= 0) { rt.tempT = 5; rt.temp = waterTemp(); } }
+function tempTick(dt){ if ((rt.tempT = (rt.tempT || 0) - dt) <= 0) { rt.tempT = 5; const out = outageOn(), tg = out ? ambientTemp(Date.now()) - .1 : waterTemp();
+  if (rt.temp == null || !(out || rt.tempEase > 0)) rt.temp = tg; else { rt.temp += (tg - rt.temp) * (out ? .07 : .2); rt.tempEase -= 5; } if (out) rt.tempEase = 90; } }
 function tsetRow(){ const seg = mk('div', 'opick'); for (const [v, n] of [[20,'冷水'],[23,'溫和'],[26,'熱帶'],[28,'高溫']]) { const b = mk('button', 'chipbtn' + (state.tset === v ? ' on' : ''), v + '°C ' + n);
     b.addEventListener('click', () => { state.tset = v; rt.temp = waterTemp(); rt.hudT = 0; markDirty(); renderShop(); toast('恆溫控制器設定為 ' + v + '°C（' + n + '）'); }); seg.appendChild(b); } return seg; }
 
@@ -4339,7 +4448,7 @@ function draw(){
   if (shieldOn() && rt.fish.some(r => r.sp.alien)) { c.strokeStyle = 'rgba(120,220,255,' + (.28 + Math.sin(t * 2) * .1).toFixed(3) + ')'; c.lineWidth = 3; c.strokeRect(3, 3, W - 6, H - 6); }
   for (const f of rt.fx) { const q = f.t / f.life; c.globalAlpha = 1 - q;
     if (f.type === 'text') { c.font = '700 ' + Math.round(17 * U) + 'px ' + FONT; c.textAlign = 'center'; c.lineWidth = 3; c.strokeStyle = 'rgba(60,35,0,.6)'; c.strokeText(f.text, f.x, f.y); c.fillStyle = '#ffd866'; c.fillText(f.text, f.x, f.y); }
-    else { c.fillStyle = f.col; dot(c, f.x, f.y, 1.8 * U); } }
+    else { c.fillStyle = f.col; dot(c, f.x, f.y, (f.r || 1.8) * U); } }
   c.globalAlpha = 1;
   for (const e of rt.emotes) { const q = e.t / e.life, a = q < .2 ? q / .2 : 1 - (q - .2) / .8, y = e.y - q * 22 * U;
     c.globalAlpha = Math.max(0, a);
@@ -4389,6 +4498,7 @@ function updateHud(dt){
   if (state.evSeen !== dayKey()) { state.evSeen = dayKey(); const ev = todayEv(); if (ev) setTimeout(() => toast('今日事件：' + DAY_EVENTS[ev].name + '・' + DAY_EVENTS[ev].desc), 3200); markDirty(); }
   let h = '';
   if (rt.mode !== 'play') h = '';
+  else if (rt.outage) h = '停電中・大約 ' + fmtClock(rt.outage.t * 1000) + ' 後復電・按住水面可以當手電筒';
   else if (rt.stars.length && !state.hints.star) h = '流星！趁它消失前點一下';
   else if (rt.court) h = rt.court.m.d.name + ' 和 ' + rt.court.f.d.name + ' 正在約會';
   else if (!state.hints.feed) h = '點一下水面，丟飼料給魚吃';
@@ -4447,7 +4557,7 @@ function claimBonus(){ const Q = ensureQuest(); if (Q.bonus || !Q.list.every(q =
   celebrate({kind:'charm', n:1, tier:1, head:'今日任務', title:'全部完成！', text:'獎勵 100 金幣和繁殖秘方 ×1。明天午夜會有新的任務。'}); }
 function claimFest(){ const fe = festival(); if (!fe || state.festGot === dayKey()) return; state.festGot = dayKey();
   const a = 88 + Math.floor(Math.random() * 11) * 10; state.coins += a; let extra = ''; if (Math.random() < .3) { state.items.charm++; extra = '，還有繁殖秘方 ×1'; }
-  markDirty(); renderToday(); celebrate({kind:'coins', amount:a, tier:1, head:fe.name, title:a + ' 金幣', text:fe.name + '快樂！拿到 ' + a + ' 金幣' + extra + '。明天還可以再來領。'}); }
+  state.festSeen[fe.k] = 1; logEv('領了' + fe.name + '的節日禮物'); markDirty(); renderToday(); celebrate({kind:'coins', amount:a, tier:1, head:fe.name, title:a + ' 金幣', text:(fe.greet || fe.name + '快樂！') + '拿到 ' + a + ' 金幣' + extra + '。明天還可以再來領。'}); }
 const todayKey = () => (rt.crowdLoss || 0) + '|' + (rt.deadPlants || 0) + '|' + loginState().done + '|' + (state.scoopDay === dayKey()) + '|' + ensureQuest().list.map(q => qProg(q) + ':' + q.got).join() + '|' + state.quest.bonus + '|' + state.fish.filter(f => f.ich).length + '|' + state.items.med + '|' + state.festGot;
 function renderToday(){
   $('#sheetTitle').textContent = '今日'; setTabs(null);
@@ -4688,6 +4798,8 @@ function drawGearIcon(c, k, w, h){
   else if (k === 'feeder') { c.fillStyle = '#5a8ab0'; rr(c, x - 22, 18, 44, 22, 5); c.fill(); c.fillStyle = '#2a3a48'; c.fillRect(x - 8, 40, 16, 5); c.fillStyle = '#b5652e'; for (let i = 0; i < 4; i++) dot(c, x - 6 + i * 4, 52 + (i % 2) * 8, 2.4); }
   else if (k === 'heater') { c.fillStyle = 'rgba(210,235,250,.35)'; rr(c, x - 8, 16, 16, h - 28, 8); c.fill(); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 2; c.stroke(); c.strokeStyle = '#ff7a3a'; c.lineWidth = 2.4; c.beginPath(); for (let i = 0; i <= 12; i++) c.lineTo(x + (i % 2 ? 5 : -5), 30 + i * (h - 52) / 12); c.stroke(); c.fillStyle = '#3a4a52'; rr(c, x - 10, 8, 20, 14, 4); c.fill(); c.fillStyle = '#ff7a3a'; dot(c, x, 15, 3); c.fillStyle = '#eaf6fb'; c.font = '700 16px system-ui,sans-serif'; c.textAlign = 'left'; c.fillText('°C', x + 18, h / 2 + 6); }
   else if (k === 'box') { c.fillStyle = 'rgba(220,240,250,.25)'; rr(c, x - 34, 22, 68, 46, 6); c.fill(); c.strokeStyle = 'rgba(235,248,255,.8)'; c.lineWidth = 2.5; c.stroke(); c.beginPath(); for (const hx of [x - 22, x + 22]) { c.moveTo(hx, 22); c.lineTo(hx, 12); c.quadraticCurveTo(hx, 6, hx - 6, 6); } c.stroke(); c.fillStyle = '#ffb36b'; c.beginPath(); c.ellipse(x, 46, 11, 5.5, 0, 0, TAU); c.fill(); c.beginPath(); c.moveTo(x - 9, 46); c.lineTo(x - 17, 40); c.lineTo(x - 17, 52); c.closePath(); c.fill(); }
+  else if (k === 'ups') { c.fillStyle = '#3a4248'; rr(c, x - 30, y - 20, 50, 40, 6); c.fill(); c.strokeStyle = '#c8d0d4'; c.lineWidth = 2; rr(c, x - 24, y - 10, 34, 20, 3); c.stroke(); c.fillStyle = '#c8d0d4'; c.fillRect(x + 10, y - 4, 4, 8);
+    c.fillStyle = '#5ad07a'; for (let i = 0; i < 3; i++) c.fillRect(x - 21 + i * 10, y - 7, 7, 14); c.fillStyle = '#ffd040'; c.beginPath(); c.moveTo(x + 30, y - 30); c.lineTo(x + 18, y - 8); c.lineTo(x + 26, y - 8); c.lineTo(x + 19, y + 12); c.lineTo(x + 36, y - 14); c.lineTo(x + 28, y - 14); c.closePath(); c.fill(); }
   else if (k === 'lid') { c.fillStyle = 'rgba(225,245,255,.8)'; rr(c, 10, 12, w - 20, 9, 3); c.fill(); c.fillStyle = '#5a6a72'; rr(c, x - 12, 6, 24, 7, 3); c.fill(); c.fillStyle = '#e3a35c'; dot(c, x + 24, h - 30, 9); for (const q of [-8, 0, 8]) dot(c, x + 24 + q, h - 41 + Math.abs(q) * .4, 3.6); c.strokeStyle = 'rgba(230,60,40,.95)'; c.lineWidth = 3.5; c.beginPath(); c.moveTo(x + 8, h - 52); c.lineTo(x + 40, h - 18); c.stroke(); }
   else if (k === 'led') { c.fillStyle = '#3a3a40'; c.fillRect(16, 18, w - 32, 8); c.fillStyle = 'rgba(255,250,210,.9)'; for (let i = 0; i < 6; i++) dot(c, 24 + i * ((w - 48) / 5), 22, 2.5); c.fillStyle = 'rgba(255,250,210,.25)'; c.beginPath(); c.moveTo(18, 26); c.lineTo(w - 18, 26); c.lineTo(w - 4, h - 12); c.lineTo(4, h - 12); c.closePath(); c.fill(); }
 }
@@ -5195,7 +5307,7 @@ $('#camBtn').addEventListener('click', takePhoto);
 $('#photoOk').addEventListener('click', () => $('#photo').classList.remove('on'));
 $('#photoDl').addEventListener('click', savePhoto);
 $('#photo').addEventListener('click', e => { if (e.target.id === 'photo') $('#photo').classList.remove('on'); });
-$('#lamp').addEventListener('click', () => { const on = !lightOn(); state.light = {on, until:nextBoundary()}; rt.hudT = 0; markDirty(); toast(on ? '開燈了，魚兒醒來囉' : '關燈了，魚兒準備睡覺'); });
+$('#lamp').addEventListener('click', () => { if (outageOn()) { toast('停電中，燈打不開。按住水面可以當手電筒'); return; } const on = !lightOn(); state.light = {on, until:nextBoundary()}; rt.hudT = 0; markDirty(); toast(on ? '開燈了，魚兒醒來囉' : '關燈了，魚兒準備睡覺'); });
 $('#sheetClose').addEventListener('click', closeSheet); scrim.addEventListener('click', closeSheet);
 $('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (!t) return; if (sheetKind === 'shop') shopTab = t.dataset.tab; else if (sheetKind === 'list') listTab = t.dataset.tab; sheetBody.scrollTop = 0; renderSheet(); });
 $('#mOk').addEventListener('click', () => { $('#modal').classList.remove('on'); bumpCoins(); setTimeout(nextCeleb, 250); });
