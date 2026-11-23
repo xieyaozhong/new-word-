@@ -383,6 +383,15 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
 .dexhead{padding:2px 6px 10px;font-size:13.5px;color:var(--mist)}
 .dexhead b{color:var(--foam);font-weight:400}
 .dexgrp{margin:12px 6px 6px;font-size:14px}
+.dexback{margin:2px 2px 10px}
+.dexhero{width:100%;height:auto;border-radius:16px;background:linear-gradient(#2c8fa1,#0f4a5c);display:block}
+.dexhero.deep{background:#020812}
+.dexd h3{margin:12px 4px 4px;font-size:20px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dexd>p{margin:5px 4px;font-size:14px;line-height:1.55;white-space:pre-line}
+.dexd>p.dim{color:var(--mist);font-size:13px}
+.dtile{cursor:default}
+.dtile small{line-height:1.35}
+.dtile.locked b{opacity:.6}
 .dex{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 2px}
 .dcell{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);text-align:center;cursor:pointer}
 .dcell canvas{width:100%;max-width:100px;height:58px;border-radius:10px;background:linear-gradient(#2c8fa1,#0f4a5c);display:block}
@@ -8072,9 +8081,49 @@ function renderList(){
   const l4 = mk('div'); l4.append(mk('b', '', '小提醒'), '　魚約 16 小時會從飽變餓，不會餓死，但餓了就不掉金幣。晚上七點到早上六點會自動關燈。');
   f.append(l1, l2, l3, l4); sheetBody.appendChild(f);
 }
+/* ---------- Dex detail: unlocked colours and genes; deep-sea creatures and giants ---------- */
+let dexSel = null, dexScroll = 0;
+function dexOpen(sel){ dexScroll = sheetBody.scrollTop; dexSel = sel; renderList(); sheetBody.scrollTop = 0; }
+function dexBack(){ dexSel = null; renderList(); sheetBody.scrollTop = dexScroll; }
+function dexTile(cv, label, sub, locked){ const w = mk('div', 'dcell dtile'); if (locked) w.classList.add('locked'); w.append(cv, mk('b', '', label)); if (sub) w.appendChild(mk('small', '', sub)); return w; }
+function dexDeepSections(){ const D = deepS(), seenN = Object.keys(DSP).filter(k => D.seen[k]).length, ownN = Object.keys(D.gown || {}).length;
+  sheetBody.appendChild(mk('div', 'dexgrp', '深海生物（深海研究站限定）' + seenN + '/' + Object.keys(DSP).length)); let grid = mk('div', 'dex');
+  for (const k of Object.keys(DSP)) { const S = DSP[k], seen = !!D.seen[k], cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; deepThumb(cv, k, seen);
+    cell.append(cv, mk('b', '', seen ? S.name : '？？？'), mk('small', '', DZONES[S.zone].name + '・' + DZONES[S.zone].depth));
+    cell.addEventListener('click', () => seen ? dexOpen({t:'deep', k}) : toast(D.built ? '派潛水艇去' + DZONES[S.zone].name + '探測，有機會撈到牠' : '先點魚缸右上角的潛水艇按鈕，建造深海研究站')); grid.appendChild(cell); }
+  sheetBody.appendChild(grid);
+  sheetBody.appendChild(mk('div', 'dexgrp', '深海巨獸（巨獸區限定）' + ownN + '/' + Object.keys(GIANTS).length)); grid = mk('div', 'dex');
+  for (const k of Object.keys(GIANTS)) { const G = GIANTS[k], own = !!(D.gown || {})[k], n = (D.gclue || {})[k] | 0, cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; giantThumb(cv, k, own);
+    cell.append(cv, mk('b', '', own || n ? G.name : '？？？'), mk('small', '', own ? G.era : G.need && ownN < G.need ? '先捕獲 ' + G.need + ' 隻巨獸' : '線索 ' + n + '/3'));
+    cell.addEventListener('click', () => own || n ? dexOpen({t:'giant', k}) : toast(D.built ? '深海探測時有機會撿到牠的線索' : '先建造深海研究站，才能追蹤深海巨獸')); grid.appendChild(cell); }
+  sheetBody.appendChild(grid); }
+function renderDexDetail(sel){
+  const back = mk('button', 'chipbtn dexback', '← 回圖鑑'); back.addEventListener('click', dexBack); sheetBody.appendChild(back);
+  const box = mk('div', 'dexd'); sheetBody.appendChild(box); const hero = document.createElement('canvas'); hero.className = 'dexhero'; hero.width = 640; hero.height = 340;
+  if (sel.t === 'deep') { const S = DSP[sel.k], Z = DZONES[S.zone], D = deepS(), n = D.list.filter(e => e.sp === sel.k).length; deepThumb(hero, sel.k, true); hero.classList.add('deep');
+    const h3 = mk('h3', '', S.name); h3.append(mk('span', 'tag', Z.name), mk('span', 'tag', Z.depth)); box.append(hero, h3, mk('p', '', S.desc), mk('p', '', '研究資料 +' + S.rp + '/時・' + S.trait), mk('p', 'dim', n ? '研究站裡養了 ' + n + ' 隻' : '研究站裡目前沒有養')); return; }
+  if (sel.t === 'giant') { const G = GIANTS[sel.k], D = deepS(), own = !!(D.gown || {})[sel.k], n = (D.gclue || {})[sel.k] | 0; giantThumb(hero, sel.k, own); hero.classList.add('deep');
+    const h3 = mk('h3', '', G.name); h3.append(mk('span', 'tag', G.era), mk('span', 'tag', DZONES[G.zone].name)); box.append(hero, h3);
+    if (own) box.append(mk('p', '', G.desc), mk('p', '', '招牌動作：' + G.act), mk('p', '', '研究資料 +' + G.rp + '/時（不用餵）'));
+    else box.append(mk('p', '', '還沒捕獲。已經找到的線索：'), ...G.clues.slice(0, n).map(c => mk('p', 'dim', '・' + c)), mk('p', 'dim', n >= 3 ? '線索集滿了，可以到深海研究站的「巨獸檔案」追蹤牠。' : '再找到 ' + (3 - n) + ' 個線索就能追蹤。'));
+    return; }
+  const k = sel.k, S = SPECIES[k], e = state.dex[k] || {m:[], r:[], t:[]}, m0 = e.m.length ? e.m[0] : 0, gl0 = genesFor(k);
+  drawFishThumb(hero, k, palette(k, 11, m0), 0, {puffK:0}, .8);
+  const h3 = mk('h3', '', S.name); for (const t of (S.tags || []).slice(0, 4)) h3.appendChild(mk('span', 'tag', t)); box.append(hero, h3, mk('p', '', S.desc));
+  if (S.traits && S.traits.length) box.appendChild(mk('p', 'dim', '・' + S.traits.join('\n・')));
+  const sec = (title, list) => { box.appendChild(mk('h4', 'sec', title)); const g = mk('div', 'dex'); for (const c of list) g.appendChild(c); box.appendChild(g); };
+  const thumb = (P, fx, lock) => { const cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; drawFishThumb(cv, k, P, 0, {puffK:0}, .78, fx, 11); if (lock) silhouette(cv); return cv; };
+  sec('花色 ' + e.m.length + '/' + S.morphs.length, S.morphs.map((nm, i) => { const got = e.m.includes(i); return dexTile(thumb(palette(k, 11, i), null, !got), got ? nm : '？？？', got ? '' : '還沒養過', !got); }));
+  sec('稀有色 ' + e.r.length + '/' + Object.keys(RARES).length, Object.keys(RARES).map(rk => { const R0 = RARES[rk], got = e.r.includes(rk); return dexTile(thumb(rarePal(palette(k, 11, m0), rk, 0), null, !got), got ? R0.name : '？？？', R0.tier > 1 ? '傳說' : '稀有', !got); }));
+  if (gl0.length) sec('基因 ' + (e.t || []).filter(x => gl0.some(G => G.k === x)).length + '/' + gl0.length, gl0.map(G => { const got = (e.t || []).includes(G.k), d = {sp:k, seed:11, m:m0, g:{[G.k]:2}, rare:''}, fx = geneFx(d);
+      const sub = got ? DOM_LABEL[G.dom] + (FX_NOTE[G.fx] ? '・' + FX_NOTE[G.fx] : '') : DOM_LABEL[G.dom] + '・還沒出現過';
+      return dexTile(thumb(palWithGenes(palette(k, 11, m0), fx), fx, !got), got ? geneNameAll(G) : '？？？', sub, !got); }));
+  box.appendChild(mk('p', 'foot', '養過的花色、出現過的稀有色和基因會自動記錄在圖鑑裡。隱性基因要爸媽都帶有才會在寶寶身上出現。'));
+}
 function renderDex(){
+  if (dexSel) return renderDexDetail(dexSel);
   const all = Object.keys(SPECIES).filter(k => !SPECIES[k].hidden), found = all.filter(k => state.dex[k]).length, rareN = all.reduce((s, k) => s + (state.dex[k] ? state.dex[k].r.length : 0), 0);
-  const head = mk('div', 'dexhead'); head.append('已發現 ', mk('b', '', found + ' / ' + all.length), ' 種・稀有花色 ', mk('b', '', String(rareN)), ' 種。點格子看說明。'); sheetBody.appendChild(head);
+  const head = mk('div', 'dexhead'); { const D = deepS(); head.append('已發現 ', mk('b', '', found + ' / ' + all.length), ' 種・稀有花色 ', mk('b', '', String(rareN)), ' 種・深海 ', mk('b', '', Object.keys(D.seen || {}).length + ' / ' + Object.keys(DSP).length), '・巨獸 ', mk('b', '', Object.keys(D.gown || {}).length + ' / ' + Object.keys(GIANTS).length), '。點格子看已解鎖的花色和基因。'); } sheetBody.appendChild(head);
   const groups = [['魚', SHOP_FISH], ['小生物', INVS], ['季節限定', SEASONAL], ['神秘魚種', MYSTERY], ['特殊生物（來客限定）', SPECIALS], ['野外生物（探險限定）', WILD], ['外星生物（外星訪客限定）', ALIENS], ['劇情限定', STORYS], ['傳說生物', MYTHS], ['不速之客', PESTS]];
   for (const [label, keys] of groups) {
     sheetBody.appendChild(mk('div', 'dexgrp', label)); const grid = mk('div', 'dex');
@@ -8083,11 +8132,12 @@ function renderDex(){
       drawFishThumb(cnv, k, palette(k, 11, e ? e.m[0] : 0), 0, {puffK:0}, .78); if (!e) silhouette(cnv);
       const dots = mk('div', 'dots'); for (const rk of Object.keys(RARES)) { const i = document.createElement('i'); if (e && e.r.includes(rk)) i.style.background = RARES[rk].col; i.title = RARES[rk].name; dots.appendChild(i); }
       cell.append(cnv, mk('b', '', e ? S.name : '？？？'), mk('small', '', e ? '花色 ' + e.m.length + '/' + S.morphs.length + (genesFor(k).length ? '・基因 ' + (e.t || []).length + '/' + genesFor(k).length : '') : S.season ? SEASONS[S.season].full + '限定' : S.story ? '劇情限定' : S.myth ? '錦鯉躍龍門' : S.moon ? '滿月夜晚限定' : S.pest ? '自己會出現' : S.wild ? '探險限定' : S.mystery ? (S.hybrid ? '禮包或配種' : '禮包限定') : S.special ? NPCS[S.npc].name + '限定' : shopHint(k)), dots);
-      cell.addEventListener('click', () => toast(e ? (genesFor(k).length ? S.name + ' 基因：' + genesFor(k).map(G => ((e.t || []).includes(G.k) ? '✓' : '？') + geneNameAll(G)).join(' ') : S.name + '：' + S.desc) : S.season ? (S.raised ? '冬天買鰻線回來養大，牠就會變成日本鰻' : '只有' + SEASONS[S.season].full + '會在水族店「今日」分頁販售') : S.story ? '完成「' + NPCS[STORY[S.story].npc].name + '」的劇情〈' + STORY[S.story].title + '〉才會得到' : S.myth ? '好感度滿分的成年錦鯉，每天可以挑戰一次躍龍門，成功就會化身成龍' : S.moon ? '滿月那幾天的晚上關燈，有機會漂進來，要趁牠漂走前點牠' : S.pest ? '在特定情況下會自己跑進魚缸' : S.wild ? '派魚去' + wildSites(k) + '探險時可能遇到' : S.mystery ? (S.hybrid ? '傳說兩種慈鯛配對會生出牠…' : '只有抽禮包才遇得到') : S.special ? '偶爾來店裡的' + NPCS[S.npc].role + ' ' + NPCS[S.npc].name + ' 才有賣' : shopHint(k) === '輪流進貨' ? '還沒進貨，留意水族店的「今日」分頁' : '水族店現在就買得到'));
+      cell.addEventListener('click', () => e ? dexOpen({t:'sp', k}) : toast(e ? (genesFor(k).length ? S.name + ' 基因：' + genesFor(k).map(G => ((e.t || []).includes(G.k) ? '✓' : '？') + geneNameAll(G)).join(' ') : S.name + '：' + S.desc) : S.season ? (S.raised ? '冬天買鰻線回來養大，牠就會變成日本鰻' : '只有' + SEASONS[S.season].full + '會在水族店「今日」分頁販售') : S.story ? '完成「' + NPCS[STORY[S.story].npc].name + '」的劇情〈' + STORY[S.story].title + '〉才會得到' : S.myth ? '好感度滿分的成年錦鯉，每天可以挑戰一次躍龍門，成功就會化身成龍' : S.moon ? '滿月那幾天的晚上關燈，有機會漂進來，要趁牠漂走前點牠' : S.pest ? '在特定情況下會自己跑進魚缸' : S.wild ? '派魚去' + wildSites(k) + '探險時可能遇到' : S.mystery ? (S.hybrid ? '傳說兩種慈鯛配對會生出牠…' : '只有抽禮包才遇得到') : S.special ? '偶爾來店裡的' + NPCS[S.npc].role + ' ' + NPCS[S.npc].name + ' 才有賣' : shopHint(k) === '輪流進貨' ? '還沒進貨，留意水族店的「今日」分頁' : '水族店現在就買得到'));
       grid.appendChild(cell);
     }
     sheetBody.appendChild(grid);
   }
+  dexDeepSections();
   const p = mk('p', 'foot'); p.textContent = '每種魚都有自己的基因，例如孔雀魚的緞帶、鬥魚的半月、金魚的熊貓，所有魚都可能出現白子。基因照顯性、隱性的規則遺傳給寶寶，每個基因每窩約有 2.5% 機率突變（繁殖秘方 3 倍）。另外還有稀有色：墨黑、白金（稀有），彩虹、星河（傳說）。點格子可以看這種魚的基因收集進度。'; sheetBody.appendChild(p);
 }
 
