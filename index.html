@@ -66,6 +66,31 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--coin);outline-o
 .mtip{position:absolute;left:24px;right:24px;bottom:calc(env(safe-area-inset-bottom) + 28px);text-align:center;color:rgba(255,255,255,.92);font-size:14.5px;line-height:1.5;transition:opacity .4s;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .evcard{margin:0 4px 10px;padding:11px 13px;border-radius:16px;background:rgba(111,195,255,.1);border:1px solid rgba(111,195,255,.28)}
 .evcard.fest{background:rgba(255,139,116,.12);border-color:rgba(255,139,116,.35)}
+.evcard.hurt{background:rgba(255,110,100,.1);border-color:rgba(255,110,100,.38)}
+.qpill.inj{display:block;margin-top:5px;border-color:rgba(255,110,100,.65);color:#ffb4a8}
+.qpill.inj[hidden]{display:none}
+.kboard{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--rim);margin:6px 0 10px}
+.khead{display:flex;gap:10px;align-items:center;margin-bottom:4px}.khead b{display:block;font-size:15px}.khead small{display:block;color:var(--mist);font-size:12.5px}
+.kemo{font-size:28px;width:54px;text-align:center;flex:none;line-height:1}
+.kstep{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid rgba(255,255,255,.07)}
+.kstep>div{flex:1;min-width:0}.kstep b{display:block;font-size:14px}.kstep small{display:block;font-size:12px;color:var(--mist);line-height:1.5}
+.kstep .kmeta{color:#bfe0d8}.kstep .kmeta.hi{color:#ffa07a}.kstep.done b{color:#8ad8a8}
+.kboard .btn{margin-top:8px}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.ktool{padding:6px 4px;border-radius:12px;background:rgba(255,255,255,.05);text-align:center;opacity:.42;cursor:pointer}.ktool.on{opacity:1;background:rgba(138,216,168,.08)}
+.ktool canvas{width:100%;height:auto;display:block}.ktool b{display:block;font-size:12.5px}.ktool small{font-size:11px;color:var(--mist)}
+#ghost{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(12,8,30,.6)}
+#ghost.on{display:flex}
+#ghost.mini{background:transparent;align-items:flex-start;padding-top:calc(env(safe-area-inset-top) + 150px)}
+#ghost .gbox{max-width:340px;width:100%;background:var(--glass-strong);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(200,190,255,.35);border-radius:20px;padding:18px;text-align:center}
+#ghost.mini .gbox{padding:0;background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+#ghost.mini .gfull,#ghost .gmini{display:none}#ghost.mini .gmini{display:inline-block}
+#ghost h3{margin:6px 0;font-size:20px}#ghost p{font-size:14px;line-height:1.65;margin:6px 0}#ghost .sub{color:var(--mist);font-size:12.5px}
+#ghost .btn{width:100%;margin-top:8px}
+#ghost .gh{font-size:52px;animation:ghf 2.6s ease-in-out infinite}
+@keyframes ghf{50%{transform:translateY(-9px) rotate(-4deg)}}
+.gmini{border:1px solid rgba(200,190,255,.5);background:var(--glass-strong);color:#e4ddff;border-radius:999px;padding:8px 16px;font-size:13.5px;cursor:pointer}
+body.dead #tank{filter:grayscale(.85) brightness(.8)}
 .evcard.season.spring{background:rgba(255,176,204,.1);border-color:rgba(255,176,204,.32)}.evcard.season.summer{background:rgba(255,214,90,.09);border-color:rgba(255,214,90,.3)}.evcard.season.autumn{background:rgba(232,128,58,.1);border-color:rgba(232,128,58,.32)}.evcard.season.winter{background:rgba(168,216,255,.1);border-color:rgba(168,216,255,.32)}
 .evcard h3{margin:0 0 3px;font-size:16px}
 .evcard p{margin:0 0 6px;font-size:13px;color:var(--mist);line-height:1.5}
@@ -360,12 +385,16 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
 
 <canvas id="tank" aria-label="魚缸。點水面餵魚，點金幣收集，點魚看資料。"></canvas>
 <div id="probe"></div>
+<div id="ghost" role="dialog" aria-label="靈魂狀態"><div class="gbox"><div class="gfull"><div class="gh">👻</div><h3>你……死掉了</h3><p id="ghText"></p>
+  <p class="sub">24 小時後會在醫院醒來，還要 <b id="ghLeft"></b>。這段時間不能餵魚、擦玻璃或做任何事；有自動餵食器的話，魚還吃得到飯。</p>
+  <button class="btn" id="ghPay"></button><button class="btn ghost" id="ghLook">飄著看魚缸</button></div><button class="gmini" id="ghMini"></button></div></div>
 
 <header id="hud">
   <div class="purse">
     <div class="coins" id="coins"><svg class="ico" id="coinIco"><use href="#i-coin"/></svg><span id="coinNum">0</span><span class="sr">金幣</span></div>
     <div class="meta" id="meta">水溫 26.0°C・第 1 天</div>
     <button class="qpill" id="qpill"><span id="qtxt">今日任務</span></button>
+    <button class="qpill inj" id="injpill" hidden></button>
   </div>
   <div class="right">
     <div class="gauges">
@@ -772,6 +801,8 @@ Object.assign(NPCS, {
        lines:['我在夜市撈到一隻魚，媽媽說家裡養不下…可以送給你嗎？','哇，你的魚缸好漂亮喔！','我長大以後也要當水族館館長！']},
   lan:{name:'阿蘭', role:'溪流保育志工', items:['goby','mudsnail','paradise'], coat:'#5a8a4a', acc:'cap', capc:'#3a5a2a', hair:'#2a2420', skin:'#e0b48a',
        lines:['這些都是保育單位人工繁殖的原生種，可以合法飼養喔。','紅斑吻鰕虎只住在台灣，很多溪流都已經看不到了。','石田螺以前田裡到處都是，現在反而要特別保護。']},
+  chef:{name:'阿忠師', role:'辦桌總舖師', mode:'chef', items:[], coat:'#f6f4ee', acc:'chef', hair:'#2a2420', skin:'#d9a27a',
+       lines:['少年仔，有好魚就留給我，價錢不會虧待你！','辦桌最重要的就是食材新鮮，活締放過血的魚才不會腥。','河豚很好吃，但沒有證照千萬不要自己殺，會出人命的。','刀要利、手要穩、心要靜。電鰻死了還會電人，你知道嗎？']},
   stray:{name:'橘子', role:'附近的流浪貓', mode:'cat', cat:true, items:[], lines:['喵～','（盯著你的魚缸，尾巴甩來甩去）','（在你腳邊翻肚子）']},
 });
 const NPC_KEYS = Object.keys(NPCS), ALIEN_NPCS = NPC_KEYS.filter(k => NPCS[k].alien);
@@ -1538,6 +1569,9 @@ function migrate(s){
   s.catFed = clamp(s.catFed | 0, 0, 3); s.catPet = +s.catPet || 0; s.bless = +s.bless || 0; s.tailDay = typeof s.tailDay === 'string' ? s.tailDay : '';
   s.boxAuto = s.boxAuto === 0 ? 0 : 1; s.moonDay = typeof s.moonDay === 'string' ? s.moonDay : ''; s.moonTip = typeof s.moonTip === 'string' ? s.moonTip : '';
   s.food = FOODS[s.food] ? s.food : 'pellet'; s.tset = [20, 23, 26, 28].includes(+s.tset) ? +s.tset : 26; s.waferT = +s.waferT || 0;
+  s.tools = Object.fromEntries(TOOLS.filter(k => s.tools && s.tools[k]).map(k => [k, 1]));
+  s.fridge = Array.isArray(s.fridge) ? s.fridge.map(cleanIng).filter(B => B && B.steps.length).slice(0, FRIDGE_MAX) : []; s.board = cleanIng(s.board); if (s.board && !s.board.steps.length) s.board = null; s.boardSel = typeof s.boardSel === 'string' ? s.boardSel : '';
+  s.inj = s.inj && INJ[s.inj.k] && +s.inj.until > 0 ? {k:s.inj.k, at:+s.inj.at || Date.now(), until:+s.inj.until, sp:SPECIES[s.inj.sp] ? s.inj.sp : 'tilapia', cause:String(s.inj.cause || '')} : null;
   s.bgoal = s.bgoal && typeof s.bgoal.wk === 'string' && SPECIES[s.bgoal.sp] ? {wk:s.bgoal.wk, sp:s.bgoal.sp, g1:String(s.bgoal.g1 || ''), g2:String(s.bgoal.g2 || ''), got:[0, 1, 2].map(i => Array.isArray(s.bgoal.got) && s.bgoal.got[i] ? 1 : 0)} : null;
   s.orders = s.orders && typeof s.orders.day === 'string' && Array.isArray(s.orders.list) ? {day:s.orders.day, list:s.orders.list.filter(o => o && SPECIES[o.sp]).slice(0, 3).map(o => ({sp:o.sp, t:['adult','sex','morph','gene','home'].includes(o.t) ? o.t : 'adult', v:o.v == null ? null : o.v, r:Math.max(10, +o.r || 50), who:String(o.who || '客人'), why:String(o.why || ''), done:o.done ? 1 : 0}))} : null;
   s.metNpc = !!s.metNpc; s.metAlien = !!s.metAlien; s.shield = +s.shield || 0;
@@ -1602,7 +1636,7 @@ function nextVisitText(npc){ const nv = nextVisit(npc), N = NPCS[npc]; if (!nv) 
   return N.name + '預計' + (dd === 0 ? '今天' : dd === 1 ? '明天' : dd === 2 ? '後天' : ' ' + dd + ' 天後') + ' ' + h + ':00–' + (h + 4) + ':00 會來水族店，那時候才能推進劇情。'; }
 const NPC_AFTER = {lin:['pararasbora','labkit'], lan:['sakura','waterwheel'], huang:['redarowana','goldbars'], elya:['starwhale','crystal'], ade:['oldturtle','amulet'], hsiung:['goldprawn','garlicbait'],
   an:['galaxybetta','kiddraw'], chang:['garra','cleanse'], zorb:['chronojelly','timeshard'], adi:['sulawesi','borobudur'], wang:['lungfish','fossil'], chen:['kohaku','podium'], ajhu:['tosakin','nightstall','thickpoi'],
-  gula:['treasurefish','ufo'], ohm:['robofish','circuit'], stray:['catsub','catgift']};
+  gula:['treasurefish','ufo'], ohm:['robofish','circuit'], stray:['catsub','catgift'], chef:['scaler','yanagi','unagi','ice','shears','crab8','shucker','mail','rubber','fugu','fugulic','hazmat']};
 const npcAfter = npc => NPC_AFTER[npc] || [];
 function npcQuestDone(npc){ if (NPCS[npc].cat) return !!state.catPet; const q = storyOfNpc(npc); return !!(q && storyState(q).done); }
 const anyName = k => (ITEMS[k] || DECOS[k] || SPECIES[k] || {}).name || k;
@@ -3758,10 +3792,12 @@ const ACHS = [
   ['gold','金獎魚','在品評會拿到金獎', s => [s.fish.some(f => f.aw === 1) || s.stats.gold ? 1 : 0, 1], 800], ['scoop10','撈魚高手','撈金魚一次撈到 10 隻', s => [s.stats.scoopBest | 0, 10], 400],
   ['login7','全勤獎','連續簽到 7 天', s => [s.login.streak | 0, 7], 500], ['bff','摯友','和一隻魚的好感度達到 100', s => [Math.round(Math.max(0, ...s.fish.map(f => f.aff || 0))), 100], 400],
   ['pest20','除螺大隊','吃掉 20 隻螺', s => [s.stats.snails | 0, 20], 400], ['pearl','珍珠','河蚌產出第一顆珍珠', s => [s.stats.pearls | 0, 1], 300],
-  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 15 段劇情', s => [s.stats.stories | 0, 15], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['goldking','金魚王','在達人攤撈到傳說中的金魚王', s => [s.miniDex && s.miniDex['scoop.king'] ? 1 : 0, 1], 800], ['shrimpking','蝦王','在釣蝦場釣到蝦王', s => [s.miniDex && s.miniDex['shrimp.king'] ? 1 : 0, 1], 800], ['legend12','夜市傳說','找到撈金魚和釣蝦的全部 12 種隱藏生物', s => [Object.keys(s.miniDex || {}).length, 12], 1500], ['bigprawn','大物','釣到一隻 100 g 以上的泰國蝦', s => [(s.miniBest && s.miniBest.fw) >= 100 ? 1 : 0, 1], 300], ['bobatea','珍奶控','在魚缸裡放一杯珍珠奶茶', s => [s.deco.some(d => d.k === 'bubbletea') ? 1 : 0, 1], 100], ['jungle','水草叢林','魚缸裡同時有 6 種不同的活水草', s => [new Set(s.deco.filter(d => DECOS[d.k].plant && !d.dead).map(d => d.k)).size, 6], 400], ['twriver','台灣溪流缸','同時養 5 種台灣原生生物', s => [new Set(s.fish.filter(d => isTwNative(d)).map(d => d.sp)).size, 5], 400], ['trade1','第一筆交易','跟其他玩家完成一次交易', s => [s.stats.trades | 0, 1], 200], ['trade10','魚市大亨','跟其他玩家完成 10 次交易', s => [s.stats.trades | 0, 10], 800], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
+  ['story1','說書人','完成一段劇情', s => [s.stats.stories | 0, 1], 300], ['story4','劇情全破','完成全部 16 段劇情', s => [s.stats.stories | 0, 16], 3000], ['typhoon','颱風夜','撐過一次颱風停電', s => [s.stats.outage | 0, 1], 200], ['fest4','過節達人','領過 4 種不同節日的禮物', s => [Object.keys(s.festSeen || {}).length, 4], 500], ['tigers','虎皮魚大隊','同時養 6 隻以上虎皮魚，牠們就不會亂咬別人', s => [s.fish.filter(d => d.sp === 'tigerbarb').length, 6], 200], ['fireflies','螢火守護者','同時養 3 隻黃緣螢幼蟲', s => [s.fish.filter(d => d.sp === 'firefly').length, 3], 200], ['galaxyg','銀河系','養出一隻看得出「銀河」或「星點」基因的魚', s => [s.fish.some(d => traitsOf(d).some(t => t.G.fx === 'galaxy')) ? 1 : 0, 1], 300], ['goldking','金魚王','在達人攤撈到傳說中的金魚王', s => [s.miniDex && s.miniDex['scoop.king'] ? 1 : 0, 1], 800], ['shrimpking','蝦王','在釣蝦場釣到蝦王', s => [s.miniDex && s.miniDex['shrimp.king'] ? 1 : 0, 1], 800], ['legend12','夜市傳說','找到撈金魚和釣蝦的全部 12 種隱藏生物', s => [Object.keys(s.miniDex || {}).length, 12], 1500], ['bigprawn','大物','釣到一隻 100 g 以上的泰國蝦', s => [(s.miniBest && s.miniBest.fw) >= 100 ? 1 : 0, 1], 300], ['bobatea','珍奶控','在魚缸裡放一杯珍珠奶茶', s => [s.deco.some(d => d.k === 'bubbletea') ? 1 : 0, 1], 100], ['jungle','水草叢林','魚缸裡同時有 6 種不同的活水草', s => [new Set(s.deco.filter(d => DECOS[d.k].plant && !d.dead).map(d => d.k)).size, 6], 400], ['twriver','台灣溪流缸','同時養 5 種台灣原生生物', s => [new Set(s.fish.filter(d => isTwNative(d)).map(d => d.sp)).size, 5], 400], ['trade1','第一筆交易','跟其他玩家完成一次交易', s => [s.stats.trades | 0, 1], 200], ['trade10','魚市大亨','跟其他玩家完成 10 次交易', s => [s.stats.trades | 0, 10], 800], ['clean10','魚的美容院','親親魚幫其他魚清潔 10 次', s => [s.stats.cleaned | 0, 10], 300], ['facgift','三方好友','三個派系的好感都達到 50', s => [['cons','trade','star'].filter(f => s.facGift && s.facGift[f]).length, 3], 1000], ['friends3','好朋友','缸裡有 3 對好朋友', s => [s.stats.friends | 0, 3], 200], ['rankS','人氣魚缸','魚缸人氣達到 S 級', s => [s.stats.rankS | 0, 1], 500], ['shrimp8','釣蝦高手','一次釣到 8 隻蝦', s => [s.stats.shrimpBest | 0, 8], 200], ['bottle5','漂流瓶收藏家','打開 5 個漂流瓶', s => [s.stats.bottles | 0, 5], 200], ['catpet','貓奴','讓流浪貓橘子留下來', s => [s.catPet ? 1 : 0, 1], 300], ['bless','媽祖保佑','擲到聖筊', s => [s.stats.bless | 0, 1], 100], ['museum10','館長','城市水族館展出 10 種生物', s => [Object.keys(s.museum || {}).length, 10], 500], ['moonj','月下訪客','在滿月夜捉到月光水母', s => [s.stats.moonj | 0, 1], 300], ['order10','金牌供應商','完成 10 個客人的委託', s => [s.stats.orders | 0, 10], 400], ['photo','攝影師','幫魚缸拍 5 張照片', s => [s.stats.photos | 0, 5], 100], ['colony','蝦子王國','缸裡的蝦子自己繁殖出 20 隻小蝦', s => [s.stats.shrimp | 0, 20], 300], ['loong','鯉躍龍門','讓錦鯉跳過龍門化身成龍', s => [s.stats.loong | 0, 1], 1500], ['cat','護魚使者','把伸進魚缸的貓掌趕走 3 次', s => [s.stats.cats | 0, 3], 200],
   ['dfly','羽化','送走一隻羽化的蜻蜓', s => [s.stats.dfly | 0, 1], 300], ['school10','大群游','同一種群游魚養到 10 隻', s => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(k => s.fish.filter(f => f.sp === k).length)), 10], 400],
   ['season1','季節限定','養過一種季節限定生物', s => [Object.values(SEASONS).filter(z => z.sp.some(k => s.dex[k])).length, 1], 200], ['season4','四季圓滿','春夏秋冬的季節限定生物都養過', s => [Object.values(SEASONS).filter(z => z.sp.some(k => s.dex[k])).length, 4], 2000], ['japeel','鰻魚長大了','把鰻線養成日本鰻', s => [s.dex.japeel ? 1 : 0, 1], 500],
   ['bgoal1','育種新手','完成一個育種協會目標', s => [s.stats.bgoal | 0, 1], 150], ['bgold','育種名家','完成一次金級育種目標', s => [s.stats.bgGold | 0, 1], 1000], ['bgoal10','育種協會會員','完成 10 個育種協會目標', s => [s.stats.bgoal | 0, 10], 800],
+  ['chef1','初次下廚','親手處理一份食材放進冰箱', s => [s.stats.cooked | 0, 1], 200], ['chef20','刀工了得','處理 20 份食材', s => [s.stats.cooked | 0, 20], 1500], ['fugu','河豚師傅','成功完成一次河豚去毒', s => [s.stats.fugu | 0, 1], 1000],
+  ['alienchef','宇宙辦桌','處理一份外星食材', s => [s.stats.alienCook | 0, 1], 1200], ['scar','傷痕累累','在廚房受傷 5 次', s => [s.stats.injuries | 0, 5], 300], ['revive','死裡逃生','死掉又活過來', s => [s.stats.deaths | 0, 1], 500],
   ['quest10','任務達人','完成 10 天的全部每日任務', s => [s.stats.qall | 0, 10], 600], ['theme3','裝潢大師','擁有 3 種付費魚缸主題', s => [s.themes.length, 3], 500],
 ];
 function achCheck(){ for (const [id, name, , fn, rw] of ACHS) { if (state.ach[id]) continue; const [v, g] = fn(state); if (v >= g) { state.ach[id] = Date.now(); state.coins += rw; bumpCoins(); markDirty(); toast('🏆 成就達成：' + name + '（+' + rw + ' 金幣）'); logEv('達成成就「' + name + '」'); return; } } }
@@ -3806,7 +3842,7 @@ let scoopLv = 1, shrimpLv = 1;
 const miniUnlocked = (kind, i) => { const LV = kind === 'scoop' ? SCOOP_LV : SHRIMP_LV; return !LV[i].need || (state.miniBest[(kind === 'scoop' ? 's' : 'f') + '1'] | 0) >= LV[i].need; };
 const fmtG = g => (g >= 100 ? Math.round(g) : g.toFixed(1)) + ' g';
 function startScoop(lv){
-  if (mini) return; lv = Number.isInteger(lv) ? lv : scoopLv; if (!miniUnlocked('scoop', lv)) lv = 1; const L0 = SCOOP_LV[lv], free = state.scoopDay !== dayKey();
+  if (mini) return; { const ib = injBlock('mini'); if (ib) { toast(ib); return; } } lv = Number.isInteger(lv) ? lv : scoopLv; if (!miniUnlocked('scoop', lv)) lv = 1; const L0 = SCOOP_LV[lv], free = state.scoopDay !== dayKey();
   if (!free) { if (state.coins < L0.cost) { toast('金幣不夠'); return; } state.coins -= L0.cost; bumpCoins(); } else state.scoopDay = dayKey();
   markDirty(); closeSheet();
   const mod = Math.random() < .7 ? pickArr(SCOOP_MOD) : null, thick = state.items.poi > 0; if (thick) state.items.poi--;
@@ -4069,6 +4105,11 @@ const STORY = {
      rw:{}, endText:'阿德伯把廟裡養了三十年的老烏龜託付給你：「牠跟著我很久了，交給你我放心。」'}]},
 };
 function storyState(k){ if (!state.story[k]) state.story[k] = {ch:0, b:{}, n:0, done:0, pick:-1}; return state.story[k]; }
+STORY.chef = {npc:'chef', title:'總舖師的傳人', doneText:'已解鎖阿忠師的廚具', ch:[
+  {name:'辦桌缺貨', say:'「少年仔，明天村裡有人娶媳婦要辦桌，魚販偏偏沒貨！你缸裡有能吃的魚嗎？先讓我帶兩尾回去應急。」', goal:'交給阿忠師 2 隻長到一半以上的食用魚（吳郭魚、苦花、泰國蝦、河蚌……都可以）', type:'give', n:2, pred:d => edible(d) && !SPECIES[d.sp].alien, rw:{coins:300}, after:'喜宴辦得很成功，阿忠師特地打電話來：「你的魚很新鮮，客人都說讚！」'},
+  {name:'海味', say:'「辦桌怎麼能少了海味？我需要一隻活跳跳的蝦或螃蟹，要夠大隻才上得了桌。」', goal:'交給阿忠師 1 隻長大八成以上的蝦或螃蟹（泰國蝦、藍螯蝦、毛蟹、澤蟹）', type:'give', n:1, pred:d => !!FOOD[d.sp] && ['shrimp', 'crab'].includes(FOOD[d.sp].c) && growRatio(d) >= .8, rw:{coins:400}, after:'「這隻夠肥！」阿忠師捏了捏殼，滿意地放進冰桶。'},
+  {name:'拜師', say:'「你對食材這麼用心，要不要跟我學兩手？照規矩，拜師要包個紅包，意思意思就好。」', goal:'包 1,200 金幣的紅包拜師', type:'pay', cost:1200, btn:'包紅包（1,200 金幣）', rw:{tools:['spike', 'deba']}, after:'阿忠師從刀箱裡拿出一支活締針和一把出刃刀交給你：「刀是廚師的命，要好好照顧。」得到活締針和出刃刀！'},
+  {name:'出師', say:'「工具給你了，現在讓我看看你的刀工。自己處理一尾魚，至少要活締放血再清肚，處理好放進冰箱。」', goal:'在「我的魚兒 → 廚房」親手處理一份食材（至少完成 2 個步驟）並放進冰箱', type:'check', base:() => ({n:state.stats.cooked2 | 0}), prog:b => [(state.stats.cooked2 | 0) - (b.n | 0), 1], rw:{coins:800}, after:'阿忠師拿起你處理的魚翻來翻去看了很久，終於點點頭：「可以出師了。以後我刀箱裡的寶貝，你想要什麼就跟我說。不過河豚跟電鰻，沒準備好千萬別亂碰。」'}]};
 const storyLocked = k => !!STORY[k].fac && repOf(STORY[k].fac) <= -30;
 function chapterReady(k){ const Q = STORY[k], s = storyState(k); if (s.done || storyLocked(k)) return false; const C = Q.ch[s.ch];
   if (C.type === 'check') { const [a, b] = C.prog(s.b); return a >= b; }
@@ -4090,16 +4131,17 @@ function giveStory(k, d){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch];
   removeCreature(d); s.n++; rt.stPick = ''; logEv('把 ' + d.name + '（' + SPECIES[d.sp].name + '）交給' + NPCS[Q.npc].name);
   if (s.n >= C.n) finishChapter(k, C.after || '', (C.rw && C.rw.rep) || {}); else { toast('交給' + NPCS[Q.npc].name + ' 了（' + s.n + ' / ' + C.n + '）'); markDirty(); reStory(); } }
 function finishChapter(k, after, rp){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch], rw = C.rw || {};
+  if (rw.tools) for (const t of rw.tools) state.tools[t] = 1;
   if (rw.coins) state.coins += rw.coins; if (rw.bless) state.bless = Math.max(state.bless || 0, Date.now()) + 864e5;
   const rs = addRep(rp); state.stats.chapters = (state.stats.chapters | 0) + 1;
   logEv('〈' + Q.title + '〉' + C.name + '完成' + (rs ? '（' + rs + '）' : ''));
   s.ch++; s.n = 0; s.b = {}; const leave = rotateVisitor(Q.npc);
-  if (s.ch >= Q.ch.length) { s.done = 1; state.stats.stories = (state.stats.stories | 0) + 1; const [sp, n] = Q.unlock, got = [];
+  if (s.ch >= Q.ch.length) { s.done = 1; state.stats.stories = (state.stats.stories | 0) + 1; if (!Q.unlock) { logEv('完成劇情〈' + Q.title + '〉'); celebrate({kind:'tool', k:'yanagi', tier:3, head:'劇情完結', title:'〈' + Q.title + '〉完結', text:after + (rw.coins ? ' 獲得 ' + rw.coins + ' 金幣。' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏：' + npcAfter(Q.npc).map(anyName).join('、') + '。' + leave}); } else { const [sp, n] = Q.unlock, got = [];
     for (let i = 0; i < n; i++) { const d = newCreature(sp, {grow:18, sex:n > 1 ? (i ? 'f' : 'm') : undefined}); addCreature(d); got.push(d); }
     logEv('完成劇情〈' + Q.title + '〉，得到' + SPECIES[sp].name + '：' + got.map(d => d.name).join('、'));
-    celebrate({kind:'fish', d:got[0], sp, tier:3, head:'劇情限定', title:'〈' + Q.title + '〉完結', text:after + (C.endText ? ' ' + C.endText : '') + ' 得到' + SPECIES[sp].name + (n > 1 ? '一對' : '') + '：' + got.map(d => '「' + d.name + '」').join('、') + '。' + (rs ? '（' + rs + '）' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏。' + leave}); }
+    celebrate({kind:'fish', d:got[0], sp, tier:3, head:'劇情限定', title:'〈' + Q.title + '〉完結', text:after + (C.endText ? ' ' + C.endText : '') + ' 得到' + SPECIES[sp].name + (n > 1 ? '一對' : '') + '：' + got.map(d => '「' + d.name + '」').join('、') + '。' + (rs ? '（' + rs + '）' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏。' + leave}); } }
   else { const N2 = Q.ch[s.ch]; if (N2.base) s.b = N2.base();
-    celebrate({kind:'coins', amount:rw.coins || 0, tier:1, head:NPCS[Q.npc].name, title:'〈' + Q.title + '〉' + C.name, text:after + (rw.coins ? ' 獲得 ' + rw.coins + ' 金幣。' : '') + (rs ? '（' + rs + '）' : '') + ' 下一章：「' + N2.name + '」。' + leave}); }
+    celebrate({kind:rw.tools ? 'tool' : 'coins', k:rw.tools ? rw.tools[1] || rw.tools[0] : '', amount:rw.coins || 0, tier:1, head:NPCS[Q.npc].name, title:'〈' + Q.title + '〉' + C.name, text:after + (rw.coins ? ' 獲得 ' + rw.coins + ' 金幣。' : '') + (rs ? '（' + rs + '）' : '') + ' 下一章：「' + N2.name + '」。' + leave}); }
   bumpCoins(); markDirty(); reStory(); }
 function renderStory(){
   const fh = mk('div', 'dexhead'); fh.textContent = '劇情要等那位 NPC 來水族店時，在「來客」分頁跟他說話才能推進；每完成一章，他就會離開，換下一位客人進來。解完整段劇情後，他們還是會來店裡，而且會賣只有你買得到的私藏。幫某一派的忙，另一派可能會不高興：好感 30 以上買東西打折，50 會收到派系送的特別造景；-30 以下會漲價、劇情暫停；-60 以下他們就不跟你做生意了。'; sheetBody.appendChild(fh);
@@ -4112,7 +4154,7 @@ function renderStoryCard(k){ sheetBody.appendChild(storyCard(k, false)); }
 function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.npc], card = mk('div', 'story' + (s.done ? ' done' : '') + (act ? ' here' : '')), av = document.createElement('canvas'); av.width = 112; av.height = 112; av.className = 'sav';
   (N.alien ? drawAlienAvatar : drawAvatar)(av.getContext('2d'), N, 112);
   const hd = mk('div', 'shead'), ht = mk('div'); ht.append(mk('b', '', '〈' + Q.title + '〉'), mk('small', '', N.name + '・' + N.role + (Q.fac ? '・' + FACTIONS[Q.fac].name : '') + '・' + (s.done ? '已完結' : '第 ' + (s.ch + 1) + ' / ' + Q.ch.length + ' 章'))); hd.append(av, ht); card.appendChild(hd);
-  if (s.done) { const C = Q.ch[Q.ch.length - 1]; card.appendChild(mk('p', 'say', (C.type === 'choice' && s.pick >= 0 ? C.choices[s.pick].after : C.after) + (C.endText ? ' ' + C.endText : ''))); card.appendChild(mk('p', 'goal ok', '✓ 已得到' + SPECIES[Q.unlock[0]].name)); return card; }
+  if (s.done) { const C = Q.ch[Q.ch.length - 1]; card.appendChild(mk('p', 'say', (C.type === 'choice' && s.pick >= 0 ? C.choices[s.pick].after : C.after) + (C.endText ? ' ' + C.endText : ''))); card.appendChild(mk('p', 'goal ok', Q.unlock ? '✓ 已得到' + SPECIES[Q.unlock[0]].name : '✓ ' + (Q.doneText || '已完成'))); return card; }
   const C = Q.ch[s.ch]; card.append(mk('h5', '', '第 ' + (s.ch + 1) + ' 章・' + C.name), mk('p', 'say', C.say));
   if (storyLocked(k)) { card.appendChild(mk('p', 'goal no', N.name + '對你很失望，現在不想談這件事。（' + FACTIONS[Q.fac].name + '的好感要回到 -30 以上）')); return card; }
   const ready = chapterReady(k), pt = C.type === 'check' ? (([a, b]) => '（' + Math.min(a, b) + ' / ' + b + '）')(C.prog(s.b)) : C.type === 'give' ? '（' + s.n + ' / ' + C.n + '）' : '';
@@ -4125,6 +4167,188 @@ function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.np
   else { const ms = state.fish.filter(C.pred); if (!ms.length) card.appendChild(mk('p', 'sub', '現在缸裡沒有符合的魚。'));
     else { const pk = mk('div', 'opick'); for (const d of ms) { const b = mk('button', 'chipbtn' + (rt.stPick === d.id ? ' on' : ''), rt.stPick === d.id ? '確定交出 ' + d.name + '？' : d.name + '・' + labelOf(d)); b.addEventListener('click', () => { if (rt.stPick === d.id) giveStory(k, d); else { rt.stPick = d.id; reStory(); } }); pk.appendChild(b); } card.appendChild(pk); } }
   return card; }
+
+/* Kitchen: the chef buys edible fish; after his story his tools let you process them for more value — at the risk of the ingredient fighting back. */
+const FOOD = {
+  tilapia:{c:'fish', v:60, fight:.15, fi:'spine'}, opsari:{c:'fish', v:50, fight:.05, fi:'spine'}, kuhua:{c:'fish', v:90, fight:.05, fi:'spine'}, culter:{c:'fish', v:80, fight:.06, fi:'spine'},
+  snakehead:{c:'fish', v:180, fight:.3, fi:'bite'}, piranha:{c:'fish', v:160, fight:.4, fi:'bite'}, arapaima:{c:'fish', v:900, fight:.3, fi:'slam'},
+  ayu:{c:'noscale', v:120, fight:.04, fi:'spine'}, mudskipper:{c:'noscale', v:60, fight:.08, fi:'bite'}, weather:{c:'noscale', v:30, fight:.03, fi:'spine'},
+  marbled:{c:'eel', v:600, fight:.25, fi:'bite'}, japeel:{c:'eel', v:700, fight:.12, fi:'bite'}, eel:{c:'electric', v:2000, fight:.5, fi:'shock'},
+  puffer:{c:'puffer', v:500, fight:.15, fi:'bite'}, stingray:{c:'ray', v:1500, fight:.35, fi:'sting'},
+  prawn:{c:'shrimp', v:45, fight:.15, fi:'pinch'}, goldprawn:{c:'shrimp', v:300, fight:.18, fi:'pinch'}, crayfish:{c:'shrimp', v:80, fight:.25, fi:'pinch'},
+  mittencrab:{c:'crab', v:260, fight:.3, fi:'pinch'}, sawacrab:{c:'crab', v:60, fight:.15, fi:'pinch'}, clam:{c:'shell', v:50, fight:0}, goldclam:{c:'shell', v:40, fight:0},
+  crystalfish:{c:'alien', v:4000, fight:.2, fi:'crystal', x:[.45, 'crystal']}, spore:{c:'alien', v:1200, fight:.25, fi:'spore', x:[.4, 'spore']}, prism:{c:'alien', v:3500, fight:.2, fi:'blind', x:[.4, 'blind']},
+  voidjelly:{c:'alien', v:5000, fight:.3, fi:'vsting', x:[.4, 'vsting']}, devourer:{c:'alien', v:7000, fight:.35, fi:'void', x:[.5, 'void']},
+};
+const CAT_STEPS = {fish:['kill','scale','gut','fillet'], noscale:['kill','gut','fillet'], eel:['kill','split'], shrimp:['ice','trim','devein'], crab:['tie','crack'], shell:['purge','shuck'], puffer:['kill','fugu'], electric:['kill','efillet'], ray:['kill','untail','wing'], alien:['subdue','xcut']};
+const CAT_EMO = {fish:'🐟', noscale:'🐟', eel:'🍱', shrimp:'🦐', crab:'🦀', shell:'🐚', puffer:'🐡', electric:'⚡', ray:'🍽️', alien:'👽'};
+const KSTEP = {
+  kill:{name:'活締放血', tool:'spike', mult:1.15, out:'活締全魚', desc:'活締針刺進腦部讓牠瞬間斷氣，再放血。這一步牠還活著，會拚命反擊。'},
+  scale:{name:'刮鱗', tool:'scaler', need:['kill'], mult:1.2, risk:.04, inj:'cut', out:'去鱗全魚', desc:'逆著鱗片刮乾淨，小心鱗片和魚鰭的硬棘。'},
+  gut:{name:'剖肚清內臟', tool:'deba', need:['kill'], mult:1.25, risk:.06, inj:'cut', out:'清肚全魚', desc:'劃開魚肚，把內臟和血線清乾淨。'},
+  fillet:{name:'三枚切・片魚', tool:'yanagi', need:['gut'], mult:1.45, risk:.08, inj:'cut', out:'魚片', desc:'沿著中骨片下兩片魚肉，再拔掉細刺。'},
+  ice:{name:'冰鎮', tool:'ice', mult:1.1, out:'冰鎮活蝦', desc:'放進冰水讓牠慢慢睡著。抓的時候小心大螯。'},
+  trim:{name:'剪鬚剪腳', tool:'shears', need:['ice'], mult:1.2, risk:.05, inj:'spine', out:'修好的蝦', desc:'剪掉長鬚、額角的尖刺和腳。'},
+  devein:{name:'開背去腸泥', tool:'shears', need:['ice'], mult:1.3, risk:.05, inj:'cut', out:'開背蝦', desc:'剪開背殼，挑出黑色的腸泥。'},
+  tie:{name:'鹹草綁蟹', tool:'', mult:1.1, out:'綁好的蟹', desc:'徒手用鹹草把螯和腳綁緊，很容易被夾。'},
+  crack:{name:'拆蟹取肉', tool:'crab8', need:['tie'], mult:1.7, risk:.05, inj:'cut', out:'蟹肉蟹膏', desc:'用蟹八件剪開蟹殼，把蟹肉和蟹膏一點一點挖出來。'},
+  purge:{name:'鹽水吐沙', tool:'', mult:1.15, out:'吐好沙的貝', desc:'泡在淡鹽水裡，讓牠把沙吐乾淨。'},
+  shuck:{name:'開殼取肉', tool:'shucker', need:['purge'], mult:1.4, risk:.12, inj:'cut', out:'貝肉', desc:'開殼刀從殼縫插進去切斷閉殼肌，刀很容易滑。'},
+  split:{name:'釘頭剖背', tool:'unagi', need:['kill'], mult:1.8, risk:.1, inj:'eelblood', out:'剖好的鰻魚', desc:'用鰻魚錐把頭釘在砧板上，從背部一刀剖開去骨。生鰻血有毒，別噴到眼睛。'},
+  fugu:{name:'河豚去毒', tool:'fugu', need:['kill'], mult:3, risk:.45, inj:'poison', out:'河豚刺身', desc:'取出含劇毒的肝臟和卵巢，一滴毒都不能沾到肉上。'},
+  efillet:{name:'切電鰻排', tool:'yanagi', need:['kill'], mult:1.6, risk:.15, inj:'shock', out:'電鰻排', desc:'電鰻死後身體還留著電，下刀前最好戴絕緣手套。'},
+  untail:{name:'剪除尾刺', tool:'shears', need:['kill'], mult:1.2, risk:.3, inj:'sting', out:'去刺魟魚', desc:'尾巴上的毒刺就算魚死了還是有毒。'},
+  wing:{name:'切魟魚翅', tool:'yanagi', need:['untail'], mult:1.5, risk:.06, inj:'cut', out:'魟魚翅', desc:'把兩片胸鰭切下來，是辦桌的高級食材。'},
+  subdue:{name:'制伏', tool:'spike', mult:1.2, out:'制伏的外星生物', desc:'用活締針找牠的……中樞？外星生物的構造跟地球完全不一樣。'},
+  xcut:{name:'外星切割', tool:'yanagi', need:['subdue'], mult:2.5, out:'外星刺身', desc:'切開外星生物的組織，誰也不知道會發生什麼事。'},
+};
+const INJ = {
+  cut:{name:'割傷', sev:1, h:.5, cost:80, desc:'刀子一滑，手指劃了一道口子。'},
+  spine:{name:'刺傷', sev:1, h:1, cost:150, desc:'硬棘扎進手指，又紅又腫。'},
+  pinch:{name:'夾傷', sev:1, h:.75, cost:120, desc:'被大螯狠狠夾住不放，手指都瘀青了。'},
+  eelblood:{name:'鰻血入眼', sev:1, h:1, cost:150, desc:'生鰻血噴進眼睛，又刺又痛，沖了好久的水。'},
+  bite:{name:'咬傷', sev:2, h:3, cost:600, desc:'被利齒咬住，傷口很深，縫了好幾針。'},
+  slam:{name:'撞傷', sev:2, h:4, cost:700, desc:'被巨大的尾巴一甩，整個人撞上櫥櫃。'},
+  sting:{name:'毒刺傷', sev:2, h:6, cost:1000, desc:'被尾巴的毒刺刺中，整條手臂又腫又痛。'},
+  shock:{name:'電擊傷', sev:2, h:4, cost:900, desc:'被電鰻電到全身發麻，手到現在還在抖。'},
+  spore:{name:'孢子寄生', sev:2, h:8, cost:1200, desc:'手臂上長出一朵朵會發光的小香菇……'},
+  blind:{name:'強光灼傷', sev:2, h:5, cost:900, desc:'一刀下去爆出一道強光，眼前一片白，要戴眼罩休息。'},
+  vsting:{name:'虛空螫傷', sev:2, h:6, cost:1100, desc:'被看不見的觸手螫到，傷口裡好像有星星在轉。'},
+  finger:{name:'斷指', sev:3, h:16, cost:3000, desc:'食人魚一口咬下，手指差點不保，連夜送急診接回去。'},
+  heavyshock:{name:'重度電擊', sev:3, h:12, cost:2500, desc:'被電到心律不整，在醫院觀察。'},
+  poison:{name:'河豚中毒', sev:3, h:20, cost:4000, desc:'嘴唇發麻、呼吸困難，被送進加護病房。'},
+  crystal:{name:'結晶化', sev:3, h:18, cost:3500, desc:'右手慢慢變成透明的水晶，完全動不了。'},
+  brink:{name:'鬼門關前走一回', sev:3, h:12, cost:3000, desc:'差一點就沒命了，在醫院躺著休養。'},
+  dead:{name:'死亡', sev:4, h:24, cost:8000, desc:'你倒下了。'},
+};
+const DEATH_BY = {shock:'被電鰻幾百伏特的電流電到心跳停止', poison:'河豚毒素麻痺了呼吸', void:'被吞星鰻一口吞進了虛空'};
+const PROT = {mail:{cut:.3, spine:.35, pinch:.35, bite:.5, slam:.7, sting:.4}, rubber:{shock:.1}, hazmat:{crystal:.15, spore:.15, blind:.15, vsting:.15, void:.15}, fugulic:{poison:.08}};
+const SEV_TXT = ['', '養傷期間不能下廚。', '養傷期間不能下廚，也不能撈金魚、釣蝦。', '養傷期間不能下廚、撈金魚、釣蝦，也不能擦玻璃和佈置。'];
+const FRIDGE_MAX = 10;
+const edible = d => !!FOOD[d.sp] && growRatio(d) >= .5;
+const sizeK = d => .35 + .65 * growRatio(d);
+const wholePrice = (d, k) => Math.round(FOOD[d.sp].v * sizeK(d) * (k || 1));
+const ingValue = B => Math.round(FOOD[B.sp].v * B.k * B.steps.reduce((a, x) => a * KSTEP[x].mult, 1));
+const ingName = B => SPECIES[B.sp].name + '・' + (B.steps.length ? KSTEP[B.steps[B.steps.length - 1]].out : '整尾');
+function cleanIng(B){ return B && FOOD[B.sp] && Array.isArray(B.steps) ? {id:String(B.id || uid()), sp:B.sp, name:String(B.name || '').slice(0, 8), k:clamp(+B.k || .5, .1, 1), steps:B.steps.filter(x => KSTEP[x] && CAT_STEPS[FOOD[B.sp].c].includes(x)), t:+B.t || Date.now()} : null; }
+function protK(inj){ let k = 1; for (const [t, m] of Object.entries(PROT)) if (state.tools[t] && m[inj]) k *= m[inj]; return k; }
+function stepRisk(sp, B, sk){ const F = FOOD[sp], S = KSTEP[sk]; let risk, inj;
+  if (!B) { risk = (F.fight || 0) * (sk === 'ice' ? .6 : 1); inj = F.fi; } else if (sk === 'xcut' && F.x) [risk, inj] = F.x; else { risk = S.risk || 0; inj = S.inj; }
+  if (!inj || !risk) return [0, ''];
+  risk *= protK(inj) * (inj === 'cut' || inj === 'eelblood' ? Math.max(.5, 1 - (state.stats.cooked | 0) * .025) : 1);
+  return [Math.min(.95, risk), inj]; }
+const deadly = inj => (inj === 'shock' && !state.tools.rubber) || (inj === 'poison' && !state.tools.fugulic) || (inj === 'void' && !state.tools.hazmat);
+
+/* Injuries: one at a time; they heal by themselves or with coins. Death is a 24-hour ghost state. */
+function injNow(){ const I = state.inj; if (!I || !INJ[I.k]) return null; if (Date.now() >= I.until) { healDone(false); return null; } return I; }
+function healDone(paid){ const I = state.inj; if (!I) return; const J = INJ[I.k]; state.inj = null; markDirty(); showGhost();
+  if (I.k === 'dead') { logEv(paid ? '花錢急救，活過來了' : '在醫院醒了過來，撿回一命'); toast(paid ? '急救成功！你又活過來了' : '你在醫院醒了過來……撿回一命！'); }
+  else { logEv(J.name + (paid ? '看醫生治好了' : '自己好了')); toast(paid ? '看完醫生，' + J.name + '治好了' : J.name + '好了，可以回廚房了'); }
+  rt.hudT = 0; if (sheetKind === 'list' && listTab === 'kitchen') renderList(); }
+function injBlock(what){ const I = injNow(); if (!I) return ''; const J = INJ[I.k], sev = J.sev;
+  if (sev >= 4) return '你已經死了……'; if (what === 'kitchen' || (what === 'mini' && sev >= 2) || (what === 'hands' && sev >= 3)) return '你還在養傷（' + J.name + '），' + (what === 'kitchen' ? '暫時不能下廚' : what === 'mini' ? '手沒辦法拿網子和釣竿' : '先好好休息吧') + '。'; return ''; }
+function healCost(){ const I = injNow(); if (!I) return 0; const f = Math.max(.3, (I.until - Date.now()) / Math.max(1, I.until - I.at)); return Math.max(10, Math.ceil(INJ[I.k].cost * f / 10) * 10); }
+function payHeal(){ const c = healCost(); if (!c || state.coins < c) return; state.coins -= c; bumpCoins(); healDone(true); }
+function hurt(k, sp, d){ const T = state.tools, r = Math.random(); let key = k;
+  if (k === 'bite' && sp === 'piranha' && r < .3) key = 'finger';
+  else if (k === 'shock' && !T.rubber) key = r < .08 ? 'dead' : r < .35 ? 'heavyshock' : 'shock';
+  else if (k === 'poison' && !T.fugulic && r < .35) key = 'dead';
+  else if (k === 'void') key = T.hazmat ? 'vsting' : 'dead';
+  let saved = false; if (key === 'dead' && (state.bless || 0) > Date.now()) { key = 'brink'; saved = true; state.bless = Date.now(); }
+  const J = INJ[key], now = Date.now(); state.inj = {k:key, at:now, until:now + J.h * 3.6e6, sp, cause:key === 'dead' ? DEATH_BY[k] || '不幸身亡' : ''};
+  state.stats.injuries = (state.stats.injuries | 0) + 1; if (key === 'dead') state.stats.deaths = (state.stats.deaths | 0) + 1;
+  logEv('處理' + SPECIES[sp].name + '時' + (key === 'dead' ? state.inj.cause + '，死了' : '受了' + J.name));
+  if (d) { const r2 = rt.fish.find(x => x.d === d); if (r2) { r2.vy = -260 * U; r2.vx = rand(-140, 140) * U; rt.ripples.push({x:r2.x, t:0}); } }
+  markDirty(); rt.hudT = 0;
+  if (key === 'dead') { closeSheet(); showGhost(); return; }
+  celebrate({kind:'hurt', tier:0, col:'#ff7a6a', tname:['', '輕傷', '中傷', '重傷'][J.sev], head:'廚房意外', title:J.name + '！',
+    text:(saved ? '媽祖保佑！本來應該沒命了，平安符替你擋下一劫（保佑效果用掉了）。' : '') + (d ? SPECIES[sp].name + '拚命掙扎反擊！' : '處理' + SPECIES[sp].name + '時出了意外。') + J.desc + ' 要 ' + fmtDur(J.h * 3.6e6) + '才會自己好，也可以花 ' + healCost().toLocaleString('zh-TW') + ' 金幣看醫生。' + SEV_TXT[J.sev]}); }
+function showGhost(){ const I = state.inj && state.inj.k === 'dead' && Date.now() < state.inj.until ? state.inj : null, g = $('#ghost');
+  document.body.classList.toggle('dead', !!I); g.classList.toggle('on', !!I); if (!I) { g.classList.remove('mini'); return; }
+  $('#ghText').textContent = '你在廚房處理' + SPECIES[I.sp].name + '時，' + I.cause + '。靈魂飄在魚缸上方，看著魚兒游來游去。'; ghostTick(); }
+function ghostTick(){ const I = state.inj; if (!I || I.k !== 'dead') return; const left = I.until - Date.now(); if (left <= 0) { healDone(false); return; }
+  const c = healCost(), b = $('#ghPay'); $('#ghLeft').textContent = fmtHMS(left); b.textContent = '花 ' + c.toLocaleString('zh-TW') + ' 金幣急救復活'; b.disabled = state.coins < c; $('#ghMini').textContent = '👻 靈魂狀態・' + fmtHMS(left) + ' 後復活・點這裡'; }
+function injHud(){ const I = injNow(), p = $('#injpill');
+  if (I && I.k === 'dead') { p.hidden = true; if (!document.body.classList.contains('dead')) showGhost(); else ghostTick(); return; }
+  if (document.body.classList.contains('dead')) showGhost();
+  p.hidden = !I; if (I) { const t = '🩹 ' + INJ[I.k].name + ' ' + fmtHMS(I.until - Date.now()); if (p.textContent !== t) p.textContent = t; } }
+
+/* Processing at the cutting board. */
+function kitchenStep(sk){ const ib = injBlock('kitchen'); if (ib) { toast(ib); return; }
+  let B = state.board; const d = B ? null : state.fish.find(f => f.id === state.boardSel && edible(f)); if (!B && !d) return;
+  const sp = B ? B.sp : d.sp, F = FOOD[sp], S = KSTEP[sk]; if (!S || !CAT_STEPS[F.c].includes(sk)) return;
+  if (B ? B.steps.includes(sk) || !(S.need || []).every(n => B.steps.includes(n)) : (S.need || []).length) return;
+  if (S.tool && !state.tools[S.tool]) return;
+  const [risk, inj] = stepRisk(sp, B, sk);
+  if (inj && Math.random() < risk) { hurt(inj, sp, d); if (sheetKind === 'list') renderList(); return; }
+  if (!B) { B = state.board = {id:uid(), sp, name:d.name, k:+sizeK(d).toFixed(3), steps:[], t:Date.now()}; state.boardSel = ''; removeCreature(d); logEv('把 ' + d.name + '（' + SPECIES[sp].name + '）放上砧板'); }
+  B.steps.push(sk); if (sk === 'fugu') state.stats.fugu = (state.stats.fugu | 0) + 1;
+  toast(S.name + '完成！' + ingName(B) + '現在值 ' + ingValue(B) + ' 金幣'); markDirty(); if (sheetKind === 'list') renderList(); }
+function toFridge(){ const B = state.board; if (!B || state.fridge.length >= FRIDGE_MAX) return; state.fridge.push(B); state.board = null;
+  state.stats.cooked = (state.stats.cooked | 0) + 1; if (B.steps.length >= 2) state.stats.cooked2 = (state.stats.cooked2 | 0) + 1; if (SPECIES[B.sp].alien) state.stats.alienCook = (state.stats.alienCook | 0) + 1;
+  logEv('把' + ingName(B) + '放進冰箱（價值 ' + ingValue(B) + ' 金幣）'); toast(ingName(B) + ' 放進冰箱了'); markDirty(); if (sheetKind === 'list') renderList(); }
+function chefWant(v){ if (rt.chefW && rt.chefW.key === v.key) return rt.chefW.sp; const R = rng(hashStr('chef-' + v.key)), all = Object.keys(FOOD).filter(k => !SPECIES[k].alien).sort(), own = [...new Set(state.fish.filter(edible).map(f => f.sp))].filter(k => all.includes(k)).sort();
+  const sp = own.length && R() < .6 ? own[(R() * own.length) | 0] : all[(R() * all.length) | 0]; rt.chefW = {key:v.key, sp}; return sp; }
+const chefHere = () => { const v = currentVisitor(); return v && v.npc === 'chef' ? v : null; };
+function sellFridge(i, chef, quiet){ const B = state.fridge[i]; if (!B) return; const v = chefHere(); if (chef && !v) return;
+  const p = Math.round(ingValue(B) * (chef ? (B.sp === chefWant(v) ? 1.5 : 1) : .7)); state.fridge.splice(i, 1); state.coins += p; state.stats.chefSold = (state.stats.chefSold | 0) + 1; bumpCoins(); markDirty();
+  logEv((chef ? '把' : '冷凍宅配') + ingName(B) + (chef ? '賣給阿忠師' : '給阿忠師') + '，' + p + ' 金幣'); if (!quiet) { toast(ingName(B) + (chef ? ' 賣給阿忠師，' : ' 冷凍宅配出去了，') + '拿到 ' + p + ' 金幣'); if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'list') renderList(); } return p; }
+function sellLive(d, price){ const v = chefHere(); if (!v || !state.fish.includes(d) || !edible(d) || npcBought('chefLive') >= 4) return; if (state.npcBuy.key !== v.key) state.npcBuy = {key:v.key, n:{}};
+  removeCreature(d); state.coins += price; state.npcBuy.n.chefLive = (state.npcBuy.n.chefLive || 0) + 1; state.stats.npc++; state.stats.chefSold = (state.stats.chefSold | 0) + 1; bumpCoins(); markDirty();
+  logEv('把 ' + d.name + '（' + SPECIES[d.sp].name + '）整尾賣給阿忠師，' + price + ' 金幣'); toast(d.name + ' 被阿忠師用 ' + price + ' 金幣收購了'); renderShop(); }
+function confirmBtn(btn, label, fn){ let armed = 0; btn.addEventListener('click', () => { if (!armed) { armed = setTimeout(() => { armed = 0; btn.innerHTML = label; }, 3000); btn.textContent = '確定？'; return; } clearTimeout(armed); fn(); }); }
+function renderChef(v){ const want = chefWant(v), got = npcBought('chefLive');
+  sheetBody.appendChild(mk('div', 'restock', '今天辦桌缺「' + SPECIES[want].name + '」，這種的收購價 1.5 倍。活魚每次最多收 4 隻（要長到一半以上）；冰箱裡處理好的食材全部都收，處理得越細越值錢。'));
+  if (state.fridge.length) { sheetBody.appendChild(mk('h4', 'sec', '冰箱裡的食材')); let sum = 0;
+    state.fridge.forEach((B, i) => { const p = Math.round(ingValue(B) * (B.sp === want ? 1.5 : 1)); sum += p; const row = mk('div', 'srow'), mid = mk('div'), btn = mk('button', 'buy');
+      mid.append(ingName(B)); mid.appendChild(mk('small', '', B.name + '・' + B.steps.map(x => KSTEP[x].name).join('→') + (B.sp === want ? '・今天加價' : ''))); btn.innerHTML = coinSvg + p.toLocaleString('zh-TW'); btn.setAttribute('aria-label', '把' + ingName(B) + '以 ' + p + ' 金幣賣給阿忠師');
+      btn.addEventListener('click', () => sellFridge(i, true)); row.append(mk('span', 'kemo', CAT_EMO[FOOD[B.sp].c]), mid, btn); sheetBody.appendChild(row); });
+    const all = mk('button', 'btn', '全部賣給阿忠師（' + sum.toLocaleString('zh-TW') + ' 金幣）'); all.addEventListener('click', () => { let t = 0; while (state.fridge.length) t += sellFridge(0, true, true) || 0; toast('冰箱清空了，拿到 ' + t + ' 金幣'); renderShop(); }); sheetBody.appendChild(all); }
+  sheetBody.appendChild(mk('h4', 'sec', '收購活魚（這次已收 ' + got + ' / 4）'));
+  const list = state.fish.filter(edible).sort((a, b) => wholePrice(b, b.sp === want ? 1.5 : 1) - wholePrice(a, a.sp === want ? 1.5 : 1));
+  if (got >= 4) sheetBody.appendChild(mk('p', 'foot', '這次收夠了，下次再來。'));
+  else if (!list.length) sheetBody.appendChild(mk('p', 'foot', '缸裡沒有長到一半以上的食用魚。阿忠師收：' + Object.keys(FOOD).filter(k => !SPECIES[k].alien).map(k => SPECIES[k].name).join('、') + '，聽說連外星生物也收。'));
+  else for (const d of list) { const price = wholePrice(d, d.sp === want ? 1.5 : 1), row = mk('div', 'srow'), mid = mk('div'), btn = mk('button', 'buy'), lab = coinSvg + price.toLocaleString('zh-TW');
+    mid.append(d.name + ' ', sexSpan(d)); mid.appendChild(mk('small', '', SPECIES[d.sp].name + '・' + stageName(d) + (d.sp === want ? '・今天加價' : ''))); btn.innerHTML = lab; btn.setAttribute('aria-label', '以 ' + price + ' 金幣把' + d.name + '賣給阿忠師');
+    confirmBtn(btn, lab, () => sellLive(d, price)); row.append(fishThumb(d), mid, btn); sheetBody.appendChild(row); }
+  if (!state.tools.spike) sheetBody.appendChild(mk('p', 'foot', '想賣更好的價錢？跟阿忠師拜師學刀工，就能自己處理食材，價值最多翻好幾倍。'));
+}
+function boardCard(B, d){ const sp = B ? B.sp : d.sp, F = FOOD[sp], steps = CAT_STEPS[F.c], I = injNow(), card = mk('div', 'kboard'), head = mk('div', 'khead'), hi = mk('div');
+  head.appendChild(d ? fishThumb(d) : mk('span', 'kemo', CAT_EMO[F.c]));
+  hi.append(mk('b', '', B ? ingName(B) + '（' + B.name + '）' : d.name + '・' + SPECIES[sp].name), mk('small', '', B ? '現在價值 ' + ingValue(B) + ' 金幣（阿忠師收購價）' : stageName(d) + '・整尾賣給阿忠師約 ' + wholePrice(d) + ' 金幣')); head.appendChild(hi); card.appendChild(head);
+  for (const sk of steps) { const S = KSTEP[sk], done = !!B && B.steps.includes(sk), root = !(S.need || []).length, needOk = B ? (S.need || []).every(n => B.steps.includes(n)) : root, tool = !S.tool || !!state.tools[S.tool], [risk, inj] = stepRisk(sp, B || (root ? null : {steps:[]}), sk);
+    const row = mk('div', 'kstep' + (done ? ' done' : '')), info = mk('div'), meta = mk('small', 'kmeta' + (inj && risk >= .2 ? ' hi' : ''), (S.tool ? '工具：' + ITEMS[S.tool].name + (tool ? ' ✓' : '（還沒有）') : '不用工具') + '・價值 ×' + S.mult + (inj ? '・危險 ' + Math.max(1, Math.round(risk * 100)) + '%（' + INJ[inj].name + (deadly(inj) ? '，可能致命' : '') + '）' : '・安全'));
+    info.append(mk('b', '', (done ? '✓ ' : '') + S.name), mk('small', '', S.desc), meta);
+    const btn = mk('button', 'buy', done ? '完成' : !needOk ? '先做前一步' : !tool ? '缺工具' : I ? '受傷中' : '動手'); btn.disabled = done || !needOk || !tool || !!I;
+    if (!B && root) confirmBtn(btn, '動手', () => kitchenStep(sk)); else btn.addEventListener('click', () => kitchenStep(sk));
+    if (!B && root && (d.aff || 0) >= 60) info.appendChild(mk('small', 'kmeta hi', d.name + '跟你很親（好感 ' + Math.round(d.aff) + '），真的要下手嗎？'));
+    row.append(info, btn); card.appendChild(row); }
+  if (B) { const all = steps.every(x => B.steps.includes(x)), full = state.fridge.length >= FRIDGE_MAX, fb = mk('button', 'btn' + (all ? '' : ' ghost'), full ? '冰箱滿了，先賣掉一些' : (all ? '處理完成！' : '') + '放進冰箱（' + ingValue(B) + ' 金幣）');
+    fb.disabled = full; fb.addEventListener('click', toFridge); card.appendChild(fb); }
+  sheetBody.appendChild(card); }
+function renderKitchen(){ const I = injNow(), B = state.board, v = chefHere();
+  sheetBody.appendChild(mk('div', 'dexhead', '阿忠師（辦桌總舖師）來店裡時，會收購長到一半以上的食用魚和冰箱裡的食材。跟他拜師後可以自己處理：處理得越細，食材越值錢。小心，有些食材會反擊，受傷要花錢看醫生或等傷口自己好；運氣不好的話……可能會死。'));
+  if (I) { const J = INJ[I.k], c = mk('div', 'evcard hurt'), cost = healCost(); c.append(mk('h3', '', '🩹 ' + J.name + '（' + ['', '輕傷', '中傷', '重傷'][J.sev] + '）'), mk('p', '', J.desc), mk('p', 'sub', '還要 ' + fmtDur(I.until - Date.now()) + '才會自己好。' + SEV_TXT[J.sev]));
+    const b = mk('button', 'btn', '花 ' + cost.toLocaleString('zh-TW') + ' 金幣看醫生'); b.disabled = state.coins < cost; b.addEventListener('click', payHeal); c.appendChild(b); sheetBody.appendChild(c); }
+  sheetBody.appendChild(mk('h4', 'sec', '砧板'));
+  if (B) boardCard(B, null);
+  else { const d = state.fish.find(f => f.id === state.boardSel && edible(f)), list = state.fish.filter(edible);
+    if (d) boardCard(null, d);
+    if (!list.length) sheetBody.appendChild(mk('p', 'foot', '缸裡還沒有長到一半以上的食用魚。可以吃的有：' + Object.keys(FOOD).filter(k => !SPECIES[k].alien).map(k => SPECIES[k].name).join('、') + '，還有幾種外星生物。'));
+    else { if (!d) sheetBody.appendChild(mk('p', 'sub', '選一條魚放上砧板：')); const pk = mk('div', 'opick');
+      for (const f of list) { const b = mk('button', 'chipbtn' + (f === d ? ' on' : ''), f.name + '・' + SPECIES[f.sp].name); b.addEventListener('click', () => { state.boardSel = f === d ? '' : f.id; renderList(); }); pk.appendChild(b); } sheetBody.appendChild(pk); } }
+  sheetBody.appendChild(mk('h4', 'sec', '冰箱 ' + state.fridge.length + ' / ' + FRIDGE_MAX));
+  if (!state.fridge.length) sheetBody.appendChild(mk('p', 'foot', '冰箱是空的。處理好的食材會放在這裡，等阿忠師來收。'));
+  state.fridge.forEach((F2, i) => { const p = Math.round(ingValue(F2) * .7), row = mk('div', 'srow'), mid = mk('div'), btn = mk('button', 'buy'), lab = coinSvg + p.toLocaleString('zh-TW');
+    mid.append(ingName(F2)); mid.appendChild(mk('small', '', F2.name + '・' + F2.steps.map(x => KSTEP[x].name).join('→') + '・阿忠師收 ' + ingValue(F2))); btn.innerHTML = lab; btn.setAttribute('aria-label', '冷凍宅配' + ingName(F2) + '，' + p + ' 金幣');
+    confirmBtn(btn, lab, () => sellFridge(i, false)); row.append(mk('span', 'kemo', CAT_EMO[FOOD[F2.sp].c]), mid, btn); sheetBody.appendChild(row); });
+  if (state.fridge.length) sheetBody.appendChild(mk('p', 'foot', v ? '阿忠師現在就在水族店！到「水族店 → 來客」賣給他是全價。' : '按金額可以冷凍宅配給阿忠師，只拿 7 成；等他來店裡賣是全價。' + nextVisitText('chef')));
+  sheetBody.appendChild(mk('h4', 'sec', '廚具 ' + TOOLS.filter(t => state.tools[t]).length + ' / ' + TOOLS.length));
+  const grid = mk('div', 'kgrid'); for (const t of TOOLS) { const cell = mk('button', 'ktool' + (state.tools[t] ? ' on' : '')), cv = document.createElement('canvas'); cv.width = 144; cv.height = 96; drawToolIcon(cv.getContext('2d'), t, 144, 96);
+    cell.append(cv, mk('b', '', ITEMS[t].name), mk('small', '', state.tools[t] ? '已擁有' : t === 'spike' || t === 'deba' ? '拜師禮' : '阿忠師私藏')); cell.addEventListener('click', () => toast(ITEMS[t].name + '：' + ITEMS[t].desc)); grid.appendChild(cell); }
+  sheetBody.appendChild(grid);
+  sheetBody.appendChild(mk('p', 'foot', '防割手套、絕緣手套、河豚證照和外星防護衣可以大幅降低受傷機率。媽祖保佑期間（媽祖平安符）就算遇到致命意外，也能撿回一命。'));
+}
 
 /* Fish milestones (Taiwanese baby customs) and friendships. */
 const MILES = [[7, '滿一週', 20], [30, '滿月', 100], [100, '百日', 300], [365, '週歲', 800]];
@@ -4203,7 +4427,7 @@ function miniCard(kind){ const isS = kind === 'scoop', LV = isS ? SCOOP_LV : SHR
   hd.textContent = '隱藏生物 ' + found.length + ' / ' + keys.length + (found.length ? '：' + found.map(k => HID[k].name).join('、') : '') + (un.length ? '。線索：' + un.map(k => HID[k].hint).join('；') : '，全部找到了！');
   card.appendChild(hd); return card; }
 function startShrimp(lv){
-  if (mini) return; lv = Number.isInteger(lv) ? lv : shrimpLv; if (!miniUnlocked('shrimp', lv)) lv = 1; const L0 = SHRIMP_LV[lv], free = state.shrimpDay !== dayKey();
+  if (mini) return; { const ib = injBlock('mini'); if (ib) { toast(ib); return; } } lv = Number.isInteger(lv) ? lv : shrimpLv; if (!miniUnlocked('shrimp', lv)) lv = 1; const L0 = SHRIMP_LV[lv], free = state.shrimpDay !== dayKey();
   if (!free) { if (state.coins < L0.cost) { toast('金幣不夠'); return; } state.coins -= L0.cost; bumpCoins(); } else state.shrimpDay = dayKey();
   markDirty(); closeSheet();
   const mod = Math.random() < .6 ? pickArr(SHRIMP_MOD) : null, night = nightNow();
@@ -5202,7 +5426,7 @@ function updateHud(dt){
   if (rt.tempMsg && !state.hints.temp) { state.hints.temp = 1; markDirty(); toast(rt.tempMsg); }
   renderFoodBtn();
   if ((rt.achT = (rt.achT || 0) - .4) <= 0) { rt.achT = 2; achCheck(); }
-  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady() || state.tipDay !== dayKey(); if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready);
+  const Q = ensureQuest(), qt = '今日任務 ' + questDone() + '/' + Q.list.length, ready = questClaimable() || !loginState().done || orderReady() || state.tipDay !== dayKey(); if (el.qtxt.textContent !== qt) el.qtxt.textContent = qt; el.qpill.classList.toggle('ready', ready); injHud();
   if (sheetKind === 'today' && todayKey() !== rendered.today) renderToday();
   if (sheetKind === 'expo') updateTripRows();
   if (state.evSeen !== dayKey()) { state.evSeen = dayKey(); const ev = todayEv(); if (ev) setTimeout(() => toast('今日事件：' + DAY_EVENTS[ev].name + '・' + DAY_EVENTS[ev].desc), 3200); markDirty(); }
@@ -5348,6 +5572,7 @@ function drawAvatar(c, N, s){
   if (N.acc === 'tie' || N.acc === 'bow') { c.fillStyle = '#f4f4f4'; c.beginPath(); c.moveTo(s * .43, s * .69); c.lineTo(s * .5, s * .79); c.lineTo(s * .57, s * .69); c.fill(); }
   if (N.acc === 'tie') { c.fillStyle = N.tiec; c.beginPath(); c.moveTo(s * .48, s * .73); c.lineTo(s * .52, s * .73); c.lineTo(s * .535, s * .93); c.lineTo(s * .5, s * .97); c.lineTo(s * .465, s * .93); c.fill(); }
   if (N.acc === 'bow') { c.fillStyle = '#111'; c.beginPath(); c.moveTo(s * .5, s * .74); c.lineTo(s * .43, s * .71); c.lineTo(s * .43, s * .78); c.closePath(); c.moveTo(s * .5, s * .74); c.lineTo(s * .57, s * .71); c.lineTo(s * .57, s * .78); c.closePath(); c.fill(); }
+  if (N.acc === 'chef') { c.fillStyle = '#d8402a'; c.beginPath(); c.moveTo(s * .41, s * .68); c.lineTo(s * .59, s * .68); c.lineTo(s * .5, s * .8); c.closePath(); c.fill(); c.fillStyle = '#cfc8b8'; for (const yy of [.8, .9]) { dot(c, s * .44, s * yy, s * .012); dot(c, s * .56, s * yy, s * .012); } }
   c.fillStyle = N.skin; c.fillRect(s * .44, s * .6, s * .12, s * .1);
   c.beginPath(); c.ellipse(s / 2, s * .47, s * .19, s * .22, 0, 0, TAU); c.fill();
   c.fillStyle = N.hair; c.beginPath(); c.ellipse(s / 2, s * .4, s * .2, s * .15, 0, Math.PI, 0); c.fill();
@@ -5357,6 +5582,7 @@ function drawAvatar(c, N, s){
   c.fillStyle = 'rgba(255,120,110,.25)'; dot(c, s * .39, s * .54, s * .03); dot(c, s * .61, s * .54, s * .03);
   if (N.acc === 'glasses') { c.strokeStyle = '#222'; c.lineWidth = s * .013; c.beginPath(); c.arc(s * .43, s * .48, s * .05, 0, TAU); c.stroke(); c.beginPath(); c.arc(s * .57, s * .48, s * .05, 0, TAU); c.stroke(); c.beginPath(); c.moveTo(s * .48, s * .48); c.lineTo(s * .52, s * .48); c.stroke(); }
   if (N.acc === 'cap') { c.fillStyle = N.capc; c.beginPath(); c.ellipse(s / 2, s * .36, s * .2, s * .12, 0, Math.PI, 0); c.fill(); c.fillRect(s * .3, s * .34, s * .44, s * .04); c.beginPath(); c.ellipse(s * .66, s * .37, s * .12, s * .03, 0, 0, TAU); c.fill(); }
+  if (N.acc === 'chef') { c.fillStyle = '#fbfaf6'; c.fillRect(s * .32, s * .25, s * .36, s * .1); for (const [x, y, r] of [[.36, .19, .09], [.5, .14, .11], [.64, .19, .09], [.43, .12, .07], [.57, .12, .07]]) dot(c, s * x, s * y, s * r); c.fillStyle = 'rgba(0,0,0,.08)'; c.fillRect(s * .32, s * .32, s * .36, s * .03); }
   if (N.acc === 'hat') { c.fillStyle = '#e8c870'; c.beginPath(); c.ellipse(s / 2, s * .33, s * .34, s * .07, 0, 0, TAU); c.fill(); c.beginPath(); c.ellipse(s / 2, s * .28, s * .18, s * .1, 0, Math.PI, 0); c.fill(); c.fillStyle = '#b8402a'; c.fillRect(s * .32, s * .26, s * .36, s * .03); }
   if (N.acc === 'flower') { c.fillStyle = '#ff8ab0'; for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; dot(c, s * .66 + Math.cos(a) * s * .035, s * .3 + Math.sin(a) * s * .035, s * .028); } c.fillStyle = '#ffd84a'; dot(c, s * .66, s * .3, s * .02); }
   c.restore();
@@ -5437,13 +5663,44 @@ function drawItemIcon(c, icon, w, h){
     c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 2; c.stroke(); c.fillStyle = '#d84a6a'; c.fillRect(x - 10, y - 36, 20, 7);
     for (const [px, py, k] of [[x - 12, y + 6, 0], [x + 12, y + 16, 1], [x - 4, y + 24, 0]]) { c.save(); c.translate(px, py); if (k) c.scale(-1, 1); drawFish(c, 'goldfish', palette('goldfish', 5 + px, 0), 18, px, .5); c.restore(); } }
 }
+function drawToolIcon(c, k, w, h, keep){
+  if (!keep) { c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h); } const S = Math.min(w / 144, h / 96); c.save(); if (!keep) c.translate((w - 144 * S) / 2, (h - 96 * S) / 2); c.scale(S, S); c.lineCap = 'round'; c.lineJoin = 'round';
+  const steel = (y0, y1) => lg(c, 0, y0, 0, y1, [[0,'#f6f9fb'],[.5,'#bcc8d0'],[1,'#86949e']]);
+  const handle = (x, y, len, th, col) => { c.fillStyle = col || '#7a4e2e'; rr(c, x, y - th / 2, len, th, th / 2.4); c.fill(); c.fillStyle = 'rgba(255,255,255,.16)'; c.fillRect(x + 4, y - th / 2 + 2, len - 8, 2); };
+  const blade = (pts, y0, y1) => { c.fillStyle = steel(y0, y1); c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) c.lineTo(q[0], q[1]); c.closePath(); c.fill(); c.strokeStyle = 'rgba(50,60,70,.45)'; c.lineWidth = 1; c.stroke(); };
+  const glove = (col, cuff) => { const parts = [[46, 42, 44, 38, 12]]; for (let i = 0; i < 4; i++) parts.push([47 + i * 11, 14 + Math.abs(i - 1.5) * 4, 10, 36, 5]);
+    c.fillStyle = col; for (const p of parts) { rr(c, p[0], p[1], p[2], p[3], p[4]); c.fill(); } c.save(); c.translate(88, 60); c.rotate(-.75); rr(c, -5.5, -24, 11, 28, 5.5); c.fill(); c.restore(); c.fillStyle = cuff; rr(c, 43, 74, 50, 12, 3); c.fill(); return parts; };
+  if (k === 'spike') { handle(14, 50, 36, 13); c.fillStyle = '#c8a040'; c.fillRect(49, 45, 6, 10); blade([[55, 47.5], [130, 50], [55, 52.5]], 47, 53); }
+  else if (k === 'scaler') { handle(10, 58, 44, 13); c.fillStyle = '#9aa6ae'; c.fillRect(52, 55, 10, 6); c.fillStyle = steel(32, 60); rr(c, 60, 32, 52, 26, 5); c.fill(); c.fillStyle = '#6a7680';
+    for (let i = 0; i < 8; i++) { const x = 63 + i * 6; c.beginPath(); c.moveTo(x, 58); c.lineTo(x + 3, 66); c.lineTo(x + 6, 58); c.fill(); } for (let i = 0; i < 4; i++) c.fillRect(66 + i * 11, 38, 3, 14); }
+  else if (k === 'deba') { handle(10, 54, 40, 14); c.fillStyle = '#2a2a2a'; c.fillRect(48, 47, 6, 14); blade([[54, 47], [58, 38], [118, 44], [134, 58], [54, 61]], 38, 61); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(60, 59); c.lineTo(128, 57); c.stroke(); }
+  else if (k === 'yanagi') { handle(6, 52, 38, 11, '#e2d2a8'); c.fillStyle = '#1a1a1a'; c.fillRect(42, 46.5, 6, 11); blade([[48, 46], [132, 47], [140, 52], [48, 57]], 46, 57); }
+  else if (k === 'unagi') { c.fillStyle = '#7a4e2e'; dot(c, 34, 28, 9); c.fillRect(34, 25, 18, 6); blade([[52, 26], [112, 28], [52, 30]], 26, 30);
+    handle(16, 66, 36, 13); blade([[52, 58], [60, 52], [96, 54], [110, 70], [52, 72]], 52, 72); }
+  else if (k === 'ice') { c.fillStyle = '#3a8ad8'; c.beginPath(); c.moveTo(36, 34); c.lineTo(108, 34); c.lineTo(100, 84); c.lineTo(44, 84); c.closePath(); c.fill(); c.fillStyle = '#5aa8f0'; rr(c, 32, 30, 80, 9, 4); c.fill();
+    c.strokeStyle = '#c8d4dc'; c.lineWidth = 3; c.beginPath(); c.arc(72, 34, 30, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); c.fillStyle = 'rgba(225,245,255,.92)';
+    for (const [x, y, a] of [[48, 22, .3], [62, 18, -.2], [78, 21, .5], [92, 24, -.4], [70, 27, .1]]) { c.save(); c.translate(x, y); c.rotate(a); rr(c, -7, -7, 14, 14, 3); c.fill(); c.restore(); } c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(42, 44, 8, 34); }
+  else if (k === 'shears') { blade([[76, 48], [130, 36], [132, 40], [80, 52]], 36, 52); blade([[76, 50], [130, 62], [128, 66], [74, 54]], 50, 66); c.fillStyle = '#5a6670'; dot(c, 78, 50, 4.5);
+    c.strokeStyle = '#d8402a'; c.lineWidth = 6; for (const [y, y2] of [[50, 30], [50, 70]]) { c.beginPath(); c.moveTo(76, y); c.lineTo(52, y2 < 50 ? 42 : 58); c.stroke(); c.beginPath(); c.ellipse(36, y2, 14, 9, 0, 0, TAU); c.stroke(); } }
+  else if (k === 'crab8') { const br = '#c8a050'; c.strokeStyle = br; c.fillStyle = br; c.lineWidth = 4; c.beginPath(); c.moveTo(26, 80); c.lineTo(40, 30); c.stroke(); rr(c, 28, 20, 26, 11, 3); c.fill();
+    c.lineWidth = 3; c.beginPath(); c.moveTo(62, 82); c.lineTo(72, 18); c.stroke(); c.beginPath(); c.moveTo(72, 18); c.lineTo(70, 10); c.moveTo(72, 18); c.lineTo(76, 11); c.stroke();
+    c.beginPath(); c.moveTo(92, 82); c.lineTo(100, 34); c.stroke(); c.beginPath(); c.ellipse(101, 26, 7, 10, .15, 0, TAU); c.fill(); c.lineWidth = 2.5; c.beginPath(); c.moveTo(116, 82); c.lineTo(126, 24); c.stroke(); c.beginPath(); c.moveTo(126, 24); c.lineTo(120, 20); c.stroke(); }
+  else if (k === 'shucker') { handle(26, 50, 44, 18, '#5a3a22'); c.fillStyle = '#9aa6ae'; c.beginPath(); c.ellipse(72, 50, 4, 14, 0, 0, TAU); c.fill(); blade([[76, 44], [106, 46], [118, 50], [106, 54], [76, 56]], 44, 56); }
+  else if (k === 'mail') { const parts = glove('#aab4bc', '#7a8690'); c.fillStyle = 'rgba(60,70,80,.4)'; for (const p of parts) for (let y = p[1] + 4; y < p[1] + p[3] - 2; y += 5) for (let x = p[0] + 3; x < p[0] + p[2] - 1; x += 5) dot(c, x, y, 1.2); }
+  else if (k === 'rubber') { glove('#f2c43a', '#d8a020'); c.fillStyle = '#2a2a2a'; c.beginPath(); c.moveTo(72, 44); c.lineTo(62, 60); c.lineTo(70, 60); c.lineTo(64, 74); c.lineTo(80, 56); c.lineTo(72, 56); c.lineTo(78, 44); c.closePath(); c.fill(); }
+  else if (k === 'fugu') { handle(6, 52, 34, 10, '#ece2c8'); c.fillStyle = '#3a6ab8'; c.fillRect(38, 47, 5, 10); blade([[43, 48.5], [134, 49.5], [140, 52], [43, 55]], 48, 55); c.fillStyle = 'rgba(140,190,255,.35)'; c.fillRect(50, 49.5, 70, 2); }
+  else if (k === 'fugulic') { c.fillStyle = '#f6efd8'; rr(c, 28, 16, 88, 64, 6); c.fill(); c.strokeStyle = '#c8a050'; c.lineWidth = 2; rr(c, 32, 20, 80, 56, 4); c.stroke(); c.fillStyle = '#8a7a5a'; for (let i = 0; i < 4; i++) c.fillRect(40, 32 + i * 9, i ? 40 : 54, 3);
+    c.fillStyle = '#d83a2a'; dot(c, 96, 60, 11); c.fillStyle = '#fff'; c.font = '700 12px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('證', 96, 60.5); }
+  else if (k === 'hazmat') { c.fillStyle = '#e8c83a'; rr(c, 42, 14, 60, 66, 26); c.fill(); c.fillStyle = '#2a3a48'; rr(c, 51, 28, 42, 26, 11); c.fill(); c.fillStyle = 'rgba(160,220,255,.5)'; rr(c, 55, 31, 14, 8, 4); c.fill();
+    c.fillStyle = '#5a6670'; dot(c, 46, 66, 8); dot(c, 98, 66, 8); c.fillStyle = '#3a444c'; dot(c, 46, 66, 4); dot(c, 98, 66, 4); c.fillStyle = '#c8a830'; c.fillRect(42, 76, 60, 8); }
+  c.restore(); }
 function itemRow(k, price, note, onBuy, sold){
   const it = ITEMS[k], row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96;
-  drawItemIcon(cnv.getContext('2d'), it.icon, 144, 96);
-  const info = mk('div'), h3 = mk('h3', '', it.name); h3.appendChild(mk('span', 'tag', it.fish ? '生物' : '道具'));
+  if (it.tool) drawToolIcon(cnv.getContext('2d'), k, 144, 96); else drawItemIcon(cnv.getContext('2d'), it.icon, 144, 96);
+  const info = mk('div'), h3 = mk('h3', '', it.name); h3.appendChild(mk('span', 'tag', it.fish ? '生物' : it.tool ? '廚具' : '道具'));
   info.append(h3, mk('p', '', it.desc)); if (note) info.appendChild(mk('p', 'sub', note));
   const btn = mk('button', 'buy'), full = it.fish && fishCount() + it.fish > capF();
-  if (sold) { btn.textContent = '賣完了'; btn.disabled = true; } else if (full) { btn.textContent = '缸滿了'; btn.disabled = true; }
+  if (sold) { btn.textContent = it.tool && state.tools[k] ? '已擁有' : '賣完了'; btn.disabled = true; } else if (full) { btn.textContent = '缸滿了'; btn.disabled = true; }
   else { btn.innerHTML = coinSvg + price; btn.disabled = state.coins < price; btn.setAttribute('aria-label', '用 ' + price + ' 金幣買' + it.name); }
   btn.addEventListener('click', onBuy); row.append(cnv, info, btn); return row;
 }
@@ -5548,6 +5805,23 @@ function renderGear(){
     btn.addEventListener('click', () => buyTheme(k)); row.append(cnv, info, btn); sheetBody.appendChild(row); }
 }
 function buyFeeder(n, price){ if (state.coins < price) return; state.coins -= price; state.items.feeder += n; bumpCoins(); toast('買了 ' + n + ' 隻活餌魚，庫存 ' + feederStock() + ' 隻'); markDirty(); renderShop(); }
+const TOOL_DEF = [
+  ['spike', '活締針', 250, '細長的鋼針，從魚頭刺進腦幹，讓魚瞬間斷氣、不再掙扎，肉質也更好。處理魚的第一步。'],
+  ['scaler', '打鱗器', 200, '鋸齒狀的刮鱗器，逆著鱗片刮，鱗片才不會亂飛。'],
+  ['deba', '出刃刀', 600, '刀背厚重的日式剖魚刀，剖肚、斷骨都靠它。'],
+  ['yanagi', '柳刃刀', 900, '細長的生魚片刀，一刀拉到底，切面才漂亮。也用來片電鰻、魟魚和外星生物。'],
+  ['unagi', '鰻魚刀組', 1200, '一支鰻魚錐加一把鰻刀：先把鰻魚頭釘在砧板上，再從背部剖開去骨。'],
+  ['ice', '冰鎮桶', 300, '裝滿碎冰的保冷桶，蝦子放進去會慢慢睡著，不會亂彈亂夾。'],
+  ['shears', '海鮮剪', 350, '剪蝦鬚、剪開蝦背，連魟魚的尾刺都剪得斷。'],
+  ['crab8', '蟹八件', 800, '傳統的拆蟹工具組：小錘、小剪、蟹針、蟹勺……一共八件，蟹肉蟹膏拆得乾乾淨淨。'],
+  ['shucker', '開殼刀', 300, '短而厚的開殼刀，插進殼縫切斷閉殼肌。'],
+  ['mail', '防割手套', 700, '不鏽鋼鏈甲織成的手套：割傷、刺傷、夾傷和咬傷的機率大幅降低。'],
+  ['rubber', '絕緣手套', 900, '電工用的厚橡膠手套，處理電鰻時幾乎不會被電到。'],
+  ['fugu', '河豚刀', 1500, '刀身極薄的河豚專用刀，可以把河豚肉切得像紙一樣薄。'],
+  ['fugulic', '河豚處理證照', 3000, '阿忠師幫你報名考照，陪你練了好幾晚。有證照的人處理河豚，中毒的機率大幅降低。'],
+  ['hazmat', '外星防護衣', 4000, '阿忠師跟佐爾博士換來的全身防護衣：結晶化、孢子寄生、強光和虛空攻擊的機率大幅降低。']];
+const TOOLS = TOOL_DEF.map(t => t[0]);
+for (const [k, n, p, desc] of TOOL_DEF) ITEMS[k] = {name:n, price:p, limit:1, tool:true, icon:'tool', desc, give:() => { state.tools[k] = 1; return '得到「' + n + '」！到「我的魚兒 → 廚房」就能用'; }};
 function buyNpcItem(item){
   const v = currentVisitor(); if (!v || !(NPCS[v.npc].items.includes(item) || (npcQuestDone(v.npc) && npcAfter(v.npc).includes(item)))) return;
   if (DECOS[item] && !SPECIES[item]) { const D = DECOS[item]; if (state.npcBuy.key !== v.key) state.npcBuy = {key:v.key, n:{}}; if ((state.npcBuy.n[item] || 0) >= 1 || state.coins < D.price || state.deco.length >= MAXDECO) return;
@@ -5555,7 +5829,7 @@ function buyNpcItem(item){
   if (state.npcBuy.key !== v.key) state.npcBuy = {key:v.key, n:{}};
   if ((state.npcBuy.n[item] || 0) >= npcLimit(item)) return;
   if (item === 'feeder10') { if (state.coins < 40) return; state.coins -= 40; state.items.feeder += 10; toast('跟' + NPCS[v.npc].name + '買了 10 隻活餌魚'); }
-  else if (ITEMS[item]) { const it = ITEMS[item]; if (state.coins < it.price || (it.fish && fishCount() + it.fish > capF())) return; state.coins -= it.price; state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; toast(it.give()); bumpCoins(); markDirty(); renderShop(); return; }
+  else if (ITEMS[item]) { const it = ITEMS[item]; if (state.coins < it.price || (it.fish && fishCount() + it.fish > capF()) || (it.tool && state.tools[item])) return; state.coins -= it.price; state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; toast(it.give()); bumpCoins(); markDirty(); renderShop(); return; }
   else { const sp = SPECIES[item], pp = npcPrice(v.npc, item); if (npcRefuse(v.npc) || state.coins < pp || (sp.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) || (sp.limit && countSp(item) >= sp.limit)) return;
     state.coins -= pp; { const fz = facOf(v.npc); if (fz === 'star') addRep({star:2, cons:-1}); else if (fz) addRep({[fz]:1}); } const d = newCreature(item, {grow:sp.alien ? GROW_MAX : 12}); addCreature(d); toast(d.name + '（' + sp.name + '）入缸了，記得看飼養條件'); }
   state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; bumpCoins(); markDirty(); renderShop();
@@ -5563,7 +5837,7 @@ function buyNpcItem(item){
 function renderVisit(v){
   const N = NPCS[v.npc], card = mk('div', N.alien ? 'npc alien' : 'npc'), av = document.createElement('canvas'); av.width = 144; av.height = 144; (N.alien ? drawAlienAvatar : N.cat ? drawCatAvatar : drawAvatar)(av.getContext('2d'), N, 144);
   const info = mk('div'), h = mk('h3', '', N.name); h.appendChild(mk('span', 'tag sp', N.role));
-  const left = mk('p', 'sub'), b = mk('b', '', fmtHMS(v.end - Date.now())); b.id = 'visitLeft'; left.append('還會待 ', b, N.mode === 'buy' ? '・只收購不賣' : N.mode === 'show' ? '・每次限報名一隻' : N.mode === 'temple' ? '・可以擲筊問神明' : N.mode === 'kid' ? '・帶了一隻魚來' : N.mode === 'cat' ? '・肚子好像餓了' : '・每樣限量');
+  const left = mk('p', 'sub'), b = mk('b', '', fmtHMS(v.end - Date.now())); b.id = 'visitLeft'; left.append('還會待 ', b, N.mode === 'buy' ? '・只收購不賣' : N.mode === 'show' ? '・每次限報名一隻' : N.mode === 'temple' ? '・可以擲筊問神明' : N.mode === 'kid' ? '・帶了一隻魚來' : N.mode === 'cat' ? '・肚子好像餓了' : N.mode === 'chef' ? '・收購食用魚和食材' : '・每樣限量');
   info.append(h, mk('p', 'say', '「' + N.lines[hashStr(v.key) % N.lines.length] + '」'), left); card.append(av, info); sheetBody.appendChild(card);
   if (N.mode === 'buy') { { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } } renderCollector(v); renderAfterShop(v); return; }
   { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } }
@@ -5573,6 +5847,7 @@ function renderVisit(v){
   if (N.mode === 'temple') { renderTemple(v); renderAfterShop(v); return; }
   if (N.mode === 'kid') { renderKid(v); renderAfterShop(v); return; }
   if (N.mode === 'cat') { renderStray(v); renderAfterShop(v); return; }
+  if (N.mode === 'chef') { renderChef(v); renderAfterShop(v); return; }
   for (const item of N.items) {
     if (ITEMS[item]) { const lim = npcLimit(item), got = npcBought(item); sheetBody.appendChild(itemRow(item, ITEMS[item].price, '這次已買 ' + got + ' / ' + lim, () => buyNpcItem(item), got >= lim)); continue; }
     const lim = npcLimit(item), got = npcBought(item);
@@ -5597,7 +5872,7 @@ function renderAfterShop(v){ const list = npcAfter(v.npc), N = NPCS[v.npc]; if (
   if (!npcQuestDone(v.npc)) { const q = storyOfNpc(v.npc); sheetBody.appendChild(mk('p', 'foot', '🔒 完成' + (N.cat ? '「跟橘子做朋友」' : '〈' + STORY[q].title + '〉') + '之後，' + N.name + '會賣只有你買得到的私藏：' + list.map(anyName).join('、') + '。')); return; }
   sheetBody.appendChild(mk('h4', 'sec', '🎁 ' + N.name + '的私藏（解完任務才買得到）'));
   for (const k of list) { const lim = npcLimit(k), got = npcBought(k);
-    if (ITEMS[k]) { sheetBody.appendChild(itemRow(k, ITEMS[k].price, '這次已買 ' + got + ' / ' + lim, () => buyNpcItem(k), got >= lim)); continue; }
+    if (ITEMS[k]) { const own = ITEMS[k].tool && state.tools[k]; sheetBody.appendChild(itemRow(k, ITEMS[k].price, own ? '已經有了' : ITEMS[k].tool ? '買了就能一直用' : '這次已買 ' + got + ' / ' + lim, () => buyNpcItem(k), own || got >= lim)); continue; }
     if (DECOS[k] && !SPECIES[k]) { const D = DECOS[k], row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96; drawDecoThumb(cnv, k);
       const info = mk('div'), h3 = mk('h3', '', D.name); h3.append(mk('span', 'tag sale', '私藏'), mk('span', 'tag', '舒適 +' + D.comfort)); info.append(h3, mk('p', '', D.desc), mk('p', 'sub', (state.deco.filter(d => d.k === k).length ? '已擺 ' + state.deco.filter(d => d.k === k).length + ' 個・' : '') + '每次來只賣 1 個'));
       const btn = mk('button', 'buy'); if (got >= 1) { btn.textContent = '賣完了'; btn.disabled = true; } else if (state.deco.length >= MAXDECO) { btn.textContent = '放不下了'; btn.disabled = true; } else { btn.innerHTML = coinSvg + D.price.toLocaleString('zh-TW'); btn.disabled = state.coins < D.price; btn.setAttribute('aria-label', '用 ' + D.price + ' 金幣跟' + N.name + '買' + D.name); }
@@ -5726,11 +6001,11 @@ function openGift(pack, prize){
   rt.gift = {t:0, pack, prize, shown:false, at:0};
   gcard.classList.add('hide'); giftEl.classList.add('on');
   giftCv.width = Math.round((giftCv.clientWidth || 300) * DPR); giftCv.height = Math.round(220 * DPR);
-  const tr = TIERS[prize.tier]; const rb = $('#gRarity'); rb.textContent = (prize.head ? prize.head + '・' : '') + tr.name; rb.style.color = tr.col;
+  const tr = TIERS[prize.tier]; const rb = $('#gRarity'); rb.textContent = (prize.head ? prize.head + '・' : '') + (prize.tname || tr.name); rb.style.color = prize.col || tr.col;
   $('#gTitle').textContent = prize.title; $('#gText').textContent = prize.text;
   const again = $('#gAgain');
   if (pack) { again.hidden = false; again.textContent = '再抽一次（' + PACKS[pack].price + '）'; again.disabled = state.coins < PACKS[pack].price; } else again.hidden = true;
-  $('#gOk').textContent = prize.kind === 'lost' ? '好' : prize.tier >= 2 ? '太好了' : '收下';
+  $('#gOk').textContent = prize.kind === 'lost' ? '好' : prize.kind === 'hurt' ? '好痛……' : prize.tier >= 2 ? '太好了' : '收下';
   if (!pack) revealGift();
 }
 function revealGift(){ const g = rt.gift; if (!g || g.shown) return; g.shown = true; g.at = g.t; gcard.classList.remove('hide'); }
@@ -5738,7 +6013,7 @@ function closeGift(){ giftEl.classList.remove('on'); rt.gift = null; if (sheetKi
 function celebrate(prize){ rt.celebQ.push(prize); nextCeleb(); }
 function nextCeleb(){ if (rt.gift || $('#modal').classList.contains('on') || !rt.celebQ.length) return; openGift(null, rt.celebQ.shift()); }
 function drawGift(){
-  const g = rt.gift, c = giftCv.getContext('2d'), w = giftCv.width, h = giftCv.height, p = g.prize, col = TIERS[p.tier].col;
+  const g = rt.gift, c = giftCv.getContext('2d'), w = giftCv.width, h = giftCv.height, p = g.prize, col = p.col || TIERS[p.tier].col;
   c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
   c.fillStyle = rg(c, w/2, h/2, 0, w/2, h/2, Math.max(w, h) * .7, [[0,'#1e6474'],[1,'#062530']]); c.fillRect(0, 0, w, h);
   if (!g.shown) {
@@ -5760,6 +6035,11 @@ function drawGift(){
   else if (p.kind === 'coins') { const n = Math.min(9, 3 + Math.floor(p.amount / 200)); for (let i = 0; i < n; i++) drawCoinAt(c, w/2 + (i - (n - 1) / 2) * h * .07, h * .55 - (i % 3) * h * .06, h * .09 * s); }
   else if (p.kind === 'deco') { const D = DECOS[p.k], sc = Math.min(w * .5 / D.w, h * .6 / D.h) * s; c.save(); c.translate(w/2, h * .8); c.scale(sc, sc); drawDecoShape(c, {id:'gift-' + p.k, k:p.k, seed:9}, g.t); c.restore(); }
   else if (p.kind === 'charm') drawCharm(c, w/2, h * .55, h * .5 * s);
+  else if (p.kind === 'tool') { const sc = Math.min(w / 144, h / 96) * .85 * s; c.save(); c.translate(w/2 - 72 * sc, h/2 - 48 * sc); c.scale(sc, sc); drawToolIcon(c, p.k, 144, 96, true); c.restore(); }
+  else if (p.kind === 'hurt') { const L = h * .62, T2 = h * .2; c.save(); c.translate(w/2, h * .52); c.rotate(-.45 + Math.sin(g.t * 3) * .04); c.scale(s, s);
+    c.fillStyle = '#e8b48a'; rr(c, -L / 2, -T2 / 2, L, T2, T2 / 2); c.fill(); c.fillStyle = '#f6e0c8'; rr(c, -L * .17, -T2 * .4, L * .34, T2 * .8, T2 * .18); c.fill();
+    c.fillStyle = 'rgba(150,100,70,.45)'; for (const sx of [-1, 1]) for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) dot(c, sx * L * (.25 + i * .07), (j - .5) * T2 * .42, h * .009);
+    c.fillStyle = 'rgba(214,58,48,.6)'; dot(c, 0, 0, T2 * .2); c.restore(); }
   if (since < .3) { c.fillStyle = 'rgba(255,255,255,' + (1 - since / .3).toFixed(3) + ')'; c.fillRect(0, 0, w, h); }
 }
 
@@ -5790,6 +6070,9 @@ function renderFishCard(){
   if (state.up.box && !S.alien && !S.myth) { const bx = mk('div', 'breed'), why = d.box ? '' : boxBlock(d);
     bx.append(mk('h4', '', '隔離盒'), mk('p', '', d.box ? '在隔離盒裡很安全：不會被吃、不會被傳染，貓也撈不到。' + (d.box === 2 ? '長到六成大會自己游出來。' : '') : '放進隔離盒可以保護小魚和病魚，最多 3 隻。'));
     const bb = mk('button', 'btn' + (d.box ? ' ghost' : ''), d.box ? '放出來' : why || '放進隔離盒'); bb.disabled = !!why; bb.addEventListener('click', () => boxToggle(d)); bx.append(bb); box.append(bx); }
+  if (FOOD[d.sp]) { const ks = mk('div', 'breed'), ok = edible(d); ks.append(mk('h4', '', '🔪 食材'), mk('p', '', ok ? '阿忠師整尾收購大約 ' + wholePrice(d) + ' 金幣；自己處理好再賣更值錢。' : '可以吃的魚，長到一半以上阿忠師才收。'));
+    if (ok) { const kb = mk('button', 'btn ghost', state.board ? '砧板上還有東西，先去廚房看看' : '帶去廚房'); kb.addEventListener('click', () => { if (!state.board) state.boardSel = d.id; listTab = 'kitchen'; openSheet('list'); }); ks.append(kb); }
+    box.append(ks); }
   if (!S.pest && d.sp !== 'feeder') { const ms = mk('div', 'breed'), why = canDonate(d), M = state.museum[d.sp];
     ms.append(mk('h4', '', '城市水族館'), mk('p', '', M ? '水族館已經在展出' + S.name + '（' + M.n + ' 捐的）。' : '每捐一種還沒展出的生物，所有魚掉的金幣永久 +1%。捐出去的魚會離開魚缸。'));
     if (!M) { const mb = mk('button', 'btn ghost', why || '捐給水族館'); mb.disabled = !!why; mb.addEventListener('click', () => { if (mb.dataset.ok) donate(d); else { mb.dataset.ok = '1'; mb.textContent = '確定捐出 ' + d.name + '？再按一次'; } }); ms.append(mb); }
@@ -5906,7 +6189,8 @@ function drawPortrait(){
   paintFish(c, d.sp, P, L, rt.t * 4, .7, r || {puffK:0}, r ? r.fx : geneFx(d), d.seed); if (d.rare) drawStars(c, P, L, rt.t, 7);
 }
 function renderList(){
-  const keepS = sheetBody.scrollTop; $('#sheetTitle').textContent = '我的魚兒'; setTabs([['mine','我的魚缸'],['story','劇情'],['dex','圖鑑'],['museum','水族館'],['diary','日記'],['ach','成就']], listTab); sheetBody.innerHTML = '';
+  const keepS = sheetBody.scrollTop; $('#sheetTitle').textContent = '我的魚兒'; setTabs([['mine','我的魚缸'],['kitchen', state.inj && state.inj.k !== 'dead' ? '廚房 🩹' : '廚房'],['story','劇情'],['dex','圖鑑'],['museum','水族館'],['diary','日記'],['ach','成就']], listTab); sheetBody.innerHTML = '';
+  if (listTab === 'kitchen') { renderKitchen(); sheetBody.scrollTop = keepS; return; }
   if (listTab === 'story') { renderStory(); sheetBody.scrollTop = keepS; return; }
   if (listTab === 'dex') return renderDex();
   if (listTab === 'museum') return renderMuseum();
@@ -5961,6 +6245,7 @@ function renderDex(){
 /* ---------- Modes ---------- */
 const edtools = $('#edtools');
 function enterMode(m, sel){
+  if ((m === 'clean' || m === 'edit') && injBlock('hands')) { toast(injBlock('hands')); return; }
   if (m === 'clean' && !state.algae.length) { toast('玻璃很乾淨，不用擦'); return; }
   rt.mode = m; rt.sel = sel || null;
   document.body.classList.toggle('mode-clean', m === 'clean'); document.body.classList.toggle('mode-edit', m === 'edit');
@@ -6030,6 +6315,10 @@ document.querySelectorAll('.dock-btn').forEach(b => b.addEventListener('click', 
 }));
 $('#modeDone').addEventListener('click', exitMode);
 $('#qpill').addEventListener('click', () => openSheet('today'));
+$('#injpill').addEventListener('click', () => { listTab = 'kitchen'; openSheet('list'); });
+$('#ghPay').addEventListener('click', payHeal);
+$('#ghLook').addEventListener('click', () => $('#ghost').classList.add('mini'));
+$('#ghMini').addEventListener('click', () => $('#ghost').classList.remove('mini'));
 $('#edTrim').addEventListener('click', () => trimPlant(rt.sel));
 $('#edFlip').addEventListener('click', () => { if (rt.sel) { rt.sel.flip = !rt.sel.flip; markDirty(); } });
 $('#edSell').addEventListener('click', () => {
