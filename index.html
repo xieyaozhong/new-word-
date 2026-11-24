@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.13">
+<meta name="application-version" content="2026.11.25.14">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3718,7 +3718,7 @@ function drawMosa(c, L, t, open){ const H = L * .11, sw = Math.sin(t * 1.4);
   c.fillStyle = '#3a4844'; c.beginPath(); c.moveTo(L * .34, -H * .32); c.quadraticCurveTo(L * .45, -H * .38, L * .56, -H * .1); c.lineTo(L * .56, 0); c.lineTo(L * .34, H * .06); c.fill();
   c.save(); c.translate(L * .36, H * .08); c.rotate(open * .45); c.fillStyle = '#4a5852'; c.beginPath(); c.moveTo(0, 0); c.lineTo(L * .2, -H * .02); c.lineTo(L * .18, H * .14); c.lineTo(0, H * .22); c.fill(); gTeeth(c, L * .02, 0, L * .19, -H * .02, 9, H * .1, true); c.restore();
   gTeeth(c, L * .36, H * .05, L * .55, 0, 10, H * .1, false); c.fillStyle = '#e8c040'; dot(c, L * .42, -H * .2, L * .008); c.fillStyle = '#100a04'; c.fillRect(L * .418, -H * .26, L * .004, H * .12); }
-function drawDunk(c, L, t, open){ const H = L * .2;
+function drawDunk(c, L, t, open){ const H = L * .25;
   c.fillStyle = '#2e3236'; c.save(); c.translate(-L * .42, 0); c.rotate(Math.sin(t * 1.5) * .12); c.beginPath(); c.moveTo(0, -H * .2); c.quadraticCurveTo(-L * .06, -H * .8, -L * .12, -H * 1.1); c.quadraticCurveTo(-L * .05, 0, -L * .1, H * .8); c.quadraticCurveTo(-L * .04, H * .5, 0, H * .2); c.fill(); c.restore();
   c.fillStyle = lg(c, 0, -H * .5, 0, H * .5, [[0,'#2a2e32'],[1,'#6a6e70']]); c.beginPath(); c.moveTo(L * .1, -H * .48); c.quadraticCurveTo(-L * .2, -H * .4, -L * .42, -H * .1); c.lineTo(-L * .42, H * .1); c.quadraticCurveTo(-L * .2, H * .42, L * .1, H * .46); c.fill();
   gFin(c, [-L * .02, -H * .45, -L * .06, -H * .95, -L * .14, -H * .9, -L * .12, -H * .6, -L * .16, -H * .38], '#2e3236');
@@ -3768,26 +3768,23 @@ const GSCENE = {
       const hx = lerp(ix, tx, k), hy = lerp(iy, ty, k), cx = (bx + hx) / 2 + Math.sin(t * .5 + i) * 40, cy = (by + hy) / 2 - 60 + Math.cos(t * .4 + i) * 30;
       c.lineCap = 'round'; c.strokeStyle = '#26321e'; c.lineWidth = 30; c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(cx, cy, hx, hy); c.stroke(); c.strokeStyle = '#3a4a30'; c.lineWidth = 20; c.stroke(); c.strokeStyle = 'rgba(90,110,70,.5)'; c.lineWidth = 3; c.setLineDash([4, 9]); c.stroke(); c.setLineDash([]);
       const ang = Math.atan2(hy - cy, hx - cx), open = A ? k : Math.max(0, Math.sin(t * 1.3 + i * 1.7)) * .5; c.save(); c.translate(hx, hy); const fl = Math.cos(ang) < 0; c.rotate(fl ? ang + Math.PI : ang); if (fl) c.scale(-1, 1); drawGHead(c, 1.3 + k * .6, open, t, i); c.restore(); } },
-  kraken(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, ex = w * (.5 + .22 * Math.sin(t * .13)), ey = h * (.44 + .08 * Math.sin(t * .17)), R = w * .42, bl = Math.max(0, Math.sin(t * .45) - .96) * 25;
-    c.fillStyle = rg(c, ex, ey, R * .5, ex, ey, R * 1.8, [[0,'#3a1814'],[1,'rgba(20,6,6,0)']]); c.fillRect(0, 0, w, h);
-    c.fillStyle = '#d8c890'; c.beginPath(); c.ellipse(ex, ey, R, R * .62, 0, 0, TAU); c.fill(); c.fillStyle = rg(c, ex, ey, 0, ex, ey, R * .56, [[0,'#3a2a08'],[.35,'#c89a28'],[.8,'#7a5a14'],[1,'#3a2a08']]); c.beginPath(); c.arc(ex, ey, R * .55, 0, TAU); c.fill();
-    c.strokeStyle = 'rgba(60,40,6,.5)'; c.lineWidth = 1.5; for (let i = 0; i < 28; i++) { const a = i / 28 * TAU; c.beginPath(); c.moveTo(ex + Math.cos(a) * R * .2, ey + Math.sin(a) * R * .2); c.lineTo(ex + Math.cos(a) * R * .53, ey + Math.sin(a) * R * .53); c.stroke(); }
-    c.fillStyle = '#050302'; c.beginPath(); c.ellipse(ex, ey, R * .34, R * .07 + Math.max(0, Math.sin(t * .3)) * R * .05, 0, 0, TAU); c.fill(); gl(c, ex, ey, R * .7, '#ffb840', .35); c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.ellipse(ex - R * .2, ey - R * .22, R * .08, R * .04, -.4, 0, TAU); c.fill();
-    if (bl > 0) { c.fillStyle = '#2a120e'; c.beginPath(); c.ellipse(ex, ey, R * 1.05, R * .66 * Math.min(1, bl), 0, 0, TAU); c.fill(); }
-    const bases = [[-50, h * .15], [w + 50, h * .28], [-50, h * .82], [w + 50, h * .7]];
-    bases.forEach(([bx, by], i) => { const sl = A ? easeOut(Math.min(1, p * 3)) : 0, tx = lerp(w * (.5 + (bx < 0 ? -.05 : .05) + .2 * Math.sin(t * .2 + i * 1.7)), w * .5 + (bx < 0 ? -30 : 30), sl), ty = lerp(h * (.3 + i * .14 + .06 * Math.sin(t * .3 + i)), h * .45 + (i - 1.5) * 50, sl);
-      const cx = (bx + tx) / 2 + Math.sin(t * .4 + i) * 60, cy = (by + ty) / 2 + Math.cos(t * .5 + i * 2) * 60, n = 22;
-      for (let j = 0; j < n; j++) { const q0 = j / n, q1 = (j + 1) / n, P0 = [(1 - q0) ** 2 * bx + 2 * (1 - q0) * q0 * cx + q0 * q0 * tx, (1 - q0) ** 2 * by + 2 * (1 - q0) * q0 * cy + q0 * q0 * ty], P1 = [(1 - q1) ** 2 * bx + 2 * (1 - q1) * q1 * cx + q1 * q1 * tx, (1 - q1) ** 2 * by + 2 * (1 - q1) * q1 * cy + q1 * q1 * ty];
-        c.strokeStyle = '#6a2a28'; c.lineCap = 'round'; c.lineWidth = 64 * (1 - q0 * .85); c.beginPath(); c.moveTo(P0[0], P0[1]); c.lineTo(P1[0], P1[1]); c.stroke();
-        if (j % 2 === 0) { const dx = P1[0] - P0[0], dy = P1[1] - P0[1], dl = Math.hypot(dx, dy) || 1, o = 20 * (1 - q0 * .85), sx = P0[0] - dy / dl * o, sy = P0[1] + dx / dl * o; c.fillStyle = '#e8b0a8'; dot(c, sx, sy, 9 * (1 - q0 * .8)); c.fillStyle = '#8a3a38'; dot(c, sx, sy, 5 * (1 - q0 * .8)); } } });
-    if (A && p > .33 && !G.hit) { G.hit = 1; G.shake = .9; G.crack = 2.5; G.cx = w * .5; G.cy = h * .45; for (let i = 0; i < 70; i++) G.parts.push({x:w * .5 + rand(-60, 60), y:h * .45 + rand(-60, 60), vx:rand(-90, 90), vy:rand(-90, 90), t:0, life:rand(2.5, 4), kind:'ink'}); }
-    if (!A) G.hit = 0; },
+  kraken(c,w,h,t,G){
+ const p=G.act?G.act.t/G.act.dur:0,k=G.act?Math.sin(Math.PI*p):0,R=Math.min(w,h)*(.34+.12*k),x=w*(.5+.07*Math.sin(t*.24)*(1-k)),y=h*(.39+.04*Math.sin(t*.5)),pulse=1+.045*Math.sin(t*2)+.08*k;
+ c.save();c.translate(x,y);
+ for(let i=0;i<8;i++){const a=i*TAU/8+.18,reach=R*(2.0+.8*k),pts=[];for(let j=0;j<=24;j++){const u=j/24,ang=a+.75*Math.sin(u*4-t*.85+i*.6)*u+.4*k*u;pts.push([Math.cos(ang)*reach*u,Math.sin(ang)*reach*u+R*.25,R*(.18*(1-u)**.8+.012)]);}
+ for(let j=23;j>=0;j--){const [xx,yy,r]=pts[j],[nx,ny]=pts[j+1];c.lineCap='round';c.strokeStyle=lg(c,xx-r,yy-r,xx+r,yy+r,[[0,'#24171e'],[.4,'#8c5146'],[.7,'#613238'],[1,'#261c29']]);c.lineWidth=r*2;c.beginPath();c.moveTo(xx,yy);c.lineTo(nx,ny);c.stroke();if(j%2===0){const a=Math.atan2(ny-yy,nx-xx);for(const d of [-1,1]){const sx=xx+Math.sin(a)*r*.42*d,sy=yy-Math.cos(a)*r*.42*d;c.fillStyle='#b98775';c.beginPath();c.ellipse(sx,sy,r*.28,r*.19,a,0,TAU);c.fill();c.fillStyle='#51333a';c.beginPath();c.ellipse(sx,sy,r*.15,r*.10,a,0,TAU);c.fill();}}}}
+ c.fillStyle=rg(c,-R*.22,-R*.48,0,0,0,R*1.2,[[0,'#bd8b75'],[.35,'#855448'],[.75,'#49303b'],[1,'#171e2b']]);c.beginPath();c.ellipse(0,-R*.24,R*.76*pulse,R*1.06/pulse,0,0,TAU);c.fill();
+ c.save();c.clip();for(let i=0;i<90;i++){const xx=R*((i*37%101)/50-1),yy=R*((i*61%103)/50-1)-R*.2;c.fillStyle=i%2?'rgba(50,23,30,.23)':'rgba(220,166,130,.12)';dot(c,xx,yy,R*(.009+(i%5)*.004));}c.restore();
+ for(const d of [-1,1]){const ex=d*R*.48,ey=R*.13;c.fillStyle='#533d38';c.beginPath();c.ellipse(ex,ey,R*.24,R*.19,d*.22,0,TAU);c.fill();c.fillStyle=rg(c,ex-R*.05,ey-R*.05,0,ex,ey,R*.19,[[0,'#f2c498'],[.65,'#a56e37'],[1,'#382721']]);c.beginPath();c.ellipse(ex,ey,R*.19,R*.13,0,0,TAU);c.fill();c.fillStyle='#080c12';c.beginPath();c.ellipse(ex,ey,R*.115,R*.035,0,0,TAU);c.fill();dot(c,ex-R*.055,ey-R*.04,R*.018);}
+ c.restore();
+ if(G.act&&p>.48&&!G.hit){G.hit=1;G.shake=.55;G.crack=1.8;G.cx=x;G.cy=y;for(let i=0;i<48;i++)G.parts.push({x,y:y+R*.6,vx:rand(-150,150),vy:rand(-60,130),t:0,life:rand(1.5,3),kind:'ink'});}
+ },
   charybdis(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, inh = A ? (p < .62 ? easeIn(Math.min(1, p / .3)) : p < .75 ? 1 : 0) : 0, exh = A && p >= .75 ? 1 - (p - .75) / .25 : 0, cx = w * .5, cy = h * .8, br = 1 + Math.sin(t * .6) * .05 + inh * .15, rx = w * .6 * br, ry = h * .1 * br;
     c.fillStyle = '#0c0a0c'; c.beginPath(); c.moveTo(0, cy - 10); c.quadraticCurveTo(w * .2, cy - 40, w * .5, cy - ry - 30); c.quadraticCurveTo(w * .8, cy - 40, w, cy - 10); c.lineTo(w, h); c.lineTo(0, h); c.fill();
     c.fillStyle = '#3a1418'; c.beginPath(); c.ellipse(cx, cy, rx * 1.12, ry * 1.25, 0, 0, TAU); c.fill(); c.fillStyle = rg(c, cx, cy, 0, cx, cy, rx, [[0,'#000'],[.6,'#1a0408'],[1,'#5a1a22']]); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
     for (let k = 0; k < 3; k++) { const s = 1 - k * .14, n = 30 - k * 6; c.fillStyle = k ? 'rgba(220,206,180,' + (.9 - k * .25) + ')' : '#e8dcc4'; for (let i = 0; i < n; i++) { const a = i / n * TAU + k * .2 + t * .05 * (k + 1), x = cx + Math.cos(a) * rx * s, y = cy + Math.sin(a) * ry * s, tx = cx + Math.cos(a) * rx * (s - .14), ty = cy + Math.sin(a) * ry * (s - .14), nx = -Math.sin(a), ny = Math.cos(a); c.beginPath(); c.moveTo(x + nx * 7, y + ny * 2); c.lineTo(tx, ty); c.lineTo(x - nx * 7, y - ny * 2); c.fill(); } }
     if (inh > 0) { for (let j = 0; j < 12; j++) { const y = cy - j * h * .055, r = rx * (.2 + j * .1), sp = t * (6 - j * .3); c.strokeStyle = 'rgba(180,220,250,' + (.6 * inh * (1 - j / 14)).toFixed(3) + ')'; c.lineWidth = 3.5; c.setLineDash([24, 18]); c.lineDashOffset = -sp * 40; c.beginPath(); c.ellipse(cx, y, r, r * .16, 0, 0, TAU); c.stroke(); } c.setLineDash([]);
-      if (Math.random() < .9) for (let i = 0; i < 3; i++) G.parts.push({kind:'vortex', r:rand(w * .4, w * .9), a:rand(0, TAU), y:rand(h * .1, h * .7), t:0, life:6, fish:Math.random() < .15}); G.shake = Math.max(G.shake, .12 * inh); }
+      if (G.parts.length<100 && Math.random() < .6) for (let i = 0; i < 2; i++) G.parts.push({kind:'vortex', r:rand(w * .4, w * .9), a:rand(0, TAU), y:rand(h * .1, h * .7), t:0, life:6, fish:Math.random() < .15}); G.shake = Math.max(G.shake, .12 * inh); }
     if (exh > 0 && !G.blew) { G.blew = 1; G.shake = .6; for (let i = 0; i < 60; i++) G.parts.push({x:cx + rand(-40, 40), y:cy, vx:rand(-160, 160), vy:rand(-320, -120), t:0, life:rand(1, 2), kind:'spray'}); }
     if (!A) G.blew = 0;
     for (let i = G.parts.length - 1; i >= 0; i--) { const q = G.parts[i]; if (q.kind !== 'vortex') continue; const dt2 = 1 / 60; q.t += dt2; q.a += dt2 * (1.2 + 260 / Math.max(30, q.r)) * (inh || .2); q.r *= 1 - dt2 * .55 * (inh || .1); q.y += (cy - q.y) * dt2 * .5 * (inh || .1);
@@ -3816,12 +3813,20 @@ const GSCENE = {
 };
 const GDUR = {dunkle:2.4, mosa:3.6, megalodon:4.5, scylla:2.8, kraken:4, charybdis:7, leviathan:3.4, kun:5};
 function giantBg(c, w, h, t){ c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#020a16'],[1,'#000206']]); c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(30,60,90,.08)'; c.beginPath(); c.moveTo(w * .35, 0); c.lineTo(w * .6, 0); c.lineTo(w * .9, h); c.lineTo(w * .05, h); c.fill(); }
+function giantCinema(c,w,h,t,G){
+ const p=G.act?clamp(G.act.t/G.act.dur,0,1):0,k=G.act?Math.sin(Math.PI*p):0;
+ c.save();const v=rg(c,w*.5,h*.43,Math.min(w,h)*.19,w*.5,h*.5,Math.hypot(w,h)*.65,[[0,'rgba(0,12,22,0)'],[.65,'rgba(0,12,22,.15)'],[1,'rgba(0,3,9,.78)']]);c.fillStyle=v;c.fillRect(0,0,w,h);
+ c.globalCompositeOperation='screen';for(let i=0;i<4;i++){const x=w*(.08+i*.24+.045*Math.sin(t*.23+i)),g=lg(c,x,0,x+w*.24,h,[[0,'rgba(100,185,200,.10)'],[1,'rgba(40,110,140,0)']]);c.fillStyle=g;c.beginPath();c.moveTo(x-12,0);c.lineTo(x+14,0);c.lineTo(x+w*.38,h);c.lineTo(x+w*.12,h);c.closePath();c.fill();}
+ c.globalCompositeOperation='source-over';for(let i=0;i<32;i++){const z=.3+(i%5)*.2,x=((i*.618+t*.005*(1+k*5))%1)*w,y=((i*.371+t*.009*z)%1)*h;c.fillStyle='rgba(178,218,224,'+(.1+z*.12)+')';dot(c,x,y,z*1.8);}
+ if(G.act){const bh=Math.min(h*.07,45)*Math.min(1,p*8,(1-p)*8);c.fillStyle='rgba(0,5,11,.82)';c.fillRect(0,0,w,bh);c.fillRect(0,h-bh,w,bh);}
+ c.restore();
+}
 function giantFrame(c, w, h, dt, t){ const M = deepUI, D = deepS(), k = D.gcur;
   if (!k || !GIANTS[k]) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('巨獸觀測窗目前沒有巨獸', w / 2, h * .42); c.font = '13px ' + FONT; c.fillText('潛水探測時有機會撿到巨獸的線索', w / 2, h * .42 + 22); c.fillText('集滿 3 個線索就能在「巨獸檔案」追蹤牠', w / 2, h * .42 + 42); return; }
   if (!M.gs || M.gs.k !== k) { M.gs = {k, act:null, parts:[], shake:0, crack:0, auto:rand(18, 30), flash:0}; if (!D.gseen) D.gseen = {}; if (!D.gseen[k]) { D.gseen[k] = 1; markDirty(); deepMsg(k === 'kun' ? '北冥有魚，其名為鯤。鯤之大，不知其幾千里也。' : GIANTS[k].name + '：' + GIANTS[k].era + '・點一下畫面看牠的招牌動作'); } }
   const G = M.gs; G.auto -= dt; if (!G.act && G.auto <= 0) { giantAct(); }
   if (G.act) { G.act.t += dt; if (G.act.t >= G.act.dur) { G.act = null; G.auto = rand(22, 38); } }
-  GSCENE[k](c, w, h, t, G);
+  c.save();const cp=G.act?Math.sin(Math.PI*clamp(G.act.t/G.act.dur,0,1)):0;const zoom=k==='megalodon'?1:1+cp*.065;c.translate(w*.5,h*.5);c.scale(zoom,zoom);c.translate(-w*.5,-h*.5);GSCENE[k](c,w,h,t,G);c.restore();giantCinema(c,w,h,t,G);
   for (let i = G.parts.length - 1; i >= 0; i--) { const q = G.parts[i]; if (q.kind === 'vortex') continue; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= q.kind === 'spray' ? .96 : .97; if (q.kind === 'debris' || q.kind === 'spray') q.vy += 90 * dt; if (q.t > q.life) { G.parts.splice(i, 1); continue; } const a = 1 - q.t / q.life;
     if (q.kind === 'ink') { c.fillStyle = 'rgba(6,2,8,' + (.6 * a).toFixed(3) + ')'; dot(c, q.x, q.y, 20 + q.t * 30); } else if (q.kind === 'gold') { c.fillStyle = 'rgba(255,220,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 2.4); gl(c, q.x, q.y, 10, '#ffcc55', a); }
     else if (q.kind === 'spray') { c.fillStyle = 'rgba(200,230,255,' + (.7 * a).toFixed(2) + ')'; dot(c, q.x, q.y, 2); } else { c.fillStyle = q.t < .3 ? 'rgba(200,60,60,' + a.toFixed(2) + ')' : 'rgba(120,120,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 3); } }
