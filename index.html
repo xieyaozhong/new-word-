@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.2">
+<meta name="application-version" content="2026.11.25.3">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1224,7 +1224,7 @@ function season(){ const n = Date.now(); if (seasonC.v && n - seasonC.t < 5000) 
 function seasonLeft(){ const d = new Date(), m = d.getMonth(), nm = [2, 5, 8, 11].find(x => x > m), nx = nm == null ? new Date(d.getFullYear() + 1, 2, 1) : new Date(d.getFullYear(), nm, 1); return Math.max(1, Math.ceil((nx - d) / 864e5)); }
 const seasonSp = () => SEASONS[season()].sp;
 let evCache = {k:'', v:''};
-function todayEv(){ const k = dayKey(); if (evCache.k !== k) { const R = rng(hashStr('ev-' + k)), ks = Object.keys(DAY_EVENTS); evCache = {k, v:R() < .35 ? '' : ks[(R() * ks.length) | 0]}; } return evCache.v; }
+function todayEv(){ const k = refreshKey()+'-'+personalSeed(); if (evCache.k !== k) { const R = rng(hashStr('ev-' + k)), ks = Object.keys(DAY_EVENTS); evCache = {k, v:R() < .35 ? '' : ks[(R() * ks.length) | 0]}; } return evCache.v; }
 const FESTS = [
   {k:'dongzhi', name:'冬至', deco:'tangyuan', greet:'冬至吃湯圓，又長大一歲了！', d:[[20261221, 20261222], [20271221, 20271222], [20281220, 20281221]]},
   {k:'newyear', name:'跨年', deco:'clock', greet:'新的一年也要一起好好養魚！', md:[[1231, 1231], [101, 101]]},
@@ -1251,9 +1251,13 @@ const STOCK_FISH = 10, STOCK_INV = 4;
 let stockCache = null;
 function dayKey(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 /* Player-specific stock, stable across reloads and synced saves. */
-function personalSeed(){ return state.pid || String(state.created || 'aquarium'); }
+function personalSeed(){ return (state.pid || String(state.created || 'aquarium')) + ':' + (state.chronoRefresh||0); }
+function refreshKey(){return dayKey()+'~'+(state.chronoRefresh||0);}
+const CHRONO_PRICE=100000;
+function activateShopChrono(){if(state.coins<CHRONO_PRICE)return;state.coins-=CHRONO_PRICE;state.chronoRefresh=(state.chronoRefresh||0)+1;stockCache=null;state.visitRot=null;state.npcConflict=null;state.firstVisit=null;state.seenVisit='';state.evSeen='';rt.hudT=0;rt.evT=1;shopTab='today';bumpCoins();markDirty();saveNow();toast('時空加速器啟動！商店與事件已重新抽取');renderShop();}
+function renderShopChrono(){const card=mk('div','evcard'),btn=mk('button','buy');card.append(mk('h3','','⏳ 時空加速器'),mk('p','sub','立即刷新輪替魚種、小生物、水草、特價、NPC及每日事件。不影響節慶或魚隻成長。'),mk('p','sub','一次性消耗・100,000 金幣'));btn.disabled=state.coins<CHRONO_PRICE;confirmBtn(btn,'啟動・100,000 金幣',activateShopChrono);btn.textContent='啟動・100,000 金幣';card.append(btn);sheetBody.append(card);}
 function dailyStock(){
-  const key = dayKey(), owner = personalSeed(); if (stockCache && stockCache.key === key && stockCache.owner === owner) return stockCache;
+  const key = refreshKey(), owner = personalSeed(); if (stockCache && stockCache.key === key && stockCache.owner === owner) return stockCache;
   const R = rng(hashStr('stock-' + owner + '-' + key));
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (R() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const items = shuf(ROT_FISH).slice(0, STOCK_FISH).sort((a, b) => SPECIES[a].price - SPECIES[b].price).concat(shuf(ROT_INV).slice(0, STOCK_INV).sort((a, b) => SPECIES[a].price - SPECIES[b].price));
@@ -1994,7 +1998,7 @@ function preyFor(pd){
   list.sort((a, b) => (a.sp === 'pestsnail' ? 0 : 1) - (b.sp === 'pestsnail' ? 0 : 1) || (a.rare ? 1 : 0) - (b.rare ? 1 : 0) || baseLen(a) - baseLen(b));
   return list[0] || null;
 }
-function visitWindow(){ const d = new Date(), slot = Math.floor(d.getHours() / 4); return {key:dayKey() + '#' + slot, end:new Date(d.getFullYear(), d.getMonth(), d.getDate(), (slot + 1) * 4).getTime()}; }
+function visitWindow(){ const d = new Date(), slot = Math.floor(d.getHours() / 4); return {key:refreshKey() + '#' + slot, end:new Date(d.getFullYear(), d.getMonth(), d.getDate(), (slot + 1) * 4).getTime()}; }
 /* Player-specific visitor picks per four-hour slot, stable on reload. */
 function baseVisitor(){
   const w = visitWindow(), R0 = state.visitRot && state.visitRot.key === w.key ? state.visitRot : null;
@@ -2047,7 +2051,7 @@ function pickVisitor(key){ const R = rng(hashStr('npc-' + personalSeed() + '-' +
   for (const k of NPC_KEYS) if (!NPCS[k].alien && (!NPCS[k].slots || NPCS[k].slots.includes(slot))) for (let i = 0; i < wt(k); i++) pool.push(k);
   return R() < .55 ? pool[(R() * pool.length) | 0] : null; }
 function nextVisit(npc){ const now = new Date();
-  for (let i = 0; i < 42; i++) { const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(now.getHours() / 4) * 4 + i * 4), key = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate() + '#' + Math.floor(t.getHours() / 4);
+  for (let i = 0; i < 42; i++) { const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(now.getHours() / 4) * 4 + i * 4), key = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate() + '~' + (state.chronoRefresh||0) + '#' + Math.floor(t.getHours() / 4);
     const who = i === 0 ? (currentVisitor() || {}).npc : state.firstVisit && state.firstVisit.key === key ? state.firstVisit.npc : pickVisitor(key); if (who === npc) return {t, now:i === 0}; }
   return null; }
 function nextVisitText(npc){ const nv = nextVisit(npc), N = NPCS[npc]; if (!nv) return N.name + '這個禮拜好像沒空來店裡，過幾天再看看。'; if (nv.now) return N.name + '現在就在水族店！';
@@ -7949,6 +7953,7 @@ function renderTankShop(){
   }
 }
 function renderGear(){
+  renderShopChrono();
   const tanks = mk('div', 'evcard'); tanks.append(mk('h3', '', '想養更多魚？開設獨立魚缸'), mk('p', '', '目前 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸。' + (state.tankRooms.length >= MAX_TANKS ? '已達開缸上限。' : '下一缸需要 ' + tankPrice().toLocaleString('zh-TW') + ' 金幣。') + '魚、生物與設備各自管理。'));
   const manage = mk('button', 'chipbtn', '管理魚缸與開新缸'); manage.addEventListener('click', openTankShop); tanks.appendChild(manage); sheetBody.appendChild(tanks);
   sheetBody.appendChild(mk('h4', 'sec', '飼料'));
@@ -8056,7 +8061,7 @@ function renderShop(){
   wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra, '・目前：' + tankRoom().name);
   sheetBody.appendChild(wallet);
   if (shopTab === 'tanks') { renderTankShop(); sheetBody.scrollTop = keep; return; }
-  if (shopTab === 'today') { rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
+  if (shopTab === 'today') { renderShopChrono(); rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
     rs.append('新舊夥伴一起輪替，今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'trade') { renderTrade(); sheetBody.scrollTop = keep; return; }
