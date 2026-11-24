@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.15">
+<meta name="application-version" content="2026.11.25.16">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -442,7 +442,6 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
 #edtools button{border:0;background:rgba(255,255,255,.09);border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-<script src="giant-3d.js?v=20261125.15"></script>
 </head>
 <body>
 <svg class="sprite" aria-hidden="true">
@@ -3827,7 +3826,7 @@ function giantFrame(c, w, h, dt, t){ const M = deepUI, D = deepS(), k = D.gcur;
   if (!M.gs || M.gs.k !== k) { M.gs = {k, act:null, parts:[], shake:0, crack:0, auto:rand(18, 30), flash:0}; if (!D.gseen) D.gseen = {}; if (!D.gseen[k]) { D.gseen[k] = 1; markDirty(); deepMsg(k === 'kun' ? '北冥有魚，其名為鯤。鯤之大，不知其幾千里也。' : GIANTS[k].name + '：' + GIANTS[k].era + '・點一下畫面看牠的招牌動作'); } }
   const G = M.gs; G.auto -= dt; if (!G.act && G.auto <= 0) { giantAct(); }
   if (G.act) { G.act.t += dt; if (G.act.t >= G.act.dur) { G.act = null; G.auto = rand(22, 38); } }
-  c.save();const cp=G.act?Math.sin(Math.PI*clamp(G.act.t/G.act.dur,0,1)):0;const zoom=k==='megalodon'?1:1+cp*.065;c.translate(w*.5,h*.5);c.scale(zoom,zoom);c.translate(-w*.5,-h*.5);if(!window.giant3DFrame?.(c,w,h,t,G))GSCENE[k](c,w,h,t,G);c.restore();giantCinema(c,w,h,t,G);
+  c.save();const cp=G.act?Math.sin(Math.PI*clamp(G.act.t/G.act.dur,0,1)):0;const zoom=k==='megalodon'?1:1+cp*.065;c.translate(w*.5,h*.5);c.scale(zoom,zoom);c.translate(-w*.5,-h*.5);GSCENE[k](c,w,h,t,G);c.restore();giantCinema(c,w,h,t,G);
   for (let i = G.parts.length - 1; i >= 0; i--) { const q = G.parts[i]; if (q.kind === 'vortex') continue; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.vy *= q.kind === 'spray' ? .96 : .97; if (q.kind === 'debris' || q.kind === 'spray') q.vy += 90 * dt; if (q.t > q.life) { G.parts.splice(i, 1); continue; } const a = 1 - q.t / q.life;
     if (q.kind === 'ink') { c.fillStyle = 'rgba(6,2,8,' + (.6 * a).toFixed(3) + ')'; dot(c, q.x, q.y, 20 + q.t * 30); } else if (q.kind === 'gold') { c.fillStyle = 'rgba(255,220,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 2.4); gl(c, q.x, q.y, 10, '#ffcc55', a); }
     else if (q.kind === 'spray') { c.fillStyle = 'rgba(200,230,255,' + (.7 * a).toFixed(2) + ')'; dot(c, q.x, q.y, 2); } else { c.fillStyle = q.t < .3 ? 'rgba(200,60,60,' + a.toFixed(2) + ')' : 'rgba(120,120,120,' + a.toFixed(2) + ')'; dot(c, q.x, q.y, 3); } }
