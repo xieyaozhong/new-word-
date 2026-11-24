@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.5">
+<meta name="application-version" content="2026.11.25.6">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3612,9 +3612,20 @@ function drawSharkModel(c,L,t,open,P,giant=false){
  const gap=giant?.012+open*.055:.009;c.beginPath();c.moveTo(.455,H*.25);c.quadraticCurveTo(.38,H*.69,.29,H*.54);c.quadraticCurveTo(.38,H*.69+gap,.455,H*.25);c.fillStyle='#20232b';c.fill();
  if(giant&&open>.12){c.fillStyle='#eee9d7';for(let i=0;i<8;i++){const x=.44-i*.017,y=H*(.33+.27*Math.sin(i/8*Math.PI));c.beginPath();c.moveTo(x-.007,y);c.lineTo(x,y+.018);c.lineTo(x+.007,y);c.fill();}}
  if(style==='hammer'){
- c.fillStyle=lg(c,0,-H,0,H,[[0,back],[.55,mid],[1,'#d9e0df']]);c.beginPath();c.moveTo(.31,-H*.45);c.bezierCurveTo(.38,-H*.9,.43,-H*1.65,.49,-H*1.55);c.quadraticCurveTo(.55,-H*1.4,.51,-H*.65);c.lineTo(.49,H*.55);c.quadraticCurveTo(.51,H*1.12,.44,H*1.05);c.quadraticCurveTo(.38,H*.8,.31,H*.35);c.closePath();c.fill();for(const y of [-H*1.28,H*.83]){c.fillStyle='#17252b';dot(c,.49,y,.013);c.fillStyle='#d8edf3';dot(c,.493,y-.004,.004);}
+ const tilt=.018*Math.sin(t*.8);
+ c.fillStyle=lg(c,.32,-H*1.5,.53,H,[[0,back],[.48,mid],[1,'#cbd9d7']]);
+ c.beginPath();c.moveTo(.29,-H*.48);c.bezierCurveTo(.35,-H*.65,.36,-H*1.24,.405,-H*1.52+tilt);c.quadraticCurveTo(.455,-H*1.73+tilt,.495,-H*1.43+tilt);c.bezierCurveTo(.51,-H*.9,.48,-H*.3,.51,H*.22);c.quadraticCurveTo(.55,H*.8,.49,H*1.03-tilt);c.quadraticCurveTo(.44,H*1.16-tilt,.40,H*.81);c.bezierCurveTo(.36,H*.48,.32,H*.48,.29,H*.35);c.closePath();c.fill();
+ c.strokeStyle='rgba(230,245,245,.3)';c.lineWidth=.006;c.beginPath();c.moveTo(.405,-H*1.4+tilt);c.quadraticCurveTo(.46,-H*.4,.48,H*.65);c.stroke();
+ for(const [x,y,r] of [[.468,-H*1.35+tilt,.011],[.485,H*.83-tilt,.016]]){c.fillStyle='#263c42';dot(c,x,y,r*1.35);c.fillStyle='#101c23';dot(c,x,y,r);c.fillStyle='#d8edf3';dot(c,x+.003,y-.004,r*.29);}
+ c.strokeStyle='#34464a';c.lineWidth=.004;c.beginPath();c.moveTo(.44,H*.35);c.quadraticCurveTo(.46,H*.52,.48,H*.43);c.stroke();
  }else if(style==='goblin'){
- c.fillStyle=lg(c,0,-H,0,H,[[0,back],[1,mid]]);c.beginPath();c.moveTo(.29,-H*.72);c.quadraticCurveTo(.46,-H*.85,.62,-H*.24);c.quadraticCurveTo(.48,-H*.08,.36,H*.05);c.closePath();c.fill();const j=.035*(.5+.5*Math.sin(t*.65));c.fillStyle='#70414d';c.beginPath();c.moveTo(.31,H*.28);c.quadraticCurveTo(.44+j,H*.15,.49+j,H*.48);c.quadraticCurveTo(.39+j,H*.9,.30,H*.54);c.fill();c.fillStyle='#f2e8dc';for(let i=0;i<6;i++){const x=.35+j+i*.023;c.beginPath();c.moveTo(x,H*.42);c.lineTo(x+.006,H*.67);c.lineTo(x+.011,H*.42);c.fill();}
+ const j=.065*Math.pow(Math.max(0,Math.sin(t*.65)),5);
+ c.fillStyle=lg(c,.33,-H,.58,H*.3,[[0,back],[.55,mid],[1,'#d7a3a6']]);c.beginPath();c.moveTo(.27,-H*.72);c.bezierCurveTo(.38,-H*.91,.48,-H*.58,.64,-H*.28);c.quadraticCurveTo(.655,-H*.20,.62,-H*.14);c.bezierCurveTo(.50,-H*.04,.42,H*.12,.34,H*.13);c.closePath();c.fill();
+ c.strokeStyle='rgba(255,230,225,.35)';c.lineWidth=.005;c.beginPath();c.moveTo(.35,-H*.66);c.quadraticCurveTo(.50,-H*.44,.62,-H*.24);c.stroke();
+ c.fillStyle='#56333e';c.beginPath();c.moveTo(.30,H*.25);c.bezierCurveTo(.38+j,H*.12,.47+j,H*.19,.49+j,H*.46);c.quadraticCurveTo(.40+j,H*.86,.30,H*.53);c.closePath();c.fill();
+ c.fillStyle='#c28c94';c.beginPath();c.moveTo(.30,H*.52);c.quadraticCurveTo(.40+j,H*.76,.49+j,H*.46);c.quadraticCurveTo(.43+j,H*.95,.34,H*.72);c.closePath();c.fill();
+ c.fillStyle='#f4e9de';for(let i=0;i<7;i++){const x=.34+j*.6+i*.019,y=H*(.29+.12*Math.sin(i*.5));c.beginPath();c.moveTo(x-.004,y);c.quadraticCurveTo(x+.004,y+.022,x+.009,y+.028);c.lineTo(x+.008,y);c.fill();c.beginPath();c.moveTo(x,H*.65);c.lineTo(x+.005,H*.45);c.lineTo(x+.010,H*.65);c.fill();}
+ c.fillStyle='#49333e';dot(c,.367,-H*.30,.014);c.fillStyle='#171d26';dot(c,.369,-H*.30,.009);c.fillStyle='#eee3dc';dot(c,.371,-H*.33,.003);
  }
  c.restore();
 }
