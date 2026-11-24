@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.10">
+<meta name="application-version" content="2026.11.25.11">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4439,6 +4439,8 @@ const EXT = {guppy:[1.5,.75,.18], neon:[1.12,.45,.05], zebra:[1.25,.55,.08], pla
   bamboo:[1.5,.75,-.2,.13], assassin:[1.1,.9,-.1,.38], clam:[1.1,.6,0,.12], pestsnail:[1.1,.85,-.1,.38], nymph:[1.3,.6,0,.05],
   cavefish:[1.12,.55,.05], bichir:[1.15,.45,.05], archer:[1.12,.8,.05], tigerfish:[1.12,.95,.05], eel:[1.05,.32,0], piranha:[1.12,.8,.05], prawn:[1.8,.75,-.35,.13], feeder:[1.12,.55,.05],
   ghost:[1.5,.75,-.2,.13], cherry:[1.5,.75,-.2,.13], amano:[1.5,.75,-.2,.13], crystal:[1.5,.75,-.2,.13], apple:[1.1,.85,-.1,.38], nerite:[1.1,.8,-.1,.35], horned:[1.1,.9,-.1,.38], moonjelly:[.75,1.15,0,-.22], paradise:[1.2,1.1,.06,-.1], bitterling:[1.12,.85,.05], sawacrab:[1.3,.7,0,.15], loong:[1.22,.5,.05,-.02]};
+Object.assign(EXT,{blacktipshark:[1.2,.65,.03,0],tigershark:[1.2,.65,.03,0],blueshark:[1.2,.65,.03,0],whiteshark:[1.2,.68,.03,0],hammerhead:[1.2,.68,.03,0],goblinshark:[1.35,.65,-.03,0],octopus:[1.5,1.25,0,-.1],remora:[1.15,.4,.03,0]});
+
 Object.assign(EXT, {ayu:[1.12,.55,.05], backswim:[1.4,.9,0,-.1], mittencrab:EXT.sawacrab, glasseel:EXT.marbled, japeel:EXT.marbled});
 Object.assign(EXT, {pencil:[1.15,.45,.04], badis:[1.15,.95,.05], kuhli:[1.08,.3,0], anabas:[1.15,.95,.06], hemimyzon:[1.1,.8,.04], flounder:[1.22,.6,.07], pantodon:[1.3,1.05,.1,-.1],
   sailfin:[1.2,1.25,.05,.2], anableps:[1.15,.6,.04,.06], pipefish:[1.12,.32,.04], ghostknife:[1.08,.55,0,-.06], sturgeon:[1.2,.62,.05], shovelnose:[1.2,.5,.03], paddlefish:[1.3,.55,-.04], gar:[1.1,.38,-.02],
@@ -8278,7 +8280,7 @@ function drawGift(){
   c.restore();
   c.fillStyle = rg(c, w/2, h/2, 0, w/2, h/2, h * .45, [[0,alpha(col, .35)],[1,alpha(col, 0)]]); c.fillRect(0, 0, w, h);
   const pop = Math.min(1, since / .35), s = .6 + .4 * (1 - (1 - pop) ** 3);
-  if (p.kind === 'fish' || p.kind === 'lost') { if (p.kind === 'lost') c.globalAlpha = .3; const d = p.d, P = palOf(d, g.t), e = EXT[d.sp], L = Math.min(w * .62 / e[0], h * .66 / e[1]) * s;
+  if (p.kind === 'fish' || p.kind === 'lost') { if (p.kind === 'lost') c.globalAlpha = .3; const d = p.d, P = palOf(d, g.t), e = EXT[d.sp] || [1.3,1,0,0], L = Math.min(w * .62 / e[0], h * .66 / e[1]) * s;
     c.save(); c.translate(w/2 + L * e[2], h/2 + L * (e[3] || 0) + Math.sin(g.t * 1.6) * 4 * DPR);
     if (d.rare && RARES[d.rare].tier === 2) { c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, 0, 0, 0, 0, 0, L * .8, [[0,alpha(RARES[d.rare].col, .3)],[1,alpha(RARES[d.rare].col, 0)]]); c.fillRect(-L, -L, L * 2, L * 2); c.restore(); }
     paintFish(c, d.sp, P, L, g.t * 4, .7, {puffK:0}, geneFx(d), d.seed); if (d.rare) drawStars(c, P, L, g.t, 7); c.restore(); c.globalAlpha = 1; }
@@ -8374,7 +8376,7 @@ function renderFishCard(){
   box.append(rb); sheetBody.appendChild(box);
   const commit = () => { const v = inp.value.trim().slice(0, 8); if (v && v !== d.name) { d.name = v; markDirty(); toast('改名為「' + v + '」'); } else inp.value = d.name; };
   inp.addEventListener('change', commit); inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
-  pc.width = Math.round(pc.clientWidth * DPR) || 600; pc.height = Math.round(150 * DPR);
+  const portraitDpr=Math.min(DPR,1.5);pc.width = Math.round(pc.clientWidth * portraitDpr) || 450; pc.height = Math.round(150 * portraitDpr);
   renderTankTransfer(d);
   updateFishCard();
 }
@@ -8432,11 +8434,12 @@ function updateFishCard(){
 }
 function drawPortrait(){
   const pc = $('#portrait'); const d = state.fish.find(f => f.id === sheetArg); if (!pc || !d) return;
+  const now=performance.now();if(pc._drawAt!==undefined&&now-pc._drawAt<83)return;pc._drawAt=now;
   const c = pc.getContext('2d'), w = pc.width, h = pc.height, r = rt.fish.find(x => x.d === d);
   c.setTransform(1,0,0,1,0,0);
   c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#3fa7b3'],[1,'#0e4a5c']]); c.fillRect(0, 0, w, h);
   c.fillStyle = '#c9b184'; c.fillRect(0, h * .9, w, h * .1);
-  const e = EXT[d.sp], L = Math.min(w * .7 / e[0], h * .78 / e[1]), P = r ? runnerPal(r) : palOf(d, rt.t);
+  const e = EXT[d.sp] || [1.3,1,0,0], L = Math.min(w * .7 / e[0], h * .78 / e[1]), P = r ? runnerPal(r) : palOf(d, rt.t);
   c.translate(w / 2 + L * e[2], h * .47 + L * (e[3] || 0) + Math.sin(rt.t * 1.3) * 3 * DPR);
   if (d.rare && RARES[d.rare].tier === 2) { c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = rg(c, 0, 0, 0, 0, 0, L * .8, [[0,alpha(RARES[d.rare].col, .3)],[1,alpha(RARES[d.rare].col, 0)]]); c.fillRect(-L, -L, L * 2, L * 2); c.restore(); }
   paintFish(c, d.sp, P, L, rt.t * 4, .7, r || {puffK:0}, r ? r.fx : geneFx(d), d.seed); if (d.rare) drawStars(c, P, L, rt.t, 7);
