@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.3">
+<meta name="application-version" content="2026.11.25.4">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -879,6 +879,7 @@ Object.assign(SPECIES, {
   asellus:{name:'水虱', kind:'inv', expansion:true, idraw:'asellus', crawl:true, price:90, len:30, interval:90, value:1, zone:'bottom', speed:.2, rests:true, scav:true, tags:['底層','清底沙','新夥伴'], traits:['用七對小腳在底沙上爬，吃掉沉底的剩飼料','成對長大後會照顧一窩小寶寶'], morphs:['褐甲','銀灰'], desc:'扁平、分節的小甲殼動物，長長的觸鬚總是在探路。'}
 });
 Object.assign(SPECIES, {octopus:{name:'夢幻章魚',kind:'inv',idraw:'octopus',expansion:true,price:1800,len:62,interval:65,value:12,zone:'bottom',speed:.48,rests:true,cond:['cave'],tags:['章魚','八腕','新夥伴','幻想海洋'],traits:['遊戲幻想章魚，可與淡水生物共居；現實章魚多為海水生物','喜歡洞穴，八條腕足會獨立擺動','成年雌雄可自然繁殖，遺傳基因並可能突變'],morphs:["珊瑚紅","海砂褐","深海藍","紫羅蘭","翡翠","琥珀金","墨黑","珍珠白","櫻花粉","冰晶青","夕陽橘","星夜靛"],desc:'柔軟的外套膜與八條靈活腕足，擁有豐富的色彩與遺傳花紋。'}});
+Object.assign(SPECIES,{"blacktipshark":{"name":"黑鰭礁鯊","kind":"fish","expansion":true,"draw":"shark","price":2600,"len":85,"interval":70,"value":15,"zone":"mid","speed":1.15,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"tigershark":{"name":"虎鯊","kind":"fish","expansion":true,"draw":"shark","price":4200,"len":105,"interval":70,"value":22,"zone":"mid","speed":0.85,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"blueshark":{"name":"大青鯊","kind":"fish","expansion":true,"draw":"shark","price":3200,"len":96,"interval":70,"value":18,"zone":"mid","speed":1.25,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"whiteshark":{"name":"大白鯊","kind":"fish","expansion":true,"draw":"shark","price":6500,"len":120,"interval":70,"value":30,"zone":"mid","speed":0.9,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"}});
 const EXPANSION_SPECIES = Object.keys(SPECIES).filter(k => SPECIES[k].expansion);
 Object.assign(GENE_TXT, {
   celestialdanio:'galaxy:密星:D:galaxy, red:火鰭:R:red', kubotai:'green:翠綠:R:green, swift:疾游:D:swift', espei:'gold:金鑽:R:xanth, long:長鰭:R:longfin',
@@ -1676,6 +1677,7 @@ Object.assign(PAL, {
   asellus:[{b1:'#655640',b2:'#b4a488',leg:'rgba(147,129,100,.9)',plate:'#4b4235'},{b1:'#637783',b2:'#bdcdd1',leg:'rgba(151,177,189,.9)',plate:'#41515b'}]
 });
 PAL.octopus = [{"b1":"#803a42","b2":"#f6a28b","sucker":"#f5d9c4"},{"b1":"#79583d","b2":"#e5c28e","sucker":"#f5d9c4"},{"b1":"#244a82","b2":"#83c9ed","sucker":"#f5d9c4"},{"b1":"#613c85","b2":"#d8a8ed","sucker":"#f5d9c4"},{"b1":"#276b61","b2":"#9de8b9","sucker":"#f5d9c4"},{"b1":"#a16b23","b2":"#ffe09a","sucker":"#f5d9c4"},{"b1":"#20283e","b2":"#75809d","sucker":"#f5d9c4"},{"b1":"#a5a5b7","b2":"#fff1e5","sucker":"#f5d9c4"},{"b1":"#a64f79","b2":"#ffc3db","sucker":"#f5d9c4"},{"b1":"#327c93","b2":"#baf5f7","sucker":"#f5d9c4"},{"b1":"#ad502d","b2":"#ffbc71","sucker":"#f5d9c4"},{"b1":"#34305f","b2":"#a7a2ff","sucker":"#f5d9c4"}];
+Object.assign(PAL,{"blacktipshark":[{"b1":"#455c68","b2":"#a8bbc1","t1":"#455c68","t2":"#a8bbc1","sharkStyle":"blacktip"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"blacktip"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"blacktip"}],"tigershark":[{"b1":"#59646a","b2":"#b6b9ac","t1":"#59646a","t2":"#b6b9ac","sharkStyle":"tiger"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"tiger"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"tiger"}],"blueshark":[{"b1":"#24577d","b2":"#89bbd0","t1":"#24577d","t2":"#89bbd0","sharkStyle":"blue"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"blue"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"blue"}],"whiteshark":[{"b1":"#46515c","b2":"#aebbc1","t1":"#46515c","t2":"#aebbc1","sharkStyle":"white"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"white"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"white"}]});
 function palette(sp, seed, m){
   const R = rng(seed), list = PAL[sp];
   let patches = null;
@@ -3592,19 +3594,26 @@ function gCrack(c, x, y, k){ const R = rng(77); c.save(); c.strokeStyle = 'rgba(
   c.beginPath(); c.arc(x, y, 22, 0, TAU); c.stroke(); c.beginPath(); c.arc(x, y, 9, 0, TAU); c.stroke(); c.restore(); }
 function gFin(c, pts, col){ c.fillStyle = col; c.beginPath(); c.moveTo(pts[0], pts[1]); c.quadraticCurveTo(pts[2], pts[3], pts[4], pts[5]); c.quadraticCurveTo(pts[6], pts[7], pts[8], pts[9]); c.fill(); }
 function gTeeth(c, x0, y0, x1, y1, n, len, up){ c.fillStyle = '#efe8da'; for (let i = 0; i < n; i++) { const q = (i + .5) / n, x = lerp(x0, x1, q), y = lerp(y0, y1, q), b = Math.abs(x1 - x0) / n * .45; c.beginPath(); c.moveTo(x - b, y); c.lineTo(x, y + (up ? -len : len) * (.7 + .3 * Math.sin(i * 2.3))); c.lineTo(x + b, y); c.fill(); } }
-function drawMeg(c, L, t, open){ const H = L * .2;
-  c.fillStyle = '#4e5a64'; c.save(); c.translate(-L * .43, 0); c.rotate(Math.sin(t * 1.6) * .12); c.beginPath(); c.moveTo(0, -H * .22); c.quadraticCurveTo(-L * .08, -H * 1.2, -L * .15, -H * 1.55); c.quadraticCurveTo(-L * .06, -H * .3, -L * .02, 0); c.quadraticCurveTo(-L * .06, H * .3, -L * .12, H * 1.1); c.quadraticCurveTo(-L * .06, H * .9, 0, H * .22); c.fill(); c.restore();
-  gFin(c, [L * .04, -H * .44, -L * .01, -H * 1.4, -L * .09, -H * 1.35, -L * .07, -H * .8, -L * .12, -H * .4], '#4e5a64'); gFin(c, [-L * .3, -H * .26, -L * .33, -H * .5, -L * .36, -H * .48, -L * .35, -H * .35, -L * .37, -H * .22], '#4e5a64');
-  c.fillStyle = lg(c, 0, -H * .5, 0, H * .5, [[0,'#46525c'],[.5,'#6a7680'],[.56,'#d6dad6'],[1,'#c4c8c4']]); c.beginPath(); c.moveTo(L * .5, H * .02); c.bezierCurveTo(L * .5, -H * .42, L * .3, -H * .5, L * .1, -H * .5); c.quadraticCurveTo(-L * .2, -H * .44, -L * .43, -H * .12);
-  c.lineTo(-L * .43, H * .12); c.quadraticCurveTo(-L * .2, H * .44, L * .1, H * .46); c.bezierCurveTo(L * .3, H * .44, L * .48, H * .32, L * .5, H * .02); c.fill();
-  c.save(); c.translate(L * .2, H * .2); c.rotate(.5); c.fillStyle = '#5a6670'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(-L * .04, H * .9, -L * .14, H * 1.1); c.quadraticCurveTo(-L * .08, H * .5, -L * .1, 0); c.fill(); c.restore();
-  c.strokeStyle = 'rgba(40,46,52,.55)'; c.lineWidth = 2; for (let i = 0; i < 5; i++) { const x = L * (.27 - i * .022); c.beginPath(); c.moveTo(x, -H * .2); c.quadraticCurveTo(x - L * .01, 0, x, H * .22); c.stroke(); }
-  c.strokeStyle = 'rgba(230,235,235,.25)'; c.lineWidth = 1.5; for (let i = 0; i < 4; i++) { c.beginPath(); c.moveTo(L * (.05 - i * .07), -H * .3); c.lineTo(L * (.0 - i * .07), -H * .1); c.stroke(); }
-  c.fillStyle = '#7a3a40'; c.beginPath(); c.moveTo(L * .46, H * .16); c.quadraticCurveTo(L * .38, H * (.32 + open * .2), L * .3, H * .26); c.quadraticCurveTo(L * .38, H * .2, L * .46, H * .16); c.fill();
-  gTeeth(c, L * .44, H * .17, L * .32, H * .25, 8, H * .07, false); if (open > .2) gTeeth(c, L * .43, H * (.24 + open * .18), L * .32, H * (.28 + open * .06), 7, H * .06, true);
-  c.fillStyle = '#0a0c10'; dot(c, L * .4, -H * .14, L * .009); c.fillStyle = 'rgba(255,255,255,.7)'; dot(c, L * .398, -H * .15, L * .003); }
-function drawMegFront(c, cx, cy, s, open, w){ const rx = w * .5 * s, ry = w * .32 * s;
-  c.fillStyle = '#56626c'; for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(cx + sx * rx * .6, cy + ry * .3); c.lineTo(cx + sx * rx * 1.7, cy + ry * 1.25); c.lineTo(cx + sx * rx * .8, cy + ry * .75); c.fill(); }
+function drawSharkModel(c,L,t,open,P,giant=false){
+ c.save();c.scale(L,L);const style=P.sharkStyle||'mega',H=giant?.125:style==='blue'?.085:style==='white'?.12:.105,sw=Math.sin(t*(giant?1.1:2)),back=P.b1,mid=P.b2;
+ const fin=(pts)=>{c.beginPath();c.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)c.lineTo(...pts[i]);c.closePath();c.fillStyle=lg(c,0,-.25,0,.24,[[0,back],[1,mid]]);c.fill();if(style==='blacktip'){const p=pts[1],a=pts[0],b=pts[2];c.fillStyle='#17232f';c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(p[0]+(a[0]-p[0])*.3,p[1]+(a[1]-p[1])*.3);c.lineTo(p[0]+(b[0]-p[0])*.3,p[1]+(b[1]-p[1])*.3);c.fill();}};
+ c.save();c.translate(-.43,sw*.025);c.rotate(sw*.14);fin([[.025,-.025],[-.13,-.23],[-.09,-.07],[-.035,0],[-.12,.19],[-.09,.055],[.025,.025]]);c.restore();
+ fin([[.10,-H*.8],[-.015,-H- .17],[-.085,-H*.85],[-.16,-H*.55]]);fin([[-.28,-H*.5],[-.33,-H*.9],[-.37,-H*.35]]);fin([[-.19,H*.65],[-.27,H+.055],[-.31,H*.42]]);
+ c.beginPath();c.moveTo(.49,.015);c.bezierCurveTo(.47,-H*.55,.29,-H*1.05,.08,-H);c.bezierCurveTo(-.13,-H,-.32,-H*.6,-.43,-.025+sw*.025);c.lineTo(-.43,.025+sw*.025);c.bezierCurveTo(-.22,H*.7,.03,H,.22,H*.84);c.bezierCurveTo(.37,H*.65,.46,H*.42,.49,.015);c.closePath();
+ c.fillStyle=lg(c,0,-H,0,H,[[0,back],[.45,mid],[.58,mid],[.67,'#d9e0df'],[1,'#bbc9cb']]);c.fill();c.save();c.clip();
+ if(style==='tiger'){c.strokeStyle='rgba(25,39,43,.46)';c.lineWidth=.018;for(let i=0;i<10;i++){let x=.15-i*.05;c.beginPath();c.moveTo(x,-H);c.quadraticCurveTo(x-.035,-H*.25,x-.015,H*.18);c.stroke();}}
+ c.strokeStyle='rgba(255,255,255,.15)';c.lineWidth=.009;c.beginPath();c.moveTo(-.31,-H*.35);c.quadraticCurveTo(.1,-H*.85,.39,-H*.23);c.stroke();
+ if(giant){c.strokeStyle='rgba(230,240,240,.27)';c.lineWidth=.004;for(let i=0;i<7;i++){const x=.13-i*.055;c.beginPath();c.moveTo(x,-H*.65);c.quadraticCurveTo(x-.018,-H*.25,x-.04,H*.06);c.stroke();}}
+ c.restore();fin([[.15,H*.37],[-.045,H+.14],[-.10,H*.8],[.03,H*.48]]);
+ c.strokeStyle='rgba(22,35,44,.65)';c.lineWidth=.005;for(let i=0;i<5;i++){let x=.24-i*.022;c.beginPath();c.moveTo(x,-H*.38);c.quadraticCurveTo(x-.018,0,x-.003,H*.49);c.stroke();}
+ c.fillStyle='#162129';dot(c,.385,-H*.23,.012);c.fillStyle='#d8edf3';dot(c,.389,-H*.27,.004);c.fillStyle='#26343c';dot(c,.447,.007,.004);
+ const gap=giant?.012+open*.055:.009;c.beginPath();c.moveTo(.455,H*.25);c.quadraticCurveTo(.38,H*.69,.29,H*.54);c.quadraticCurveTo(.38,H*.69+gap,.455,H*.25);c.fillStyle='#20232b';c.fill();
+ if(giant&&open>.12){c.fillStyle='#eee9d7';for(let i=0;i<8;i++){const x=.44-i*.017,y=H*(.33+.27*Math.sin(i/8*Math.PI));c.beginPath();c.moveTo(x-.007,y);c.lineTo(x,y+.018);c.lineTo(x+.007,y);c.fill();}}
+ c.restore();
+}
+function drawMeg(c,L,t,open){drawSharkModel(c,L,t,open,{b1:'#35434e',b2:'#81919a',sharkStyle:'mega'},true);}
+function drawMegFront(c, cx, cy, s, open, w){ const rx = w * .5 * s, ry = w * .29 * s;
+  c.fillStyle = lg(c,0,cy-ry,0,cy+ry,[[0,'#34434e'],[1,'#8799a4']]); for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(cx + sx * rx * .6, cy + ry * .3); c.lineTo(cx + sx * rx * 1.7, cy + ry * 1.25); c.lineTo(cx + sx * rx * .8, cy + ry * .75); c.fill(); }
   c.beginPath(); c.moveTo(cx - rx * .04, cy - ry * .8); c.lineTo(cx, cy - ry * 1.9); c.lineTo(cx + rx * .04, cy - ry * .8); c.fill();
   c.fillStyle = lg(c, 0, cy - ry, 0, cy + ry, [[0,'#4a5660'],[.45,'#6c7882'],[.55,'#d4d8d4'],[1,'#c0c4c0']]); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
   c.fillStyle = '#05070a'; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(cx + sx * rx * .8, cy - ry * .1, rx * .045, ry * .08, 0, 0, TAU); c.fill(); c.fillStyle = 'rgba(255,255,255,.6)'; dot(c, cx + sx * rx * .79, cy - ry * .14, rx * .012); c.fillStyle = '#05070a'; }
@@ -3748,6 +3757,7 @@ function giantPanel(kind, ent){ const P = deepUI.el.querySelector('#deepPanel'),
   P.classList.add('on'); }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
+  if(tpl==='shark')return drawSharkModel(c,L,ph,0,P);
   if (S.idraw) return IDRAW[S.idraw](c, P, L, ph, ex);
   if (NEWTPL[tpl]) return NEWTPL[tpl](c, P, L, ph, amp, ex);
   if (S.kind === 'inv') return S.snail ? drawSnail(c, P, L, ph) : S.frog ? drawFrog(c, P, L, ph) : S.jelly ? drawJelly(c, P, L, ph) : S.crab ? drawCrab(c, P, L, ph) : S.turtle ? drawTurtle(c, P, L, ph) : S.tadpole ? drawTadpole(c, P, L, ph) : S.swarm ? drawSwarm(c, P, L, ph) : S.clam ? drawClam(c, P, L, ph) : S.nymph ? drawNymph(c, P, L, ph) : S.larva ? drawLarva(c, P, L, ph) : S.beetle ? drawBeetle(c, P, L, ph) : S.swimmer ? drawSwimmer(c, P, L, ph) : (drawShrimp(c, P, L, ph), P.led && drawLed(c, P, L, ph), P.fans && drawFans(c, P, L, ph));
