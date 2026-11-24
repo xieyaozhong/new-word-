@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.8">
+<meta name="application-version" content="2026.11.25.9">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -882,6 +882,7 @@ Object.assign(SPECIES, {octopus:{name:'夢幻章魚',kind:'inv',idraw:'octopus',
 Object.assign(SPECIES,{"blacktipshark":{"name":"黑鰭礁鯊","kind":"fish","expansion":true,"draw":"shark","price":2600,"len":85,"interval":70,"value":15,"zone":"mid","speed":1.15,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"tigershark":{"name":"虎鯊","kind":"fish","expansion":true,"draw":"shark","price":4200,"len":105,"interval":70,"value":22,"zone":"mid","speed":0.85,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"blueshark":{"name":"大青鯊","kind":"fish","expansion":true,"draw":"shark","price":3200,"len":96,"interval":70,"value":18,"zone":"mid","speed":1.25,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"},"whiteshark":{"name":"大白鯊","kind":"fish","expansion":true,"draw":"shark","price":6500,"len":120,"interval":70,"value":30,"zone":"mid","speed":0.9,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，可與其他魚共居；現實物種為海水鯊魚"],"morphs":["原色","銀白","深海"],"desc":"流線身體、五道鰓裂與強勁尾鰭。"}});
 Object.assign(SPECIES,{"hammerhead":{"name":"雙髻鯊（鎚頭鯊）","kind":"fish","expansion":true,"draw":"shark","price":8500,"len":115,"interval":75,"value":38,"zone":"mid","speed":1.05,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，不主動捕食其他魚"],"morphs":["原色","銀白","深海"],"desc":"橫向延伸的鎚形頭部，雙眼位於兩端。"},"goblinshark":{"name":"哥布林鯊（歐氏尖吻鮫）","kind":"fish","expansion":true,"draw":"shark","price":12000,"len":110,"interval":75,"value":52,"zone":"mid","speed":0.55,"tags":["鯊魚","新夥伴","幻想海洋"],"traits":["幻想水族箱物種，不主動捕食其他魚"],"morphs":["原色","銀白","深海"],"desc":"深海鯊魚，具有扁長尖吻及可向前伸出的顎部。"}});
 for(const [k,ratio,meal,cd] of [['blacktipshark',.65,22,5],['blueshark',.72,18,4],['tigershark',.90,13,3],['whiteshark',.95,12,3],['hammerhead',.82,16,4],['goblinshark',.75,20,6]]){const S=SPECIES[k];Object.assign(S,{livefood:true,voracious:90,hunt:{ratio,on:'fish'},sharkMeal:meal,sharkCd:cd});S.tags.push('掠食','高食量');S.traits=['只吃活餌，食量極大','活餌不足時會連續追捕並吃掉較小的魚，建議獨立飼養','幻想水族箱物種'];}
+SPECIES.remora={name:'鮣魚（吸盤魚）',kind:'fish',expansion:true,draw:'remora',price:1600,len:48,interval:65,value:9,zone:'mid',speed:.85,tags:['共生','鯊魚','新夥伴'],traits:['不會被鯊魚捕食','會跟隨同缸鯊魚，分享捕食後的食物碎屑'],morphs:['銀灰','深褐','銀白'],desc:'頭頂具有吸盤，常依附鯊魚等大型海洋動物。'};
 const EXPANSION_SPECIES = Object.keys(SPECIES).filter(k => SPECIES[k].expansion);
 Object.assign(GENE_TXT, {
   celestialdanio:'galaxy:密星:D:galaxy, red:火鰭:R:red', kubotai:'green:翠綠:R:green, swift:疾游:D:swift', espei:'gold:金鑽:R:xanth, long:長鰭:R:longfin',
@@ -1681,6 +1682,7 @@ Object.assign(PAL, {
 PAL.octopus = [{"b1":"#803a42","b2":"#f6a28b","sucker":"#f5d9c4"},{"b1":"#79583d","b2":"#e5c28e","sucker":"#f5d9c4"},{"b1":"#244a82","b2":"#83c9ed","sucker":"#f5d9c4"},{"b1":"#613c85","b2":"#d8a8ed","sucker":"#f5d9c4"},{"b1":"#276b61","b2":"#9de8b9","sucker":"#f5d9c4"},{"b1":"#a16b23","b2":"#ffe09a","sucker":"#f5d9c4"},{"b1":"#20283e","b2":"#75809d","sucker":"#f5d9c4"},{"b1":"#a5a5b7","b2":"#fff1e5","sucker":"#f5d9c4"},{"b1":"#a64f79","b2":"#ffc3db","sucker":"#f5d9c4"},{"b1":"#327c93","b2":"#baf5f7","sucker":"#f5d9c4"},{"b1":"#ad502d","b2":"#ffbc71","sucker":"#f5d9c4"},{"b1":"#34305f","b2":"#a7a2ff","sucker":"#f5d9c4"}];
 Object.assign(PAL,{"blacktipshark":[{"b1":"#455c68","b2":"#a8bbc1","t1":"#455c68","t2":"#a8bbc1","sharkStyle":"blacktip"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"blacktip"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"blacktip"}],"tigershark":[{"b1":"#59646a","b2":"#b6b9ac","t1":"#59646a","t2":"#b6b9ac","sharkStyle":"tiger"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"tiger"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"tiger"}],"blueshark":[{"b1":"#24577d","b2":"#89bbd0","t1":"#24577d","t2":"#89bbd0","sharkStyle":"blue"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"blue"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"blue"}],"whiteshark":[{"b1":"#46515c","b2":"#aebbc1","t1":"#46515c","t2":"#aebbc1","sharkStyle":"white"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"white"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"white"}]});
 Object.assign(PAL,{"hammerhead":[{"b1":"#526b72","b2":"#a9c0bf","t1":"#526b72","t2":"#a9c0bf","sharkStyle":"hammer"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"hammer"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"hammer"}],"goblinshark":[{"b1":"#986b78","b2":"#e6b5b3","t1":"#986b78","t2":"#e6b5b3","sharkStyle":"goblin"},{"b1":"#a4aeb4","b2":"#e5e8df","t1":"#a4aeb4","t2":"#e5e8df","sharkStyle":"goblin"},{"b1":"#26364e","b2":"#718ca0","t1":"#26364e","t2":"#718ca0","sharkStyle":"goblin"}]});
+PAL.remora=[{b1:'#47565c',b2:'#aab9b8',t1:'#52636a',t2:'#9eafaf'},{b1:'#51463d',b2:'#a18d75',t1:'#65574b',t2:'#a18d75'},{b1:'#9caeb4',b2:'#e8ece5',t1:'#a5b5b9',t2:'#e8ece5'}];
 function palette(sp, seed, m){
   const R = rng(seed), list = PAL[sp];
   let patches = null;
@@ -2020,7 +2022,7 @@ function predatorWarTick(dt){
 function preyFor(pd){
   const h = SPECIES[pd.sp].hunt; if (!h) return null;
   const maxLen = baseLen(pd) * h.ratio;
-  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !predatorAllied(pd,d) && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : h.on === 'pest' ? SPECIES[d.sp].snail && SPECIES[d.sp].pest : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
+  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !predatorAllied(pd,d) && !(SPECIES[pd.sp].sharkMeal && d.sp==='remora') && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : h.on === 'pest' ? SPECIES[d.sp].snail && SPECIES[d.sp].pest : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
   list.sort((a, b) => (a.sp === 'pestsnail' ? 0 : 1) - (b.sp === 'pestsnail' ? 0 : 1) || (a.rare ? 1 : 0) - (b.rare ? 1 : 0) || baseLen(a) - baseLen(b));
   return list[0] || null;
 }
@@ -3797,6 +3799,7 @@ function giantPanel(kind, ent){ const P = deepUI.el.querySelector('#deepPanel'),
   P.classList.add('on'); }
 function drawFish(c, sp, P, L, ph, amp, ex){
   const S = SPECIES[sp], tpl = S.draw || sp;
+  if(tpl==='remora'){c.save();c.scale(L,L);c.fillStyle=P.b1;c.beginPath();c.moveTo(-.32,0);c.lineTo(-.56,-.12);c.lineTo(-.51,.11);c.closePath();c.fill();c.fillStyle=lg(c,0,-.09,0,.09,[[0,P.b1],[1,P.b2]]);c.beginPath();c.moveTo(-.35,0);c.bezierCurveTo(-.15,-.09,.36,-.12,.49,-.02);c.quadraticCurveTo(.49,.11,.15,.09);c.quadraticCurveTo(-.2,.07,-.35,0);c.fill();c.fillStyle=P.b1;c.beginPath();c.ellipse(.29,-.075,.18,.038,0,0,TAU);c.fill();c.strokeStyle=P.b2;c.lineWidth=.006;for(let i=0;i<9;i++){const x=.15+i*.032;c.beginPath();c.moveTo(x,-.095);c.lineTo(x,-.055);c.stroke();}c.fillStyle='#17242a';dot(c,.42,-.025,.014);c.restore();return;}
   if(tpl==='shark')return drawSharkModel(c,L,ph,0,P);
   if (S.idraw) return IDRAW[S.idraw](c, P, L, ph, ex);
   if (NEWTPL[tpl]) return NEWTPL[tpl](c, P, L, ph, amp, ex);
@@ -5205,6 +5208,7 @@ function devour(pred, prey){
   if (prey.d.sp === 'feeder') { rt.feeders = rt.feeders.filter(x => x !== prey); state.items.feeder = Math.max(0, state.items.feeder - 1); }
   else if (prey.sp.snail) { removeCreature(prey.d); state.stats.snails = (state.stats.snails | 0) + 1; if (!rt.warnedSnail) { rt.warnedSnail = true; toast(d.name + '（' + pred.sp.name + '）開始吃' + prey.sp.name + '了'); } }
   else { removeCreature(prey.d); state.stats.eaten++; toast(prey.d.name + ' 被' + d.name + '（' + pred.sp.name + '）吃掉了…'); logEv(prey.d.name + ' 被' + d.name + '（' + pred.sp.name + '）吃掉了'); if (pred.sp.alien) { const v = 40 + rehomeValue(prey.d) * 3; for (let i = 0; i < 5; i++) spawnCoin(prey.x + rand(-12, 12) * U, prey.y, Math.max(1, Math.round(v / 5))); } }
+  if(pred.sp.sharkMeal)for(const q of rt.fish){if(q.d.sp==='remora'&&!q.d.box&&Math.hypot(q.x-pred.x,q.y-pred.y)<150*U)q.d.full=Math.min(100,q.d.full+25);}
   d.full = Math.min(100, d.full + (pred.sp.sharkMeal || (prey.sp.snail ? 15 : 45))); d.grow = Math.min(GROW_MAX, d.grow + 2); pred.eat = .4; pred.prey = null; pred.huntCd = pred.sp.sharkCd || (prey.sp.snail ? rand(90, 150) : 8);
   for (let k = 0; k < 8; k++) rt.fx.push({type:'spark', x:prey.x, y:prey.y, vx:rand(-40, 40) * U, vy:rand(-40, 20) * U, t:0, life:.6, col:prey.d.sp === 'feeder' ? '#e6ecea' : '#ff9a8a'});
   markDirty();
@@ -5373,6 +5377,7 @@ function updateFish(r, dt, sleep){
   if (r.puff > 0) r.puff -= dt; r.puffK += ((r.puff > 0 ? 1 : 0) - r.puffK) * Math.min(1, dt * 6);
   let spd = 34 * U * sp.speed * (r.fx ? r.fx.spd || 1 : 1) * (d.pers === 'playful' ? 1.2 : d.pers === 'lazy' ? .8 : 1) * (sleep ? .32 : 1) * (!nf && d.full <= 0 ? .55 : 1) * (1 - Math.min(.4, tStress(d) * .08));
   let busy = false;
+  if(d.sp==='remora'){const host=rt.fish.filter(q=>q.sp.sharkMeal&&!q.d.box).sort((a,b)=>Math.hypot(a.x-r.x,a.y-r.y)-Math.hypot(b.x-r.x,b.y-r.y))[0];if(host){r.tx=host.x-host.face*fishLen(host)*.25;r.ty=host.y+fishLen(host)*.16;spd=Math.max(spd,65*U);busy=true;}}
   if(r.predEnemy&&rt.fish.includes(r.predEnemy)&&!r.predEnemy.d.box){r.tx=r.predEnemy.x;r.ty=r.predEnemy.y;spd=Math.max(spd,105*U*sp.speed);busy=true;r.flee=null;}
   else if(r.predFollow&&rt.fish.includes(r.predFollow)&&Math.hypot(r.x-r.predFollow.x,r.y-r.predFollow.y)>90*U){r.tx=r.predFollow.x-r.predFollow.face*50*U;r.ty=r.predFollow.y+15*U;spd=Math.max(spd,45*U);busy=true;}
   if (r.flee && !sp.snail) { r.fleeT = (r.fleeT || 0) - dt; const a = r.flee;
