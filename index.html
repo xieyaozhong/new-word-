@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
+<meta name="application-version" content="2026.11.24.1">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -383,6 +384,22 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
 .dexhead{padding:2px 6px 10px;font-size:13.5px;color:var(--mist)}
 .dexhead b{color:var(--foam);font-weight:400}
 .dexgrp{margin:12px 6px 6px;font-size:14px}
+.dexsearch{margin:0 2px 12px;padding:12px;border:1px solid var(--rim);border-radius:14px;background:rgba(6,30,38,.65)}
+.dexsearch>label{display:block;margin-bottom:7px;font-size:16px;color:var(--foam)}
+.dexsearch input,.dexsearch select{width:100%;min-width:0;min-height:44px;padding:9px 10px;border:1px solid var(--rim);border-radius:10px;background:#092a34;color:var(--foam);font:inherit;font-size:16px}
+.dexsearch input{user-select:text;-webkit-user-select:text}
+.dexsearch input::placeholder{color:var(--mist);opacity:1}
+.dexfilters{display:flex;flex-wrap:wrap;align-items:end;gap:8px;margin-top:10px}
+.dexfilters label{flex:1 1 115px;font-size:14px;color:var(--mist)}
+.dexfilters select{display:block;margin-top:4px;font-size:14px}
+.dexfilters button{min-height:44px;margin-bottom:0;font-size:14px}
+.dexstatus{margin:10px 2px 0;color:var(--kelp);font-size:14px;line-height:1.5}
+.dexempty{padding:28px 14px;text-align:center;border:1px dashed var(--rim);border-radius:14px;color:var(--mist);line-height:1.7}
+.tankname{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.tankname input,.tankname select{min-width:0;flex:1 1 160px;padding:10px;border:1px solid var(--rim);border-radius:10px;background:#092a34;color:var(--foam);font:inherit;font-size:16px;user-select:text;-webkit-user-select:text}
+.tankname button{min-height:42px;font-size:14px}
+.tankactive{border-color:var(--kelp)}
+#tankSwitch{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:30px}
 .dexback{margin:2px 2px 10px}
 .dexhero{width:100%;height:auto;border-radius:16px;background:linear-gradient(#2c8fa1,#0f4a5c);display:block}
 .dexhero.deep{background:#020812}
@@ -451,6 +468,7 @@ body.mode-clean .mode-row,body.mode-edit .mode-row{display:flex}
     <div class="coins" id="coins"><svg class="ico" id="coinIco"><use href="#i-coin"/></svg><span id="coinNum">0</span><span class="sr">金幣</span></div>
     <div class="meta" id="meta">水溫 26.0°C・第 1 天</div>
     <button class="qpill" id="qpill"><span id="qtxt">今日任務</span></button>
+    <button class="qpill" id="tankSwitch" aria-label="管理魚缸">第一缸・管理</button>
     <button class="qpill inj" id="injpill" hidden></button>
   </div>
   <div class="right">
@@ -839,6 +857,36 @@ Object.assign(GENE_TXT, {
   ranatra:'green:草綠:R:green, ghost:透明:R:ghost, giant:巨型:D:giant', waterbug:'gold:金背:R:xanth, saddle:斑背:D:saddle, lucky:福氣:D:lucky',
   tubifex:'glow:螢光:D:glow, gold:黃金:R:xanth, rich:肥美:D:rich', matamata:'ivory:白化:R:leuc, green:長苔:D:green, calm:溫吞:D:calm',
 });
+/* New companions: regular stock, breeding genes and the permanent discovery shelf. */
+Object.assign(SPECIES, {
+  celestialdanio:{name:'銀河斑馬', kind:'fish', expansion:true, draw:'tetra', price:140, len:34, interval:55, value:3, zone:'mid', speed:.85, school:true, tags:['群游','星點','新夥伴'], traits:['成群飼養時更有安全感，身上的小金點像一片星空'], morphs:['星空藍','暖金'], desc:'深藍身體上散著奶油色星點，橘紅的魚鰭像小小火焰。'},
+  kubotai:{name:'綠蓮燈', kind:'fish', expansion:true, draw:'tetra', price:65, len:32, interval:55, value:2, zone:'top', speed:1.15, school:true, tags:['群游','上層','新夥伴'], traits:['喜歡成群在水草上方來回巡游'], morphs:['萊姆綠'], desc:'一小群萊姆綠的亮點穿過水草，像把春天裝進了魚缸。'},
+  espei:{name:'火翅金鑽', kind:'fish', expansion:true, draw:'rasbora', price:85, len:36, interval:55, value:2, zone:'mid', speed:1, school:true, tags:['群游','楔形斑','新夥伴'], traits:['六隻以上一起游時更開心'], morphs:['銅橘','金橘'], desc:'橘銅色的身體拖著一枚深色楔形斑，轉身時像一片發亮的銅葉。'},
+  silvertip:{name:'銀尖燈', kind:'fish', expansion:true, draw:'tetra', price:75, len:40, interval:50, value:2, zone:'mid', speed:1.25, school:true, tags:['群游','好動','新夥伴'], traits:['游得很快，常常領著同伴搶先找到飼料'], morphs:['琥珀'], desc:'琥珀色的小魚，魚鰭末端帶著亮亮的乳白色。'},
+  blackneon:{name:'黑蓮燈', kind:'fish', expansion:true, draw:'tetra', price:60, len:38, interval:55, value:2, zone:'mid', speed:1, school:true, tags:['群游','黑銀側線','新夥伴'], traits:['黑色側線配上銀亮的背色，和綠蓮燈一起游特別醒目'], morphs:['黑銀'], desc:'一道黑色緞帶橫過銀灰身體，眼睛上緣有一抹橘紅。'},
+  serpae:{name:'紅寶石燈', kind:'fish', expansion:true, draw:'tetra', price:95, len:42, interval:55, value:3, zone:'mid', speed:1.05, school:true, tags:['群游','紅色','新夥伴'], traits:['成群活動時更有精神，適合留出一片游泳空間'], morphs:['紅寶石','長鰭'], desc:'像一顆會游動的紅寶石，肩上有黑色小斑，背鰭披著黑邊。'},
+  threadfin:{name:'絲鰭彩虹', kind:'fish', expansion:true, draw:'tetra', price:240, len:48, interval:55, value:4, zone:'mid', speed:.7, school:true, tags:['群游','長鰭','新夥伴'], traits:['長長的魚鰭會隨著游動輕輕飄擺'], morphs:['蜜金','夕照'], desc:'透明金色的身體，長鰭像細絲一樣在水中飄動。'},
+  forktail:{name:'叉尾藍眼', kind:'fish', expansion:true, draw:'tetra', price:180, len:42, interval:55, value:3, zone:'top', speed:1.1, school:true, tags:['群游','藍眼','新夥伴'], traits:['在上層成群游動，亮藍色眼睛很容易辨認'], morphs:['黃鰭'], desc:'一雙亮藍色眼睛，配上張開時像小旗子的黃色魚鰭。'},
+  honeygourami:{name:'蜜蜂麗麗', kind:'fish', expansion:true, draw:'gourami', price:280, len:48, interval:55, value:5, zone:'top', speed:.55, nest:true, tags:['上層','泡巢','新夥伴'], traits:['會在水面築泡巢，爸爸留下來守護魚卵'], morphs:['蜂蜜','日落'], desc:'蜂蜜色的小麗魚，用兩根細長觸鬚慢慢探索周圍的世界。'},
+  pygmycory:{name:'精靈鼠', kind:'fish', expansion:true, draw:'cory', price:130, len:32, interval:55, value:2, zone:'bottom', speed:.8, school:true, rests:true, scav:true, tags:['底層','群游','清底沙','新夥伴'], traits:['會吃掉沉底的飼料，與同伴一起活動時更開心'], morphs:['銀線'], desc:'小得像精靈的鼠魚，黑色側線從眼睛延伸到尾巴。'},
+  peacockgoby:{name:'彩塘鱧', kind:'fish', expansion:true, draw:'apisto', price:380, len:48, interval:55, value:6, zone:'low', speed:.6, rests:true, cond:['cave'], tags:['中下層','洞穴','新夥伴'], traits:['喜歡有陶罐、沉木或城堡可以躲藏，環境合適時更開心'], morphs:['孔雀藍','玫瑰'], desc:'藍綠身體配著細細的紅紋，像住在水草間的小孔雀。'},
+  hillstream:{name:'婆羅洲吸鰍', kind:'fish', expansion:true, draw:'hemimyzon', price:360, len:44, interval:55, value:5, zone:'glass', speed:.4, rests:true, algae:.65, topview:true, cond:['flow'], tags:['貼玻璃','吃藻','溪流','新夥伴'], traits:['沿著玻璃慢慢刮藻，讓水變髒的速度減慢','喜歡有氣泡石或過濾設備帶動水流'], morphs:['豹點','金網'], desc:'扁扁的身體像小飛碟，寬大的魚鰭貼在玻璃上，背上綴著細小斑點。'},
+  vampirefan:{name:'非洲巨扇蝦', kind:'inv', expansion:true, shrimp:true, filterFeed:true, price:420, len:50, interval:70, value:5, zone:'bottom', speed:.22, rests:true, cond:['flow'], tags:['濾食','藍甲','新夥伴'], traits:['張開四把小扇子濾食浮游生物，撈到時會掉金幣','有水流時才住得舒服'], morphs:['靛藍','灰紫'], desc:'厚實的藍灰色甲殼，前腳的小扇子忙著從水流中收集食物。'},
+  pompomcrab:{name:'淡水拳擊蟹', kind:'inv', expansion:true, crab:true, price:320, len:28, interval:75, value:4, zone:'bottom', speed:.3, rests:true, scav:true, tags:['小蟹','清底沙','新夥伴'], traits:['在沙上撿剩飼料，兩隻毛茸茸的小鉗子像拳擊手套'], morphs:['奶油','赤砂'], desc:'鉗子上長著一團細毛的迷你螃蟹，走路時像舉著兩團小毛球。'},
+  malaysiansnail:{name:'馬來螺', kind:'inv', expansion:true, snail:true, price:70, len:26, interval:90, value:1, zone:'bottom', speed:.12, rests:true, scav:true, nocturnal:true, tags:['底層','夜行','清底沙','新夥伴'], traits:['關燈後會沿著沙面尋找剩飼料','長大後能生出小螺，記得留意小生物的空間'], morphs:['砂塔','金塔'], desc:'尖尖的螺殼像一座小塔，喜歡在安靜的夜裡巡視缸底。'},
+  spixisnail:{name:'斑馬蘋果螺', kind:'inv', expansion:true, snail:true, price:160, len:30, interval:85, value:2, zone:'bottom', speed:.16, rests:true, algae:.45, tags:['條紋殼','吃藻','新夥伴'], traits:['沿著玻璃啃藻，讓魚缸比較不容易髒','成對長大後會留下卵團，孵出新的條紋小螺'], morphs:['奶油條紋'], desc:'圓圓的奶油色螺殼繞著深褐色條紋，像一顆迷你旋轉糖果。'},
+  seedshrimp:{name:'介形蟲', kind:'inv', expansion:true, idraw:'seedshrimp', price:55, len:24, interval:100, value:1, zone:'low', speed:.45, scav:true, tags:['微型生物','豆子殼','新夥伴'], traits:['一對小殼包住身體，像一顆會划水的芝麻','水質乾淨時，長大的個體會繁殖出小夥伴'], morphs:['琥珀','乳白'], desc:'躲在兩片小殼裡的微型甲殼動物，用細小的腳一划一划地前進。'},
+  asellus:{name:'水虱', kind:'inv', expansion:true, idraw:'asellus', crawl:true, price:90, len:30, interval:90, value:1, zone:'bottom', speed:.2, rests:true, scav:true, tags:['底層','清底沙','新夥伴'], traits:['用七對小腳在底沙上爬，吃掉沉底的剩飼料','成對長大後會照顧一窩小寶寶'], morphs:['褐甲','銀灰'], desc:'扁平、分節的小甲殼動物，長長的觸鬚總是在探路。'}
+});
+const EXPANSION_SPECIES = Object.keys(SPECIES).filter(k => SPECIES[k].expansion);
+Object.assign(GENE_TXT, {
+  celestialdanio:'galaxy:密星:D:galaxy, red:火鰭:R:red', kubotai:'green:翠綠:R:green, swift:疾游:D:swift', espei:'gold:金鑽:R:xanth, long:長鰭:R:longfin',
+  silvertip:'silver:銀光:D:metal, swift:疾風:D:swift', blackneon:'snow:銀雪:D:snow, long:長鰭:R:longfin', serpae:'ruby:深紅:D:ruby, long:長鰭:R:longfin',
+  threadfin:'opal:虹彩:D:opal, veil:紗尾:R:veil', forktail:'blue:藍光:R:blue, gold:金鰭:D:xanth', honeygourami:'gold:蜂蜜金:R:xanth, blush:紅頰:D:blush',
+  pygmycory:'dwarf:迷你:R:dwarf, silver:銀甲:D:metal', peacockgoby:'ruby:紅紋:D:ruby, opal:虹彩:D:opal', hillstream:'maze:金網:D:maze, hardy:強健:D:hardy',
+  vampirefan:'blue:深藍:R:blue, giant:巨型:D:giant', pompomcrab:'gold:金毛:R:xanth, calm:乖巧:D:calm', malaysiansnail:'gold:金塔:R:xanth, lines:旋紋:D:lines',
+  spixisnail:'ivory:象牙:R:leuc, stripes:粗紋:D:stripes', seedshrimp:'ghost:透明:R:ghost, gold:琥珀:R:xanth', asellus:'silver:銀甲:D:metal, swift:快腳:D:swift'
+});
 /* one extra, more characterful gene for many existing fish */
 for (const [k, s] of Object.entries({neon:'swift:疾光:D:swift', guppy:'opal:虹彩:D:opal', betta:'lucky:招福:D:lucky', goldfish:'flake:金箔:D:flake', koi:'flake:金箔:D:flake, lucky:錦運:D:lucky',
   discus:'opal:虹彩:D:opal', angel:'twotone:半黑:D:twotone', oscar:'eyespot:雙眼斑:D:eyespot', arowana:'rich:招財:D:rich', cory:'hardy:強健:D:hardy', pleco:'maze:迷宮紋:D:maze',
@@ -927,6 +975,15 @@ Object.assign(NPCS, {
   chef:{name:'阿忠師', role:'辦桌總舖師', mode:'chef', items:[], coat:'#f6f4ee', acc:'chef', hair:'#2a2420', skin:'#d9a27a',
        lines:['少年仔，有好魚就留給我，價錢不會虧待你！','辦桌最重要的就是食材新鮮，活締放過血的魚才不會腥。','河豚很好吃，但沒有證照千萬不要自己殺，會出人命的。','刀要利、手要穩、心要靜。電鰻死了還會電人，你知道嗎？']},
   stray:{name:'橘子', role:'附近的流浪貓', mode:'cat', cat:true, items:[], lines:['喵～','（盯著你的魚缸，尾巴甩來甩去）','（在你腳邊翻肚子）']},
+});
+/* New neighbours share the existing visit rotation and chapter rewards. */
+Object.assign(NPCS, {
+  xiaocheng:{name:'小澄', role:'水下攝影師', items:['celestialdanio','threadfin','brine20'], coat:'#477ca8', acc:'cap', capc:'#e6b054', hair:'#34251e', skin:'#edc3a3',
+    lines:['最好看的照片，是魚兒自在游泳的樣子。','先把水養清，再等魚群排好隊，快門不用急。','同一個魚缸，白天和夜晚可以拍出完全不同的故事。']},
+  heteacher:{name:'何老師', role:'水草生態老師', items:['seedshrimp','asellus','fert'], coat:'#60966c', acc:'glasses', hair:'#62605b', skin:'#ebc09e',
+    lines:['小小的蝦蟲，也在幫魚缸做大大的事。','水草、底棲生物和乾淨的水，缺一個都不行。','我們來做一個迷你生態教室，讓孩子看見水底的鄰居。']},
+  amu:{name:'阿沐', role:'溪流領航員', items:['hillstream','pygmycory','vitamin'], coat:'#b7824d', acc:'hat', hair:'#292725', skin:'#d9a782',
+    lines:['出發前先確認魚吃飽了，旅途才有精神。','每次平安回來，都值得寫進探險日記。','這些魚是人工繁殖的，觀察野外生物就讓牠留在原地。']},
 });
 const NPC_KEYS = Object.keys(NPCS), ALIEN_NPCS = NPC_KEYS.filter(k => NPCS[k].alien);
 const GOLDFAM = ['goldfish','ranchu','pearlscale','oranda','bubbleeye'];
@@ -1078,9 +1135,10 @@ function regionPrompt(place){
     '7. geo 是畫地圖用的簡化地理，座標一律 [lat, lon]：sea 是海的多邊形，沿著海岸線畫，再往海的方向延伸到距離 home 至少 100 公里外把整片海包起來（附近 70 公里內沒有海就給 []）；hills 最多 3 個山區或丘陵多邊形，往山的那一側同樣延伸到 100 公里外；rivers 最多 8 條主要河流，每條 3 到 10 個點，w 是 1 小溪、2 河、3 大河；lakes 是主要湖泊或水庫，第三個數字是大小 1 到 3；labels 最多 5 個地形名稱。'].join('\n');
 }
 let regionGen = null, regionMsg = '', regionEdit = false, regionDraft = '';
+function anyTankTrips(){ return state.trips.length > 0 || (state.tankRooms || []).some(r => r.id !== state.activeTank && r.data && r.data.trips.length > 0); }
 async function genRegion(place){
   place = cleanStr(place, 40); if (!place) { regionMsg = '先輸入你住的地區。'; renderExpo(); return; }
-  if (state.trips.length) { regionMsg = '還有魚在探險，等牠們回來再換地區。'; renderExpo(); return; }
+  if (anyTankTrips()) { regionMsg = '還有魚缸的魚在探險，等牠們回來再換地區。'; renderExpo(); return; }
   if (regionGen) return;
   const cl = window.claude, sample = cl && typeof cl.use === 'function' ? await cl.use('sample').catch(() => null) : null;
   if (!sample) { regionMsg = '這裡沒辦法請 Claude 產生地圖，可以先用示範地圖。'; renderExpo(); return; }
@@ -1089,17 +1147,17 @@ async function genRegion(place){
     const raw = await sample.json(regionPrompt(place), {signal:ctl.signal, cache:false, onText:({text}) => { const el = document.getElementById('genProg'); if (el) el.textContent = '正在畫地圖… ' + Math.min(99, Math.round(text.length / 55)) + '%'; }});
     const R = buildRegion(raw, place);
     if (!R) throw {code:'bad_region'};
-    if (state.trips.length) throw {code:'busy'};
+    if (anyTankTrips()) throw {code:'busy'};
     state.region = R; applyRegion(R); expoSel = ''; state.expoLast = ''; regionEdit = false; markDirty();
     toast('「' + R.name + '」附近的探險地圖完成了！');
   } catch (e) {
     const code = e && e.code;
     regionMsg = code === 'cancelled' ? '' : ({not_granted:'沒有允許這個遊戲使用 Claude，所以不能產生地圖。', sampling_disabled:'這個帳號不能讓遊戲使用 Claude。', rate_limited:'Claude 現在很忙，或是你的用量到上限了，晚一點再試。', session_expired:'請重新登入 Claude 再試一次。',
-      bad_region:'找不到「' + place + '」附近夠多的水域，換個寫法再試試（例如加上縣市或國家）。', invalid_json:'地圖資料不完整，再按一次試試。', busy:'還有魚在探險，等牠們回來再換地區。', refused:'這個地點沒辦法產生地圖，換一個試試。'})[code] || '產生地圖失敗了，再按一次試試。';
+      bad_region:'找不到「' + place + '」附近夠多的水域，換個寫法再試試（例如加上縣市或國家）。', invalid_json:'地圖資料不完整，再按一次試試。', busy:'還有魚缸的魚在探險，等牠們回來再換地區。', refused:'這個地點沒辦法產生地圖，換一個試試。'})[code] || '產生地圖失敗了，再按一次試試。';
   }
   regionGen = null; if (sheetKind === 'expo') renderExpo();
 }
-function setRegion(r){ if (state.trips.length) { regionMsg = '還有魚在探險，等牠們回來再換地區。'; renderExpo(); return; }
+function setRegion(r){ if (anyTankTrips()) { regionMsg = '還有魚缸的魚在探險，等牠們回來再換地區。'; renderExpo(); return; }
   state.region = r; applyRegion(r); expoSel = ''; state.expoLast = ''; regionEdit = false; regionMsg = ''; markDirty(); renderExpo(); }
 const KY = 110.57;
 const kmOff = (lat, lon) => [(lon - HOME.lon) * KX, (lat - HOME.lat) * KY];
@@ -1145,6 +1203,10 @@ const DAY_EVENTS = {
   love:{name:'戀愛季節', desc:'魚卵和懷孕只要一半時間就會孵化。'},
   sale:{name:'水族店週年慶', desc:'水族店的魚和小生物全部 85 折，可以和今日特價疊加。'},
   meteor:{name:'流星雨', desc:'關燈後流星出現的次數變成 4 倍，點流星可以拿金幣。'},
+  clearwater:{name:'清流日', desc:'淨水微生物特別活躍，魚缸髒污累積速度降低 30%，離線期間也有效。'},
+  nutrition:{name:'營養補給日', desc:'吃下飼料、紅蟲、豐年蝦或藻片並正常獲得成長值時，額外增加 1 點成長值。'},
+  survey:{name:'調查隊同行', desc:'今天出發的探險有調查隊陪伴：風險降低 25%，帶回的金幣增加 30%。'},
+  openhouse:{name:'水族開放日', desc:'更多鄰居來參觀，今日「魚缸人氣」的小費增加 50%，記得到今日任務領取。'},
 };
 /* Seasons follow the real calendar (flipped south of the equator): each brings a small bonus, a seasonal creature and a seasonal decoration. */
 const SEASONS = {
@@ -1197,8 +1259,8 @@ function dailyStock(){
   return stockCache;
 }
 const priceOf = k => Math.round(SPECIES[k].price * (dailyStock().sale === k ? .8 : 1) * (todayEv() === 'sale' ? .85 : 1));
-const inShop = k => CORE.includes(k) || dailyStock().items.includes(k) || seasonSp().includes(k);
-const shopHint = k => CORE.includes(k) ? '水族店常駐' : dailyStock().items.includes(k) ? '今天有賣' : '輪流進貨';
+const inShop = k => !!SPECIES[k]?.expansion || CORE.includes(k) || dailyStock().items.includes(k) || seasonSp().includes(k);
+const shopHint = k => SPECIES[k]?.expansion ? '新夥伴專區' : CORE.includes(k) ? '水族店常駐' : dailyStock().items.includes(k) ? '今天有賣' : '輪流進貨';
 function msToMidnight(){ const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); return m - d; }
 function fmtHMS(ms){ const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 3600) + ':' + String(Math.floor(t / 60) % 60).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
 const DECOS = {
@@ -1585,6 +1647,27 @@ Object.assign(PAL, {
   bellspider:[{b1:'#4a3424',b2:'#6a4a30',leg:'rgba(72,52,34,.95)',air:'rgba(225,236,255,.82)'}],
   matamata:[{b1:'#5a4a30',b2:'#7e6c46',skin:'#8a7a50',flap:'rgba(122,102,62,.92)'}],
 });
+/* Every new companion has a complete palette for its shared drawing template. */
+Object.assign(PAL, {
+  celestialdanio:[{b1:'#244a70',b2:'#7596a2',fin:'rgba(242,105,65,.8)',glitter:'#ffe4a4',H:.28},{b1:'#796843',b2:'#d4bc87',fin:'rgba(234,88,48,.82)',glitter:'#fff1cc',H:.28}],
+  kubotai:[{b1:'#73b52e',b2:'#d4f986',fin:'rgba(174,225,102,.55)',lat:'rgba(204,255,138,.8)',H:.25}],
+  espei:[{b1:'#cc6935',b2:'#ffbf79',fin:'rgba(247,123,54,.65)',tri:'#282121'},{b1:'#bd872d',b2:'#ffe0a0',fin:'rgba(248,180,65,.65)',tri:'#372b1d'}],
+  silvertip:[{b1:'#ad782e',b2:'#f2d78b',fin:'rgba(249,237,204,.8)',tail:'rgba(255,247,225,.9)',dorsalTip:'#ffffff',H:.3}],
+  blackneon:[{b1:'#576e65',b2:'#dfebe3',fin:'rgba(214,229,220,.45)',lat:'#1b2221',eyeTop:'#ed7c3c',H:.3}],
+  serpae:[{b1:'#b92b2d',b2:'#f98b68',fin:'rgba(213,52,45,.8)',shoulder:'#3d2223',dorsalPatch:'#2e2225',H:.42},{b1:'#a52f4b',b2:'#fa9a9b',fin:'rgba(224,73,96,.65)',shoulder:'#3d222d',dorsalPatch:'#33212b',longfin:1,analLong:'rgba(224,73,96,.65)',H:.42}],
+  threadfin:[{b1:'#9b984f',b2:'#eee4aa',fin:'rgba(200,185,105,.55)',tail:'rgba(60,65,52,.6)',longfin:1,analLong:'rgba(235,193,84,.55)',H:.26},{b1:'#a67759',b2:'#f4d4a6',fin:'rgba(225,135,85,.6)',tail:'rgba(64,58,53,.65)',longfin:1,analLong:'rgba(240,160,105,.55)',H:.26}],
+  forktail:[{b1:'#75a99d',b2:'#e0e8ba',fin:'rgba(252,217,65,.85)',tail:'rgba(255,225,89,.8)',eyeTop:'#49baff',iris:'#1e6ca1',H:.3}],
+  honeygourami:[{b1:'#d8a332',b2:'#ffe2a0',fin:'rgba(245,186,61,.68)',fil:'rgba(255,220,137,.85)',throat:'rgba(70,65,42,.65)'},{b1:'#d87e2b',b2:'#ffc376',fin:'rgba(239,126,43,.68)',fil:'rgba(255,199,129,.85)',throat:'rgba(79,55,38,.6)'}],
+  pygmycory:[{b1:'#8b9992',bm:'#d1dacf',b2:'#eff3e5',fin:'rgba(222,234,219,.65)',barb:'#dbe3d1',stripe:'#2f3938'}],
+  peacockgoby:[{b1:'#5db5c2',b2:'#e9e4ad',fin:'rgba(77,166,193,.65)',edge:'#f1d46d',band:'rgba(220,96,102,.72)',cheek:'rgba(226,102,109,.85)'},{b1:'#b77194',b2:'#eee1bd',fin:'rgba(188,112,155,.65)',edge:'#f4d98b',band:'rgba(173,65,103,.75)',cheek:'rgba(206,87,120,.85)'}],
+  hillstream:[{b1:'#655037',b2:'#c9ad6a',fin:'rgba(168,144,91,.78)',rim:'rgba(250,225,159,.7)',bar:'rgba(48,35,20,.65)',spot:'rgba(247,221,157,.9)'},{b1:'#87612a',b2:'#e3be6d',fin:'rgba(187,149,69,.78)',rim:'rgba(255,226,145,.7)',bar:'rgba(71,42,18,.6)',spot:'rgba(255,232,175,.92)'}],
+  vampirefan:[{b1:'#3d628c',b2:'#94b4cf',leg:'rgba(88,125,163,.85)',fans:1},{b1:'#77648b',b2:'#bba9cf',leg:'rgba(127,111,158,.85)',fans:1}],
+  pompomcrab:[{b1:'#c4a770',b2:'#f3dfb1',leg:'rgba(190,155,105,.9)',mitten:'#f3e6c8'},{b1:'#bd7454',b2:'#ebba8e',leg:'rgba(176,111,78,.9)',mitten:'#ead0ac'}],
+  malaysiansnail:[{pat:'cone',sh1:'#6d5131',sh2:'#bfa77c',band:'rgba(67,44,22,.65)',foot:'#8b7a60'},{pat:'cone',sh1:'#a47b31',sh2:'#e8ce88',band:'rgba(100,62,17,.55)',foot:'#b59e6c'}],
+  spixisnail:[{pat:'band',sh1:'#c7af6e',sh2:'#f7ecc2',band:'rgba(84,56,29,.86)',foot:'#c7b888'}],
+  seedshrimp:[{b1:'#997235',b2:'#e8ca88',leg:'rgba(240,215,153,.9)'},{b1:'#c7c8ab',b2:'#f5f2d9',leg:'rgba(242,240,210,.9)'}],
+  asellus:[{b1:'#655640',b2:'#b4a488',leg:'rgba(147,129,100,.9)',plate:'#4b4235'},{b1:'#637783',b2:'#bdcdd1',leg:'rgba(151,177,189,.9)',plate:'#41515b'}]
+});
 function palette(sp, seed, m){
   const R = rng(seed), list = PAL[sp];
   let patches = null;
@@ -1689,9 +1772,10 @@ function tierOf(d){ return SPECIES[d.sp].mystery ? 3 : d.rare ? RARES[d.rare].ti
 
 /* ---------- State ---------- */
 let state, W = 0, H = 0, DPR = 1, U = 1, sandTop = 0, sandOY = 0, safeT = 0, safeB = 0, surfaceY = 6;
-const rt = { fish:[], food:[], coins:[], bubbles:[], fx:[], flyers:[], ripples:[], emotes:[], geo:new Map(), emit:new Map(), schools:{},
+function freshRuntime(){ return { fish:[], food:[], coins:[], bubbles:[], fx:[], flyers:[], ripples:[], emotes:[], geo:new Map(), emit:new Map(), schools:{},
   t:0, mode:'play', sel:null, drag:null, ptr:null, lightK:1, showCoins:0, hudT:0, coinTarget:{x:30,y:30}, algaeRate:0, nFish:0, nInv:0,
-  at:{spore:rand(600, 1500), crystal:rand(1800, 3600), void:rand(300, 700), vac:60, sing:rand(1200, 2400), nano:rand(600, 1200), mut:60, hive:20}, alienAcc:0, plank:[], plankT:new Map(), trap:new Map(), snap:new Map(), court:null, courtT:12, eggT:0, kissT:4, gift:null, celebQ:[], feeders:[], shocks:[], jets:[], visitKey:null, flies:[], stars:[], starT:40, chest:new Map(), ichT:20 };
+  at:{spore:rand(600, 1500), crystal:rand(1800, 3600), void:rand(300, 700), vac:60, sing:rand(1200, 2400), nano:rand(600, 1200), mut:60, hive:20}, alienAcc:0, plank:[], plankT:new Map(), trap:new Map(), snap:new Map(), court:null, courtT:12, eggT:0, kissT:4, gift:null, celebQ:[], feeders:[], shocks:[], jets:[], visitKey:null, flies:[], stars:[], starT:40, chest:new Map(), ichT:20 }; }
+const rt = freshRuntime();
 
 function newCreature(sp, o){
   o = o || {}; const S = SPECIES[sp], seed = (Math.random() * 1e9) | 0;
@@ -1713,7 +1797,7 @@ function newState(){
 function dexAddTo(s, d){ const e = s.dex[d.sp] || (s.dex[d.sp] = {m:[], r:[], t:[]}); if (!e.t) e.t = []; if (!e.m.includes(d.m)) e.m.push(d.m); if (d.rare && !e.r.includes(d.rare)) e.r.push(d.rare); for (const {G} of traitsOf(d)) if (!e.t.includes(G.k)) e.t.push(G.k); }
 const dexAdd = d => { const isNew = !state.dex[d.sp]; dexAddTo(state, d); if (isNew) logEv('第一次養到「' + SPECIES[d.sp].name + '」，圖鑑多了一種'); };
 function snapParent(p){ p = p || {}; return {id:String(p.id || ''), name:String(p.name || '').slice(0, 8), sp:SPECIES[p.sp] ? p.sp : 'guppy', m:Math.max(0, p.m | 0), rare:RARES[p.rare] ? p.rare : '', gen:Math.max(1, p.gen | 0), g:cleanGenes(SPECIES[p.sp] ? p.sp : 'guppy', p.g)}; }
-function migrate(s){
+function migrate(s, skipTanks){
   s.v = 2;
   s.coins = Math.max(0, Math.floor(+s.coins || 0));
   const cleanFish = f => {
@@ -1801,7 +1885,96 @@ function migrate(s){
   s.hints = Object.assign({feed:0, coin:0}, s.hints || {});
   s.created = +s.created || Date.now(); s.t = +s.t || Date.now(); s.savedAt = +s.savedAt || 0;
   s.light = (s.light && typeof s.light === 'object') ? {on:!!s.light.on, until:+s.light.until || 0} : null;
+  if (!skipTanks) migrateTankRooms(s);
   return s;
+}
+
+/* Multiple aquariums share collection/progression, while physical tank state stays independent.
+   The active tank lives in the legacy top-level fields; its room.data is always null. */
+const MAX_TANKS = 5;
+const TANK_FIELDS = ['fish','deco','dirt','algae','sand','light','eggs','seggs','ib','colT','boxAuto','autoBreed','up','theme','fert','rotted','food','tset','waferT','rush','shield','trips','expoLast','t'];
+const tankClone = value => JSON.parse(JSON.stringify(value));
+function tankSnapshot(s){ return tankClone(Object.fromEntries(TANK_FIELDS.filter(k => s[k] !== undefined).map(k => [k, s[k]]))); }
+function cleanTankData(raw, owner){
+  const base = newState(); base.fish = []; base.deco = []; base.sand = []; base.dex = {}; base.dirt = 0;
+  Object.assign(base, tankSnapshot(raw || {})); base.dirt = clamp(+(raw || {}).dirt || 0, 0, 100);
+  base.region = owner.region; base.themes = owner.themes;
+  const clean = migrate(base, true); return {...tankSnapshot(clean), dirt:clean.dirt};
+}
+function migrateTankRooms(s){
+  const input = Array.isArray(s.tankRooms) ? s.tankRooms.filter(r => r && typeof r === 'object').slice(0, MAX_TANKS) : [];
+  const used = new Set();
+  s.tankRooms = input.length ? input.map((r, i) => { let id = typeof r.id === 'string' ? r.id.slice(0, 80) : ''; if (!id || used.has(id)) id = uid(); used.add(id);
+    return {id, name:cleanStr(r.name, 16) || '魚缸 ' + (i + 1), data:r.data}; }) : [{id:'home', name:'第一缸', data:null}];
+  if (!s.tankRooms.some(r => r.id === s.activeTank)) s.activeTank = s.tankRooms[0].id;
+  for (const room of s.tankRooms) {
+    room.data = room.id === s.activeTank ? null : cleanTankData(room.data, s);
+    if (room.data) for (const f of room.data.fish) dexAddTo(s, f);
+  }
+  applyUpgrades(s.up);
+}
+const tankRoom = () => state.tankRooms.find(r => r.id === state.activeTank);
+const tankData = room => room.id === state.activeTank ? state : room.data;
+const tankPrice = () => 50000 * Math.pow(2, state.tankRooms.length - 1);
+function roomCapacity(data, kind){
+  const level = (data.up && data.up.tank) | 0, cap = TANK_CAP[level] || TANK_CAP[0];
+  const mass = data.deco.filter(d => DECOS[d.k].plant && !d.dead).reduce((n, d) => n + plantMass(d), 0);
+  const loss = Math.min(10, Math.round(Math.max(0, (mass - (6 + level * 2)) / (6 + level * 2)) * 10));
+  return kind === 'inv' ? Math.max(3, cap[1] - Math.floor(loss / 2)) : kind === 'deco' ? cap[2] : Math.max(4, cap[0] - loss);
+}
+function buyTank(){
+  if (state.tankRooms.length >= MAX_TANKS) return false;
+  const price = tankPrice(); if (state.coins < price) { toast('開新缸需要 ' + price.toLocaleString('zh-TW') + ' 金幣'); return false; }
+  const data = cleanTankData({}, state); applyUpgrades(state.up);
+  state.coins -= price;
+  const room = {id:uid(), name:'魚缸 ' + (state.tankRooms.length + 1), data}; state.tankRooms.push(room);
+  logEv('花了 ' + price.toLocaleString('zh-TW') + ' 金幣開設「' + room.name + '」'); bumpCoins(); markDirty(); saveNow();
+  toast(room.name + '準備好了！切換後就能買魚與佈置'); if (sheetKind === 'shop') renderShop(); return true;
+}
+function renameTank(id, value){
+  const room = state.tankRooms.find(r => r.id === id), name = cleanStr(value, 16); if (!room || !name) return false;
+  room.name = name; markDirty(); if (sheetKind === 'shop') renderShop(); return true;
+}
+function switchTank(id){
+  const room = state.tankRooms.find(r => r.id === id); if (!room || room.id === state.activeTank || !room.data) return false;
+  if (mini || rt.gift || rt.celebQ.length || FB.busy || TR.busy || TR.collecting) { toast('先完成目前的活動或交易，再切換魚缸'); return false; }
+  const previous = tankRoom();
+  serialize(); state.t = Date.now(); previous.data = {...tankSnapshot(state), dirt:state.dirt};
+  const incoming = room.data; for (const k of TANK_FIELDS) delete state[k];
+  Object.assign(state, incoming); state.activeTank = room.id; room.data = null;
+  closeDeep(); exitMode(); applyUpgrades(state.up); initRuntime(); resize();
+  const away = catchUp(Date.now()); foodShown = ''; rendered.today = ''; rendered.stock = ''; rt.hudT = 0;
+  markDirty(); saveNow();
+  if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'list') renderList(); else closeSheet();
+  toast('切換到「' + room.name + '」' + (away && away.earn ? '，離開期間累積 ' + away.earn.toLocaleString('zh-TW') + ' 金幣在缸底' : '')); return true;
+}
+function tankTransferReason(data, d){
+  const S = SPECIES[d.sp], travelers = (data.trips || []).map(t => t.d).filter(Boolean);
+  const own = data.fish.filter(f => f.sp === d.sp).length + travelers.filter(f => f.sp === d.sp).length;
+  const occupied = data.fish.filter(f => SPECIES[f.sp].kind === S.kind).length + travelers.filter(f => SPECIES[f.sp].kind === S.kind).length;
+  const pending = S.kind === 'fish' ? data.eggs.reduce((n, e) => n + e.n, 0) : 0;
+  if (S.limit && own >= S.limit) return '已達同種上限';
+  return occupied + pending >= roomCapacity(data, S.kind) ? '沒有足夠空位（含待出生寶寶）' : '';
+}
+function transferFish(id, destination){
+  const d = state.fish.find(f => f.id === id), source = tankRoom(), room = state.tankRooms.find(r => r.id === destination);
+  if (!d || !room || room.id === source.id) return false;
+  if (state.eggs.some(e => e.mom.id === id || e.dad.id === id) || (state.ib || []).some(e => e.mom.id === id || e.dad.id === id)) { toast('請等這一窩寶寶出生後再搬缸'); return false; }
+  let reason = tankTransferReason(room.data, d); if (reason) { toast(reason); return false; }
+  if (!switchTank(room.id)) return false;
+  reason = tankTransferReason(state, d); if (reason) { toast('目的缸剛有新變化：' + reason + '。生物仍留在原缸'); return false; }
+  const moving = source.data.fish.find(f => f.id === id); if (!moving) return false;
+  source.data.fish = source.data.fish.filter(f => f.id !== id); moving.box = 0; moving.friend = '';
+  for (const f of source.data.fish) if (f.friend === id) f.friend = '';
+  addCreature(moving); logEv(moving.name + '從「' + source.name + '」搬到「' + room.name + '」'); markDirty(); saveNow();
+  openSheet('fish', id); toast(moving.name + '已搬進「' + room.name + '」'); return true;
+}
+function renderTankTransfer(d){
+  if (state.tankRooms.length < 2) return;
+  const card = mk('div', 'evcard'); card.append(mk('h3', '', '搬到其他魚缸'), mk('p', 'sub', '搬缸後會切換到目的缸；正在照顧魚卵的親魚要等寶寶出生。'));
+  const row = mk('div', 'tankname'), select = document.createElement('select'); select.setAttribute('aria-label', '搬缸目的地');
+  for (const room of state.tankRooms) if (room.id !== state.activeTank) { const reason = tankTransferReason(room.data, d), o = mk('option', '', room.name + (reason ? '・' + reason : '')); o.value = room.id; o.disabled = !!reason; select.appendChild(o); }
+  const move = mk('button', 'chipbtn', '搬過去'); move.disabled = !select.value; move.addEventListener('click', () => transferFish(d.id, select.value)); row.append(select, move); card.appendChild(row); sheetBody.appendChild(card);
 }
 
 /* ---------- Rules ---------- */
@@ -1851,6 +2024,7 @@ function nextVisitText(npc){ const nv = nextVisit(npc), N = NPCS[npc]; if (!nv) 
 const NPC_AFTER = {lin:['pararasbora','labkit'], lan:['sakura','waterwheel'], huang:['redarowana','goldbars'], elya:['starwhale','crystal'], ade:['oldturtle','amulet'], hsiung:['goldprawn','garlicbait'],
   an:['galaxybetta','kiddraw'], chang:['garra','cleanse'], zorb:['chronojelly','timeshard'], adi:['sulawesi','borobudur'], wang:['lungfish','fossil'], chen:['kohaku','podium'], ajhu:['tosakin','nightstall','thickpoi'],
   gula:['treasurefish','ufo'], ohm:['robofish','circuit'], stray:['catsub','catgift'], chef:['scaler','yanagi','unagi','ice','shears','crab8','shucker','mail','rubber','fugu','fugulic','hazmat']};
+Object.assign(NPC_AFTER, {xiaocheng:['forktail','peacockgoby','brine20'], heteacher:['vampirefan','pompomcrab','fert'], amu:['kubotai','espei','vitamin']});
 const npcAfter = npc => NPC_AFTER[npc] || [];
 function npcQuestDone(npc){ if (NPCS[npc].cat) return !!state.catPet; const q = storyOfNpc(npc); return !!(q && storyState(q).done); }
 const anyName = k => (ITEMS[k] || DECOS[k] || SPECIES[k] || {}).name || k;
@@ -1873,7 +2047,7 @@ function happinessWith(d, full, dirt){
 }
 const happiness = d => happinessWith(d, d.full, state.dirt);
 function countCache(){ let a = 0, nf = 0, ni = 0; for (const f of state.fish) { a += SPECIES[f.sp].algae || 0; if (isInv(f)) ni++; else nf++; } rt.algaeRate = a; rt.nFish = nf; rt.nInv = ni; rt.hive = state.fish.some(f => f.sp === 'hivemind'); }
-const dirtRate = () => FILTER_K[outageOn() ? 0 : state.up.filter | 0] * Math.max(.4, 2.4 + rt.nFish * .12 + rt.nInv * .04 - rt.algaeRate - Math.min(1.2, (rt.plantMass || 0) * .08) + (rt.deadPlants || 0) * .5) * (todayEv() === 'bloom' ? 1.5 : 1) * (rt.hive ? 0 : 1);
+const dirtRate = () => FILTER_K[outageOn() ? 0 : state.up.filter | 0] * Math.max(.4, 2.4 + rt.nFish * .12 + rt.nInv * .04 - rt.algaeRate - Math.min(1.2, (rt.plantMass || 0) * .08) + (rt.deadPlants || 0) * .5) * (todayEv() === 'bloom' ? 1.5 : todayEv() === 'clearwater' ? .7 : 1) * (rt.hive ? 0 : 1);
 function rehomeValue(d){ const S = SPECIES[d.sp]; const st = isInv(d) ? 1 : [.5, .75, 1][growRatio(d) >= 1 ? 2 : growRatio(d) >= .4 ? 1 : 0]; return Math.max(1, Math.floor(S.price * .4 * st * (1 + .5 * traitsOf(d).length) * (d.rare ? (RARES[d.rare].tier === 2 ? 8 : 3) : 1))); }
 function clockNight(){ const h = new Date().getHours(); return h >= 19 || h < 6; }
 const outageOn = () => !!(typeof rt !== 'undefined' && rt.outage);
@@ -2549,6 +2723,25 @@ const IDRAW = {
     c.fillStyle = 'rgba(110,130,60,.35)'; for (let i = 0; i < 7; i++) dot(c, L * (-.3 + i * .09), -H * (.3 + (i % 3) * .15), L * .03); },
 };
 
+Object.assign(IDRAW, {
+  seedshrimp(c, P, L, ph){
+    const wave = Math.sin(ph * 2.5), H = L * .28;
+    c.strokeStyle = P.leg; c.lineCap = 'round'; c.lineWidth = Math.max(.5, L * .018);
+    for (let i = 0; i < 3; i++) { const x = L * (.02 + i * .075); c.beginPath(); c.moveTo(x, H * .45); c.quadraticCurveTo(x + L * .06, H * .9, x + L * (.17 + wave * .025), H * (.6 + i * .22)); c.stroke(); }
+    c.beginPath(); c.moveTo(L * .23, -H * .05); c.quadraticCurveTo(L * .42, -H * .6, L * .58, -H * .55 + wave * L * .03); c.moveTo(L * .23, H * .1); c.quadraticCurveTo(L * .42, H * .2, L * .55, H * .3 - wave * L * .03); c.stroke();
+    c.fillStyle = lg(c, 0, -H, 0, H, [[0,P.b2],[1,P.b1]]); c.beginPath(); c.ellipse(-L * .03, 0, L * .34, H, -.12, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(65,48,23,.38)'; c.lineWidth = Math.max(.5, L * .015); c.stroke(); c.beginPath(); c.ellipse(-L * .04, 0, L * .26, H * .72, -.12, -.5, 2.9); c.stroke();
+    c.fillStyle = 'rgba(255,250,215,.45)'; c.beginPath(); c.ellipse(-L * .08, -H * .4, L * .15, H * .2, -.2, 0, TAU); c.fill(); c.fillStyle = '#31281c'; dot(c, L * .19, -H * .16, L * .022);
+  },
+  asellus(c, P, L, ph){
+    c.lineCap = 'round'; c.strokeStyle = P.leg; c.lineWidth = Math.max(.55, L * .02);
+    for (const side of [-1, 1]) for (let i = 0; i < 7; i++) { const x = L * (.22 - i * .075), step = Math.sin(ph * 2.6 + i * .8 + side) * L * .025; c.beginPath(); c.moveTo(x, side * L * .075); c.lineTo(x - L * .03 + step, side * L * .17); c.lineTo(x - L * .07 + step, side * L * .21); c.stroke(); }
+    c.fillStyle = lg(c, 0, -L * .14, 0, L * .14, [[0,P.b2],[1,P.b1]]); c.beginPath(); c.ellipse(-L * .03, 0, L * .35, L * .135, 0, 0, TAU); c.fill();
+    c.strokeStyle = P.plate; c.lineWidth = Math.max(.4, L * .012); for (let i = 0; i < 7; i++) { const x = L * (.21 - i * .075), h = L * .13 * Math.sqrt(Math.max(.1, 1 - Math.pow(x / (L * .36), 2))); c.beginPath(); c.moveTo(x, -h); c.quadraticCurveTo(x - L * .025, 0, x, h); c.stroke(); }
+    c.fillStyle = P.b2; c.beginPath(); c.ellipse(L * .3, 0, L * .08, L * .09, 0, 0, TAU); c.fill(); c.fillStyle = '#181d19'; dot(c, L * .32, -L * .05, L * .016); dot(c, L * .32, L * .05, L * .016);
+    c.strokeStyle = P.leg; for (const side of [-1, 1]) { c.beginPath(); c.moveTo(L * .35, side * L * .035); c.quadraticCurveTo(L * .45, side * L * .11, L * .58, side * L * .15 + Math.sin(ph + side) * L * .025); c.moveTo(-L * .36, side * L * .035); c.lineTo(-L * .46, side * L * .07); c.stroke(); }
+  }
+});
 /* Small-creature reproduction: each kind breeds its own way, and the babies inherit genes. */
 const BROOD = {
   triops:{need:1, lay:[100, 200], hatch:[18, 35], n:[2, 4], max:8, layTxt:'鱟蟲在沙裡埋下了一批休眠卵', hatchTxt:'沙裡的休眠卵孵出了 {n} 隻小鱟蟲'},
@@ -2558,6 +2751,12 @@ const BROOD = {
   caddis:{need:2, lay:[140, 240], hatch:[25, 45], n:[2, 3], max:6, layTxt:'石蠶在水草上產下了一串果凍般的卵', hatchTxt:'卵孵出了 {n} 隻小石蠶，正忙著撿小石子蓋房子'},
   tubifex:{need:1, lay:[240, 420], hatch:[10, 20], n:[1, 1], max:3, layTxt:'', hatchTxt:'絲蚯蚓越長越多，分出了一團新的蟲床'},
 };
+Object.assign(BROOD, {
+  malaysiansnail:{need:1, lay:[240, 420], hatch:[20, 40], n:[1, 2], max:6, layTxt:'馬來螺正在殼裡照顧小寶寶', hatchTxt:'沙面上出現了 {n} 隻小馬來螺'},
+  spixisnail:{need:2, lay:[180, 300], hatch:[35, 55], n:[1, 3], max:6, layTxt:'斑馬蘋果螺在水草旁留下了一小團卵', hatchTxt:'卵團孵出了 {n} 隻條紋小螺'},
+  seedshrimp:{need:1, lay:[180, 320], hatch:[20, 35], n:[1, 2], max:6, layTxt:'介形蟲在底沙間留下了小小的卵', hatchTxt:'底沙間游出了 {n} 隻小介形蟲'},
+  asellus:{need:2, lay:[220, 360], hatch:[30, 50], n:[1, 3], max:6, layTxt:'水虱媽媽把小寶寶藏進腹部的育兒袋', hatchTxt:'育兒袋裡爬出了 {n} 隻小水虱'}
+});
 function broodTick(mins, quiet, out){
   const now = Date.now(); if (!Array.isArray(state.ib)) state.ib = [];
   for (const b of [...state.ib]) { if (now < b.at) continue; state.ib = state.ib.filter(x => x !== b); const B = BROOD[b.sp]; if (!B || !SPECIES[b.sp]) continue;
@@ -3554,7 +3753,8 @@ function drawFish(c, sp, P, L, ph, amp, ex){
     fin(c, [L * .08, -H * .42, -L * .02, -H * 1.05 + w2 * L * .02, -L * .15, -H * .4, -L * .05, -H * .45], P.dfin || P.fin);
     bodyPath(c, L, H, .08); c.fillStyle = lg(c, 0, -H/2, 0, H/2, [[0,P.b1],[.6,P.bm],[1,P.b2]]); c.fill();
     c.save(); c.clip(); if (P.spots) { c.fillStyle = P.spot; for (const q of P.spots) dot(c, q[0] * L, q[1] * H, L * .028); }
-    if (P.panda) { c.fillStyle = P.panda; c.beginPath(); c.ellipse(L * .28, -H * .1, L * .07, H * .55, .15, 0, TAU); c.fill(); dot(c, -L * .26, -H * .08, L * .05); } sheen(c, L, H); c.restore();
+    if (P.panda) { c.fillStyle = P.panda; c.beginPath(); c.ellipse(L * .28, -H * .1, L * .07, H * .55, .15, 0, TAU); c.fill(); dot(c, -L * .26, -H * .08, L * .05); }
+    if (P.stripe) { c.fillStyle = P.stripe; c.fillRect(-L * .34, -H * .06, L * .8, H * .16); } sheen(c, L, H); c.restore();
     c.strokeStyle = P.barb; c.lineWidth = Math.max(.6, L * .014);
     c.beginPath(); c.moveTo(L * .46, H * .14); c.lineTo(L * .54, H * .32); c.moveTo(L * .41, H * .18); c.lineTo(L * .45, H * .36); c.stroke();
     pectoral(c, L, H, ph, P.pec); eye(c, L * .28, -H * .12, L * .065, P);
@@ -4116,6 +4316,9 @@ Object.assign(EXT, {pencil:[1.15,.45,.04], badis:[1.15,.95,.05], kuhli:[1.08,.3,
   sailfin:[1.2,1.25,.05,.2], anableps:[1.15,.6,.04,.06], pipefish:[1.12,.32,.04], ghostknife:[1.08,.55,0,-.06], sturgeon:[1.2,.62,.05], shovelnose:[1.2,.5,.03], paddlefish:[1.3,.55,-.04], gar:[1.1,.38,-.02],
   payara:[1.25,.85,.08], caddis:[1.1,.5,.05,.08], triops:[1.45,.6,.16,.06], tubifex:[1.05,.6,0,.25], waterbug:[1.2,.7,0,.06], ranatra:[1.45,.6,.2,0], hermit:[1.05,.95,.02,.12], bellspider:[1.25,.75,0,.04], matamata:[1.35,.75,-.06,.08]});
 Object.assign(EXT, {sulawesi:EXT.cherry, lungfish:EXT.bichir, kohaku:EXT.koi, tosakin:EXT.goldfish, treasurefish:EXT.prism, robofish:EXT.crystalfish, upsidecat:EXT.cory, sicyo:EXT.mudskipper, shibin:EXT.redtail, firemouth:EXT.ram, glassfish:[1.12,.75,.05], congo:[1.25,.8,.06], vampirecrab:EXT.microcrab, ramshorn:EXT.nerite, goldclam:EXT.clam, tigerbarb:[1.12,.8,.05], cherrybarb:[1.12,.7,.05], lampeye:[1.12,.55,.05], clownkilli:[1.2,.5,.08], krib:EXT.apisto, newt:EXT.axolotl, firefly:[1.1,.45,0,.1], beetle:[1.25,.7,0,.05], softshell:EXT.turtle, garra:EXT.redtail, chronojelly:EXT.voidjelly, pararasbora:EXT.neon, goldprawn:EXT.prawn, galaxybetta:EXT.betta, sakura:EXT.redtail, redarowana:EXT.culter, starwhale:[1.15,.8,.03,.04], oldturtle:EXT.turtle, balashark:EXT.redtail, rbshark:EXT.redtail, altum:EXT.angel, praecox:EXT.rainbowfish, goby:EXT.mudskipper, mudsnail:EXT.rabbit});
+Object.assign(EXT, {celestialdanio:EXT.neon, kubotai:EXT.neon, espei:EXT.rasbora, silvertip:EXT.lemon, blackneon:EXT.neon, serpae:EXT.diamondtetra,
+  threadfin:[1.35,.95,.12], forktail:EXT.lemon, honeygourami:EXT.gourami, pygmycory:EXT.cory, peacockgoby:EXT.apisto, hillstream:EXT.hemimyzon,
+  vampirefan:EXT.bamboo, pompomcrab:EXT.microcrab, malaysiansnail:EXT.rabbit, spixisnail:EXT.apple, seedshrimp:[1.2,.75,0], asellus:[1.2,.55,0]});
 function drawFishThumb(cnv, sp, P, ph, ex, fit, fx, seed){
   const c = cnv.getContext('2d'), w = cnv.width, h = cnv.height, e = EXT[sp] || [1.3,1,0,0];
   c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
@@ -4853,10 +5056,10 @@ function eatFood(r, p){
   const d = r.d; r.eat = .3;
   for (let k = 0; k < 3; k++) rt.fx.push({type:'spark', x:p.x, y:p.y, vx:rand(-20, 20) * U, vy:rand(-30, -5) * U, t:0, life:.5, col:'#fff4c8'});
   const fk = p.kind || ''; if (fk === 'wafer' && isInv(d)) state.waferT = Date.now();
-  if (noFood(d)) { if (d.grow < GROW_MAX) d.grow = Math.min(GROW_MAX, d.grow + (fk === 'wafer' ? 2 : 1)); markDirty(); return; }
+  if (noFood(d)) { if (d.grow < GROW_MAX) d.grow = Math.min(GROW_MAX, d.grow + (fk === 'wafer' ? 2 : 1) + (todayEv() === 'nutrition' ? 1 : 0)); markDirty(); return; }
   const wasAdult = growRatio(d) >= 1;
   d.full = Math.min(100, d.full + PELLET * (fk === 'worm' ? 1.3 : fk === 'brine' ? .5 : 1)); if (d.aff < 100) d.aff = Math.min(100, (d.aff || 0) + (fk === 'worm' ? 1 : .3) * (d.pers === 'showoff' ? 2 : 1));
-  if (d.full <= 97 || fk === 'brine') d.grow = Math.min(GROW_MAX, d.grow + (fk === 'brine' && growRatio(d) < 1 ? 3 : 1) + (season() === 'autumn' && Math.random() < .5 ? 1 : 0));
+  if (d.full <= 97 || fk === 'brine') d.grow = Math.min(GROW_MAX, d.grow + (fk === 'brine' && growRatio(d) < 1 ? 3 : 1) + (season() === 'autumn' && Math.random() < .5 ? 1 : 0) + (todayEv() === 'nutrition' ? 1 : 0));
   if (fk === 'worm' && Math.random() < .35) rt.emotes.push({type:'heart', x:r.x, y:r.y - fishLen(r) * .4, t:0, life:1.2});
   state.stats.fed++;
   if (!wasAdult && growRatio(d) >= 1) toast(d.name + ' 長成成魚了，可以開始找對象囉');
@@ -5518,7 +5721,7 @@ function lifeTick(quiet){
 }
 /* Factions and story lines: some creatures only come from finishing a visitor's story, and helping one side upsets another. */
 const FACTIONS = {
-  cons:{name:'溪流守護會', col:'#6ad49a', npcs:['lan','lin','wang','chang'], desc:'保護台灣溪流和原生魚的志工、學者和獸醫。'},
+  cons:{name:'溪流守護會', col:'#6ad49a', npcs:['lan','lin','wang','chang','heteacher','amu'], desc:'保護台灣溪流和原生魚的志工、學者和獸醫。'},
   trade:{name:'珍稀魚商會', col:'#f2b84a', npcs:['huang','hsiung','ajhu'], desc:'做魚生意的老闆們，稀奇的魚越多越好。'},
   star:{name:'星際交流團', col:'#b48cff', npcs:['zorb','gula','elya','ohm'], desc:'從各個星系來的訪客，對地球生物充滿好奇。'}};
 const facOf = npc => Object.keys(FACTIONS).find(k => FACTIONS[k].npcs.includes(npc)) || '';
@@ -5628,6 +5831,22 @@ const STORY = {
       {label:'說服他改成「護生」', cost:800, rep:{cons:20}, after:'阿德伯想了很久：「讓魚在廟裡好好活著，也是功德。」法會改成了「護生」，還請阿蘭來教香客怎麼照顧魚。'}],
      rw:{}, endText:'阿德伯把廟裡養了三十年的老烏龜託付給你：「牠跟著我很久了，交給你我放心。」'}]},
 };
+Object.assign(STORY, {
+  xiaocheng:{npc:'xiaocheng', fac:'', title:'把水底拍成星空', unlock:['celestialdanio', 1], ch:[
+    {name:'找好主角', say:'「第一張作品先拍魚群吧。三個小夥伴游在一起，就像水裡的星座。」', goal:'缸裡同時養著至少 3 隻同種的群游魚', type:'check', prog:() => [Math.max(0, ...Object.keys(SPECIES).filter(k => SPECIES[k].school).map(countSp)), 3], rw:{coins:120}, after:'小澄沿著玻璃比了個取景框：「這個隊形很有故事！」'},
+    {name:'三張練習', say:'「試著換個時間、換個光線拍。按魚缸右上角的相機，留下三張你喜歡的照片。」', goal:'從這一章開始，再拍 3 張魚缸照片', type:'check', base:() => ({n:state.stats.photos | 0}), prog:b => [(state.stats.photos | 0) - (b.n | 0), 3], rw:{coins:180}, after:'三張照片放在一起，記下了魚兒一天的生活。'},
+    {name:'第一場小展覽', say:'「作品準備好了！要在社區分享，還是辦一場溪流保育義展？」', goal:'選擇展覽的方式', type:'choice', choices:[
+      {label:'社區分享展（120 金幣）', cost:120, rep:{trade:5}, after:'鄰居帶著孩子來看照片，大家開始聊起自己的第一個魚缸。'},
+      {label:'溪流保育義展（250 金幣）', cost:250, rep:{cons:12}, after:'展覽收益用來支持溪流調查，何老師也帶學生來看。'}], rw:{}, endText:'小澄把一隻銀河斑馬交給你：「牠身上的星點，留給你下一張作品。」'}]},
+  heteacher:{npc:'heteacher', fac:'cons', title:'一缸小小的生態課', unlock:['vampirefan', 1], ch:[
+    {name:'種一片森林', say:'「先種兩種活水草。高高低低的葉子，都是小生物的家。」', goal:'缸裡有 2 種不同的活水草', type:'check', prog:() => [new Set(state.deco.filter(d => DECOS[d.k].plant && !d.dead).map(d => d.k)).size, 2], rw:{coins:120, rep:{cons:5}}, after:'何老師把水草畫進筆記，標上魚兒躲藏的位置。'},
+    {name:'水底的小鄰居', say:'「別只看魚。找兩種小生物，觀察牠們怎麼清理殘餌、吃藻和濾食。」', goal:'缸裡同時有 2 種不同的小生物（不含害蟲）', type:'check', prog:() => [new Set(state.fish.filter(d => isInv(d) && !SPECIES[d.sp].pest).map(d => d.sp)).size, 2], rw:{coins:180, rep:{cons:5}}, after:'孩子們發現了蝦蟲的工作，紛紛說牠們是魚缸的小幫手。'},
+    {name:'生態教室開課', say:'「最後，把水維持清澈，讓兩種水草健健康康。明天就能邀請孩子來觀察！」', goal:'髒污在 15 以下，並有 2 種健康度至少 70 的活水草', type:'check', prog:() => [state.dirt <= 15 && new Set(state.deco.filter(d => DECOS[d.k].plant && !d.dead && (d.hp == null ? 100 : d.hp) >= 70).map(d => d.k)).size >= 2 ? 1 : 0, 1], rw:{coins:220, rep:{cons:10}}, after:'生態教室開課了！何老師送來一隻非洲巨扇蝦，讓大家觀察牠用小扇子濾食的模樣。'}]},
+  amu:{npc:'amu', fac:'cons', title:'一起平安回家', unlock:['hillstream', 1], ch:[
+    {name:'出發前的準備', say:'「探險前先照顧好夥伴。長大一點、吃飽一點，別帶生病的魚出門。」', goal:'缸裡有 1 隻長大六成、飽足至少 70 且沒有白點病的魚', type:'check', prog:() => [state.fish.some(d => !isInv(d) && !d.box && growRatio(d) >= .6 && d.full >= 70 && !d.ich) ? 1 : 0, 1], rw:{coins:150, rep:{cons:5}}, after:'阿沐幫你檢查裝備，也在地圖上標了幾個適合觀察的地方。'},
+    {name:'寫下水域紀錄', say:'「現在派魚去附近水域走走。選路線時看清楚風險，平安比收穫更重要。」', goal:'從這一章開始，再派魚去探險 2 次', type:'check', base:() => ({n:state.stats.sent | 0}), prog:b => [(state.stats.sent | 0) - (b.n | 0), 2], rw:{coins:200, rep:{cons:5}}, after:'兩份出發紀錄都寫好了，接下來等待夥伴回家。'},
+    {name:'歡迎回家', say:'「看到熟悉的身影游回來，就是探險最好的一刻。讓我們把平安返航的紀錄收好。」', goal:'累計有 2 次探險平安完成（提早召回不計）', type:'check', prog:() => [state.stats.back | 0, 2], rw:{coins:300, rep:{cons:10}}, after:'阿沐送你一隻人工繁殖的婆羅洲吸鰍：「下次在溪邊看到野生的，就把牠留在自己的家。」'}]},
+});
 function storyState(k){ if (!state.story[k]) state.story[k] = {ch:0, b:{}, n:0, done:0, pick:-1}; return state.story[k]; }
 STORY.chef = {npc:'chef', title:'總舖師的傳人', doneText:'已解鎖阿忠師的廚具', ch:[
   {name:'辦桌缺貨', say:'「少年仔，明天村裡有人娶媳婦要辦桌，魚販偏偏沒貨！你缸裡有能吃的魚嗎？先讓我帶兩尾回去應急。」', goal:'交給阿忠師 2 隻長到一半以上的食用魚（吳郭魚、苦花、泰國蝦、河蚌……都可以）', type:'give', n:2, pred:d => edible(d) && !SPECIES[d.sp].alien, rw:{coins:300}, after:'喜宴辦得很成功，阿忠師特地打電話來：「你的魚很新鮮，客人都說讚！」'},
@@ -5635,7 +5854,14 @@ STORY.chef = {npc:'chef', title:'總舖師的傳人', doneText:'已解鎖阿忠�
   {name:'拜師', say:'「你對食材這麼用心，要不要跟我學兩手？照規矩，拜師要包個紅包，意思意思就好。」', goal:'包 1,200 金幣的紅包拜師', type:'pay', cost:1200, btn:'包紅包（1,200 金幣）', rw:{tools:['spike', 'deba']}, after:'阿忠師從刀箱裡拿出一支活締針和一把出刃刀交給你：「刀是廚師的命，要好好照顧。」得到活締針和出刃刀！'},
   {name:'出師', say:'「工具給你了，現在讓我看看你的刀工。自己處理一尾魚，至少要活締放血再清肚，處理好放進冰箱。」', goal:'在「我的魚兒 → 廚房」親手處理一份食材（至少完成 2 個步驟）並放進冰箱', type:'check', base:() => ({n:state.stats.cooked2 | 0}), prog:b => [(state.stats.cooked2 | 0) - (b.n | 0), 1], rw:{coins:800}, after:'阿忠師拿起你處理的魚翻來翻去看了很久，終於點點頭：「可以出師了。以後我刀箱裡的寶貝，你想要什麼就跟我說。不過河豚跟電鰻，沒準備好千萬別亂碰。」'}]};
 const storyLocked = k => !!STORY[k].fac && repOf(STORY[k].fac) <= -30;
+function storyRewardBlock(k, outgoing){ const Q = STORY[k], s = storyState(k); if (s.done || !Q.unlock || s.ch !== Q.ch.length - 1) return '';
+  const [sp, n] = Q.unlock, S = SPECIES[sp], sameKind = outgoing && SPECIES[outgoing.sp].kind === S.kind ? 1 : 0;
+  const used = (S.kind === 'inv' ? invCount() : fishCount()) - sameKind, cap = S.kind === 'inv' ? capI() : capF();
+  if (used + n > cap) return '先空出 ' + n + ' 個' + (S.kind === 'inv' ? '小生物' : '魚兒') + '位置，再領取劇情獎勵';
+  if (S.limit && countSp(sp) - (outgoing && outgoing.sp === sp ? 1 : 0) + n > S.limit) return S.name + '已達飼養上限，先安置現有個體再領獎';
+  return ''; }
 function chapterReady(k){ const Q = STORY[k], s = storyState(k); if (s.done || storyLocked(k)) return false; const C = Q.ch[s.ch];
+  if (C.type !== 'give' && storyRewardBlock(k)) return false;
   if (C.type === 'check') { const [a, b] = C.prog(s.b); return a >= b; }
   if (C.type === 'give') return state.fish.some(C.pred);
   if (C.type === 'pay') return state.coins >= C.cost && (!C.req || C.req());
@@ -5645,6 +5871,7 @@ const storyNow = () => { const v = currentVisitor(), k = v && storyOfNpc(v.npc);
 const reStory = () => { if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'list') renderList(); };
 const storyHere = k => { const v = currentVisitor(); return !!v && v.npc === STORY[k].npc; };
 function advanceStory(k, choice){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch]; if (s.done || storyLocked(k) || !storyHere(k)) return;
+  const blocked = storyRewardBlock(k); if (blocked) { toast(blocked); return; }
   let after = C.after || '', rp = Object.assign({}, (C.rw && C.rw.rep) || {});
   if (C.type === 'check') { const [a, b] = C.prog(s.b); if (a < b) return; }
   else if (C.type === 'pay') { if (state.coins < C.cost || (C.req && !C.req())) return; state.coins -= C.cost; if (C.take) C.take(); }
@@ -5652,6 +5879,7 @@ function advanceStory(k, choice){ const Q = STORY[k], s = storyState(k), C = Q.c
   else return;
   finishChapter(k, after, rp); }
 function giveStory(k, d){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch]; if (s.done || storyLocked(k) || !storyHere(k) || C.type !== 'give' || !state.fish.includes(d) || !C.pred(d)) return;
+  if (s.n + 1 >= C.n) { const blocked = storyRewardBlock(k, d); if (blocked) { toast(blocked); return; } }
   removeCreature(d); s.n++; rt.stPick = ''; logEv('把 ' + d.name + '（' + SPECIES[d.sp].name + '）交給' + NPCS[Q.npc].name);
   if (s.n >= C.n) finishChapter(k, C.after || '', (C.rw && C.rw.rep) || {}); else { toast('交給' + NPCS[Q.npc].name + ' 了（' + s.n + ' / ' + C.n + '）'); markDirty(); reStory(); } }
 function finishChapter(k, after, rp){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch], rw = C.rw || {};
@@ -5673,13 +5901,14 @@ function renderStory(){
     const bar = mk('div', 'fbar'), fill = mk('i'); fill.style.left = (v < 0 ? 50 + v / 2 : 50) + '%'; fill.style.width = Math.abs(v) / 2 + '%'; fill.style.background = v < 0 ? '#ff7a6a' : F.col; bar.appendChild(fill);
     row.append(top, bar, mk('small', '', F.desc + '成員：' + F.npcs.map(n => NPCS[n].name).join('、') + '。' + (state.facGift[f] ? '已收到「' + DECOS[FAC_GIFT[f].deco].name + '」。' : '好感 50 會送你「' + DECOS[FAC_GIFT[f].deco].name + '」。') + (v >= 70 ? '跟他們買東西打 8 折。' : v >= 30 ? '跟他們買東西打 9 折。' : v <= -60 ? '他們不肯跟你做生意。' : v <= -30 ? '跟他們買東西要多付 30%，劇情也暫停了。' : ''))); sheetBody.appendChild(row); }
   sheetBody.appendChild(mk('h4', 'sec', '劇情'));
-  for (const k of Object.keys(STORY)) renderStoryCard(k); }
+  for (const k of ['xiaocheng','heteacher','amu', ...Object.keys(STORY).filter(k => !['xiaocheng','heteacher','amu'].includes(k))]) renderStoryCard(k); }
 function renderStoryCard(k){ sheetBody.appendChild(storyCard(k, false)); }
 function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.npc], card = mk('div', 'story' + (s.done ? ' done' : '') + (act ? ' here' : '')), av = document.createElement('canvas'); av.width = 112; av.height = 112; av.className = 'sav';
   (N.alien ? drawAlienAvatar : drawAvatar)(av.getContext('2d'), N, 112);
   const hd = mk('div', 'shead'), ht = mk('div'); ht.append(mk('b', '', '〈' + Q.title + '〉'), mk('small', '', N.name + '・' + N.role + (Q.fac ? '・' + FACTIONS[Q.fac].name : '') + '・' + (s.done ? '已完結' : '第 ' + (s.ch + 1) + ' / ' + Q.ch.length + ' 章'))); hd.append(av, ht); card.appendChild(hd);
   if (s.done) { const C = Q.ch[Q.ch.length - 1]; card.appendChild(mk('p', 'say', (C.type === 'choice' && s.pick >= 0 ? C.choices[s.pick].after : C.after) + (C.endText ? ' ' + C.endText : ''))); card.appendChild(mk('p', 'goal ok', Q.unlock ? '✓ 已得到' + SPECIES[Q.unlock[0]].name : '✓ ' + (Q.doneText || '已完成'))); return card; }
   const C = Q.ch[s.ch]; card.append(mk('h5', '', '第 ' + (s.ch + 1) + ' 章・' + C.name), mk('p', 'say', C.say));
+  { const blocked = C.type !== 'give' && storyRewardBlock(k); if (blocked) card.appendChild(mk('p', 'goal no', blocked)); }
   if (storyLocked(k)) { card.appendChild(mk('p', 'goal no', N.name + '對你很失望，現在不想談這件事。（' + FACTIONS[Q.fac].name + '的好感要回到 -30 以上）')); return card; }
   const ready = chapterReady(k), pt = C.type === 'check' ? (([a, b]) => '（' + Math.min(a, b) + ' / ' + b + '）')(C.prog(s.b)) : C.type === 'give' ? '（' + s.n + ' / ' + C.n + '）' : '';
   card.appendChild(mk('p', 'goal' + (ready ? ' ok' : ''), (ready ? '✓ ' : '目標：') + C.goal + pt));
@@ -6215,7 +6444,7 @@ function tankRating(){ const fish = state.fish.filter(f => !SPECIES[f.sp].pest),
   const hap = fish.length ? fish.reduce((a, f) => a + happiness(f), 0) / fish.length : 0;
   const parts = [['造景', Math.min(30, comfort() * .3), 30, '多擺一些造景和水草'], ['物種多樣', Math.min(25, nsp * 2.5), 25, '養更多不同種類的生物'], ['稀有度', Math.min(15, rare * 5 + gene * 1.5), 15, '繁殖出稀有色或特殊基因的魚'], ['魚兒心情', hap * 20, 20, '讓魚吃飽、住得舒服、水溫剛好'], ['乾淨程度', Math.max(0, 1 - state.dirt / 100) * 10, 10, '常常清潔魚缸']];
   const score = Math.round(parts.reduce((a, p) => a + p[1], 0)); return {score, rank:score >= 88 ? 'S' : score >= 72 ? 'A' : score >= 55 ? 'B' : score >= 35 ? 'C' : 'D', parts}; }
-function tipAmount(T){ return Math.round((T.score * 3 + museumN() * 5) * (state.deco.some(dc => dc.k === 'shrine') ? 1.2 : 1)); }
+function tipAmount(T){ return Math.round((T.score * 3 + museumN() * 5) * (state.deco.some(dc => dc.k === 'shrine') ? 1.2 : 1) * (todayEv() === 'openhouse' ? 1.5 : 1)); }
 function claimTips(){ if (state.tipDay === dayKey()) return; const T = tankRating(), tip = tipAmount(T); state.tipDay = dayKey(); state.coins += tip; if (T.rank === 'S') state.stats.rankS = 1; bumpCoins(); markDirty();
   logEv('客人來參觀魚缸（人氣 ' + T.rank + ' 級），留下 ' + tip + ' 金幣小費'); toast('收下 ' + tip + ' 金幣小費'); renderToday(); }
 
@@ -6631,6 +6860,8 @@ const TEMP = {goldfish:[10,27], ranchu:[12,27], pearlscale:[12,27], oranda:[12,2
 Object.assign(TEMP, {pencil:[24,29], badis:[20,28], kuhli:[24,30], anabas:[22,33], hemimyzon:[12,25], flounder:[20,28], pantodon:[24,30], sailfin:[12,26], anableps:[24,30], pipefish:[24,29],
   ghostknife:[23,29], sturgeon:[8,23], shovelnose:[24,30], paddlefish:[10,26], gar:[18,31], payara:[25,31], caddis:[10,25], triops:[20,31], tubifex:[10,28], waterbug:[18,32], ranatra:[18,31], hermit:[24,30], bellspider:[10,25], matamata:[25,31]});
 Object.assign(TEMP, {ayu:[10,26], backswim:[16,33], mittencrab:[8,28], glasseel:[8,28], japeel:[8,30]});
+Object.assign(TEMP, {celestialdanio:[20,26], kubotai:[22,28], espei:[23,28], silvertip:[22,28], blackneon:[22,28], serpae:[22,28], threadfin:[24,29], forktail:[24,29],
+  honeygourami:[23,29], pygmycory:[22,27], peacockgoby:[22,28], hillstream:[20,26], vampirefan:[23,29], pompomcrab:[22,28], malaysiansnail:[18,30], spixisnail:[20,28], seedshrimp:[15,28], asellus:[12,25]});
 function tempRange(k){ const S = SPECIES[k]; if (!S || S.alien || S.myth || S.pest || k === 'feeder') return null; if (TEMP[k]) return TEMP[k]; if (S.kind === 'inv') return [15, 30];
   if (S.wild || (S.tags || []).some(t => t.includes('原生'))) return [12, 31]; return [22, 30]; }
 function ambientTemp(now){ const d = new Date(now), lat = HOME ? HOME.lat : 24, al = Math.abs(lat), doy = (d - new Date(d.getFullYear(), 0, 1)) / 864e5;
@@ -6862,13 +7093,13 @@ function tripRisk(d, k){ const S = SITES[k], sp = SPECIES[d.sp], L = baseLen(d),
   if (sp.hunt) r *= .6;
   if (d.full >= 70 && hap >= .7) r *= .7; else if (d.full < 35) r *= 1.4;
   if (d.zz === 'boat') r *= .7;
-  return clamp(r, .005, .4); }
+  return clamp(r, .005, .4) * (todayEv() === 'survey' ? .75 : 1); }
 function startTrip(d, k){
   const S = SITES[k]; if (!S || state.trips.length >= MAXTRIPS || !state.fish.includes(d) || tripBlock(d)) return;
   const mins = tripMins(k), hap = happiness(d), now = Date.now();
   const out = {dead:Math.random() < tripRisk(d, k) ? 1 : 0, coins:0, deco:'', friend:'', sick:0, tale:(Math.random() * S.tales.length) | 0};
   if (!out.dead) {
-    out.coins = Math.round(tripBase(k) * rand(.7, 1.4) * (.8 + hap * .4) * valueK(d) * (todayEv() === 'harvest' ? 1.2 : 1));
+    out.coins = Math.round(tripBase(k) * rand(.7, 1.4) * (.8 + hap * .4) * valueK(d) * (todayEv() === 'harvest' ? 1.2 : todayEv() === 'survey' ? 1.3 : 1));
     if (Math.random() < S.dc) out.deco = pickArr(S.decos);
     if (Math.random() < S.fc * (.7 + hap * .6)) { const f = wpick(S.friends); out.friend = f === 'MYSTERY' ? pickArr(MYSTERY) : f; }
     if (Math.random() < S.sick * (hap < .5 ? 1.5 : 1)) out.sick = 1;
@@ -6986,7 +7217,7 @@ function renderExpo(){
   cnv.addEventListener('click', e => { const b = cnv.getBoundingClientRect(), x = e.clientX - b.left, y = e.clientY - b.top; let best = null, bd = 26 * 26;
     for (const q of rt.mapPins || []) { const dd = (q.x - x) ** 2 + (q.y - y) ** 2; if (dd < bd) { bd = dd; best = q.k; } } if (best && best !== expoSel) { expoSel = best; renderExpo(); } });
   const rrow = mk('div', 'regrow'), rname = mk('b', '', '📍 ' + HOME.name); rrow.appendChild(rname);
-  if (!regionEdit) { const chg = mk('button', 'linkbtn', '更換地區'); chg.addEventListener('click', () => { if (state.trips.length) { toast('還有魚在探險，等牠們回來再換地區'); return; } regionEdit = true; regionMsg = ''; regionDraft = ''; renderExpo(); sheetBody.scrollTop = 0; }); rrow.appendChild(chg); }
+  if (!regionEdit) { const chg = mk('button', 'linkbtn', '更換地區'); chg.addEventListener('click', () => { if (anyTankTrips()) { toast('還有魚缸的魚在探險，等牠們回來再換地區'); return; } regionEdit = true; regionMsg = ''; regionDraft = ''; renderExpo(); sheetBody.scrollTop = 0; }); rrow.appendChild(chg); }
   sheetBody.append(rrow, cnv, mk('p', 'mapnote', (state.region.builtin ? '示範地圖：依台中市東區附近的真實水域繪製' : '由 Claude 依「' + HOME.name + '」附近的真實水域整理，位置是示意') + '・越遠的地方縮得越小・點地圖上的圓點換目的地'));
   if (state.trips.length) { sheetBody.appendChild(mk('h4', 'sec', '探險中 ' + state.trips.length + ' / ' + MAXTRIPS));
     for (const tr of state.trips) { const S = SITES[tr.site], row = mk('div', 'srow'), mid = mk('div'), sm = mk('small'), bar = mk('div', 'tbar'), fill = document.createElement('i'), btn = mk('button', 'buy', '召回');
@@ -7248,6 +7479,7 @@ function updateHud(dt){
   if (Math.abs(state.coins - rt.showCoins) < .5) rt.showCoins = state.coins;
   const shown = Math.round(rt.showCoins).toLocaleString('zh-TW'); if (el.coinNum.textContent !== shown) el.coinNum.textContent = shown;
   rt.hudT -= dt; if (rt.hudT > 0) return; rt.hudT = .4;
+  const roomLabel = tankRoom().name + '・管理'; if ($('#tankSwitch').textContent !== roomLabel) $('#tankSwitch').textContent = roomLabel;
   const fish = state.fish.filter(f => !noFood(f)), n = fish.length, avg = n ? fish.reduce((s, f) => s + f.full, 0) / n : 100;
   el.gFull.style.width = avg.toFixed(0) + '%';
   el.gFull.style.backgroundColor = avg > 50 ? '#7fd6a8' : avg > 25 ? '#f5c451' : '#ff8b74';
@@ -7348,7 +7580,13 @@ function renderToday(){
     rc.appendChild(bars); const low = T.parts.reduce((a, p) => p[1] / p[2] < a[1] / a[2] ? p : a); rc.appendChild(mk('p', 'sub', '想提高人氣：' + low[3] + '。'));
     const tb = mk('button', 'btn', got ? '明天再來收' : '收下小費'); tb.disabled = got; tb.addEventListener('click', claimTips); rc.appendChild(tb); sheetBody.appendChild(rc); }
   const ec = mk('div', 'evcard'); ec.append(mk('h3', '', '今日事件：' + (ev ? DAY_EVENTS[ev].name : '風平浪靜')), mk('p', '', ev ? DAY_EVENTS[ev].desc : '今天沒有特別的事。每天午夜會重新抽一次事件。'));
+  const eventsInfo = mk('details'), eventsTitle = mk('summary', '', '查看 ' + Object.keys(DAY_EVENTS).length + ' 種日常事件');
+  eventsInfo.appendChild(eventsTitle); eventsInfo.appendChild(mk('p', 'sub', '每天午夜重新抽選，當日效果會顯示在上方。'));
+  for (const [k, E] of Object.entries(DAY_EVENTS)) eventsInfo.appendChild(mk('p', 'sub', (k === ev ? '今日・' : '') + E.name + '：' + E.desc));
+  ec.appendChild(eventsInfo);
   sheetBody.appendChild(ec);
+  { const nc = mk('div', 'evcard'); nc.append(mk('h3', '', '認識水族店的新鄰居'), mk('p', '', '小澄邀你拍攝魚群，何老師帶來生態課，阿沐陪你準備溪流探險。三段新劇情各有三章，完成後能獲得生物與私藏商品。'));
+    const nb = mk('button', 'btn', '查看新鄰居的劇情與來訪時間'); nb.addEventListener('click', () => { listTab = 'story'; openSheet('list'); }); nc.appendChild(nb); sheetBody.appendChild(nc); }
   { const z = season(), Z = SEASONS[z], sc = mk('div', 'evcard season ' + z);
     sc.append(mk('h3', '', '現在是' + Z.full + '・' + Z.title), mk('p', '', Z.desc), mk('p', 'sub', '季節限定：' + Z.sp.map(k => SPECIES[k].name).join('、') + '（水族店「今日」分頁）、' + DECOS[Z.deco].name + '（造景）。再 ' + seasonLeft() + ' 天換季。'));
     sheetBody.appendChild(sc); }
@@ -7625,7 +7863,25 @@ function upgrade(k){ const U2 = UPG[k], lv = state.up[k] | 0; if (lv >= upMax(k)
   state.coins -= price; state.up[k] = lv + 1; applyUpgrades(state.up); bumpCoins(); markDirty(); toast(U2.name + '升級成「' + U2.lv[lv + 1] + '」'); renderShop(); }
 function buyTheme(k){ const T = THEMES[k]; if (!state.themes.includes(k)) { if (T.needAlien && !ALIENS.some(a => state.dex[a])) return; if (state.coins < T.price) return; state.coins -= T.price; state.themes.push(k); bumpCoins(); toast('買了「' + T.name + '」主題'); }
   state.theme = k; buildSand(); buildFar(); markDirty(); renderShop(); }
+function openTankShop(){ shopTab = 'tanks'; openSheet('shop'); }
+function renderTankShop(){
+  const price = tankPrice(), full = state.tankRooms.length >= MAX_TANKS, card = mk('div', 'evcard');
+  card.append(mk('h3', '', '開設獨立魚缸'), mk('p', '', '每個新缸都是空的標準缸，可養 20 隻魚、15 隻小生物，擺放 14 件造景。設備需要各缸分別升級。'), mk('p', 'sub', '第 2～5 缸售價：50,000／100,000／200,000／400,000 金幣。開缸商品不參加折扣，最多共 5 缸。'));
+  const buy = mk('button', 'btn', full ? '已達 5 缸上限' : '開新缸・' + price.toLocaleString('zh-TW') + ' 金幣'); buy.disabled = full || state.coins < price; buy.addEventListener('click', buyTank); card.appendChild(buy);
+  if (!full && state.coins < price) card.appendChild(mk('p', 'sub', '還差 ' + (price - state.coins).toLocaleString('zh-TW') + ' 金幣，再努力存一點！'));
+  sheetBody.appendChild(card);
+  sheetBody.appendChild(mk('p', 'foot', '金幣、道具、圖鑑與任務進度共用。各缸的生物、魚卵、水質、佈置、設備與探險分開保存；離開的缸會在切回時結算離線養殖。從生物資料頁可搬到其他缸。'));
+  for (const room of state.tankRooms) {
+    const data = tankData(room), active = room.id === state.activeTank, row = mk('div', 'evcard' + (active ? ' tankactive' : ''));
+    row.append(mk('h3', '', room.name + (active ? '・照顧中' : '')), mk('p', '', '魚 ' + data.fish.filter(f => !isInv(f)).length + ' / ' + roomCapacity(data, 'fish') + '・小生物 ' + data.fish.filter(isInv).length + ' / ' + roomCapacity(data, 'inv') + '・造景 ' + data.deco.length + ' / ' + roomCapacity(data, 'deco')), mk('p', 'sub', '缸型：' + UPG.tank.lv[data.up.tank | 0] + '・探險中 ' + data.trips.length + ' 隻'));
+    const edit = mk('div', 'tankname'), input = document.createElement('input'); input.value = room.name; input.maxLength = 16; input.setAttribute('aria-label', '魚缸名稱：' + room.name);
+    const save = mk('button', 'chipbtn', '儲存名稱'); save.addEventListener('click', () => renameTank(room.id, input.value)); input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); renameTank(room.id, input.value); } }); edit.append(input, save); row.appendChild(edit);
+    const go = mk('button', 'btn' + (active ? ' ghost' : ''), active ? '目前所在魚缸' : '切換到「' + room.name + '」'); go.disabled = active; go.addEventListener('click', () => switchTank(room.id)); row.appendChild(go); sheetBody.appendChild(row);
+  }
+}
 function renderGear(){
+  const tanks = mk('div', 'evcard'); tanks.append(mk('h3', '', '想養更多魚？開設獨立魚缸'), mk('p', '', '目前 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸。' + (state.tankRooms.length >= MAX_TANKS ? '已達開缸上限。' : '下一缸需要 ' + tankPrice().toLocaleString('zh-TW') + ' 金幣。') + '魚、生物與設備各自管理。'));
+  const manage = mk('button', 'chipbtn', '管理魚缸與開新缸'); manage.addEventListener('click', openTankShop); tanks.appendChild(manage); sheetBody.appendChild(tanks);
   sheetBody.appendChild(mk('h4', 'sec', '飼料'));
   for (const k of ['worm20', 'brine20', 'wafer20']) sheetBody.appendChild(itemRow(k, ITEMS[k].price, '庫存 ' + (state.items[ITEMS[k].food] | 0) + ' 份', () => buyFood(k), false));
   sheetBody.appendChild(mk('h4', 'sec', '設備升級'));
@@ -7720,14 +7976,16 @@ function renderAfterShop(v){ const list = npcAfter(v.npc), N = NPCS[v.npc]; if (
 function renderShop(){
   $('#sheetTitle').textContent = '水族店';
   const visitor = currentVisitor(); if (shopTab === 'visit' && !visitor) shopTab = 'today';
-  setTabs([['today','今日']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易所 ●' : '交易所']]), shopTab);
+  setTabs([['today','今日'],['new','新夥伴'],['tanks','魚缸']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易所 ●' : '交易所']]), shopTab);
   if (shopTab === 'today' && state.shopDay !== dayKey()) { state.shopDay = dayKey(); markDirty(); }
   if (shopTab === 'visit') { state.metNpc = true; if (NPCS[visitor.npc].alien) state.metAlien = true; if (state.seenVisit !== visitor.key) { state.seenVisit = visitor.key; markDirty(); } }
   const keep = sheetBody.scrollTop; sheetBody.innerHTML = '';
   const wallet = mk('div', 'wallet');
-  const extra = shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備和主題買了就一直保留' :  shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
-  wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra);
+  const extra = shopTab === 'tanks' ? '已開設 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸' : shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' || shopTab === 'new' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備只升級目前魚缸，主題解鎖全缸共用' : shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
+  wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra, '・目前：' + tankRoom().name);
   sheetBody.appendChild(wallet);
+  if (shopTab === 'tanks') { renderTankShop(); sheetBody.scrollTop = keep; return; }
+  if (shopTab === 'new') sheetBody.appendChild(mk('p', 'restock', '新夥伴到店了！這裡固定供應新加入的魚與小生物，也會參加每日輪替特價。圖鑑搜尋「新夥伴」可以一次找到牠們。'));
   if (shopTab === 'today') { rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
     rs.append('今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
@@ -7747,7 +8005,7 @@ function renderShop(){
     const p = mk('p', 'foot'); p.textContent = '神秘魚種只能從禮包抽到：' + MYSTERY.map(k => SPECIES[k].name).join('、') + '。禮包裡的魚不受每日進貨限制。不管抽哪一種禮包，連續 ' + PITY + ' 次沒抽到神秘魚種，下一次一定會中。繁殖秘方會在下一窩寶寶自動使用。'; sheetBody.appendChild(p);
     sheetBody.scrollTop = keep; return;
   }
-  const keys = shopTab === 'today' ? seasonSp().concat(dailyStock().items) : shopTab === 'fish' ? SHOP_FISH.filter(k => CORE.includes(k)) : shopTab === 'inv' ? INVS.filter(k => CORE.includes(k)) : Object.keys(DECOS).filter(k => !DECOS[k].award && !DECOS[k].wild && !DECOS[k].npc && !DECOS[k].plant && (!DECOS[k].fest || (festival() || {}).k === DECOS[k].fest) && (!DECOS[k].season || DECOS[k].season === season()));
+  const keys = shopTab === 'new' ? Object.keys(SPECIES).filter(k => SPECIES[k].expansion) : shopTab === 'today' ? seasonSp().concat(dailyStock().items) : shopTab === 'fish' ? SHOP_FISH.filter(k => CORE.includes(k)) : shopTab === 'inv' ? INVS.filter(k => CORE.includes(k)) : Object.keys(DECOS).filter(k => !DECOS[k].award && !DECOS[k].wild && !DECOS[k].npc && !DECOS[k].plant && (!DECOS[k].fest || (festival() || {}).k === DECOS[k].fest) && (!DECOS[k].season || DECOS[k].season === season()));
   for (const k of keys) {
     const it = shopTab === 'deco' ? DECOS[k] : SPECIES[k];
     const row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96;
@@ -7981,6 +8239,7 @@ function renderFishCard(){
   const commit = () => { const v = inp.value.trim().slice(0, 8); if (v && v !== d.name) { d.name = v; markDirty(); toast('改名為「' + v + '」'); } else inp.value = d.name; };
   inp.addEventListener('change', commit); inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   pc.width = Math.round(pc.clientWidth * DPR) || 600; pc.height = Math.round(150 * DPR);
+  renderTankTransfer(d);
   updateFishCard();
 }
 function renderPartners(d, bl){
@@ -8083,20 +8342,38 @@ function renderList(){
 }
 /* ---------- Dex detail: unlocked colours and genes; deep-sea creatures and giants ---------- */
 let dexSel = null, dexScroll = 0;
+const dexFilter = {query:'', kind:'all', discovery:'all'};
+const dexNormalize = s => String(s || '').normalize('NFKC').toLocaleLowerCase('zh-TW').trim();
+function dexMatches(type, k, label){
+  const S = type === 'sp' ? SPECIES[k] : type === 'deep' ? DSP[k] : GIANTS[k], D = deepS();
+  const found = type === 'sp' ? !!state.dex[k] : type === 'deep' ? !!D.seen[k] : !!(D.gown || {})[k];
+  const kind = type === 'sp' ? S.kind : type;
+  if (dexFilter.kind !== 'all' && dexFilter.kind !== kind) return false;
+  if (dexFilter.discovery === 'found' && !found || dexFilter.discovery === 'missing' && found) return false;
+  const tokens = dexNormalize(dexFilter.query).split(/\s+/).filter(Boolean); if (!tokens.length) return true;
+  let extra = '';
+  if (type === 'sp') {
+    const N = NPCS[S.npc] || (S.story && STORY[S.story] ? NPCS[STORY[S.story].npc] : null);
+    extra = [S.kind === 'fish' ? '魚 魚種' : '小生物', (S.tags || []).join(' '), (S.traits || []).join(' '), S.morphs.join(' '), genesFor(k).map(geneNameAll).join(' '), N ? N.name + ' ' + N.role : '', S.expansion ? '新夥伴 新物種 新增' : '', shopHint(k), S.season ? SEASONS[S.season].full : ''].join(' ');
+  } else extra = [DZONES[S.zone].name, DZONES[S.zone].depth, S.trait || S.act, S.era || '', type === 'deep' ? '深海 研究站 潛水探測' : '深海 巨獸 線索'].join(' ');
+  const text = dexNormalize([k, S.name, S.desc, label, extra].join(' '));
+  return tokens.every(token => text.includes(token));
+}
 function dexOpen(sel){ dexScroll = sheetBody.scrollTop; dexSel = sel; renderList(); sheetBody.scrollTop = 0; }
 function dexBack(){ dexSel = null; renderList(); sheetBody.scrollTop = dexScroll; }
 function dexTile(cv, label, sub, locked){ const w = mk('div', 'dcell dtile'); if (locked) w.classList.add('locked'); w.append(cv, mk('b', '', label)); if (sub) w.appendChild(mk('small', '', sub)); return w; }
-function dexDeepSections(){ const D = deepS(), seenN = Object.keys(DSP).filter(k => D.seen[k]).length, ownN = Object.keys(D.gown || {}).length;
-  sheetBody.appendChild(mk('div', 'dexgrp', '深海生物（深海研究站限定）' + seenN + '/' + Object.keys(DSP).length)); let grid = mk('div', 'dex');
-  for (const k of Object.keys(DSP)) { const S = DSP[k], seen = !!D.seen[k], cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; deepThumb(cv, k, seen);
+function dexDeepSections(host){ const D = deepS(), seenN = Object.keys(DSP).filter(k => D.seen[k]).length, ownN = Object.keys(D.gown || {}).length;
+  const deepKeys = Object.keys(DSP).filter(k => dexMatches('deep', k, '深海生物')), giantKeys = Object.keys(GIANTS).filter(k => dexMatches('giant', k, '深海巨獸'));
+  if (deepKeys.length) host.appendChild(mk('div', 'dexgrp', '深海生物（深海研究站限定）' + seenN + '/' + Object.keys(DSP).length)); let grid = mk('div', 'dex');
+  for (const k of deepKeys) { const S = DSP[k], seen = !!D.seen[k], cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; deepThumb(cv, k, seen);
     cell.append(cv, mk('b', '', seen ? S.name : '？？？'), mk('small', '', DZONES[S.zone].name + '・' + DZONES[S.zone].depth));
     cell.addEventListener('click', () => seen ? dexOpen({t:'deep', k}) : toast(D.built ? '派潛水艇去' + DZONES[S.zone].name + '探測，有機會撈到牠' : '先點魚缸右上角的潛水艇按鈕，建造深海研究站')); grid.appendChild(cell); }
-  sheetBody.appendChild(grid);
-  sheetBody.appendChild(mk('div', 'dexgrp', '深海巨獸（巨獸區限定）' + ownN + '/' + Object.keys(GIANTS).length)); grid = mk('div', 'dex');
-  for (const k of Object.keys(GIANTS)) { const G = GIANTS[k], own = !!(D.gown || {})[k], n = (D.gclue || {})[k] | 0, cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; giantThumb(cv, k, own);
+  if (deepKeys.length) host.appendChild(grid);
+  if (giantKeys.length) host.appendChild(mk('div', 'dexgrp', '深海巨獸（巨獸區限定）' + ownN + '/' + Object.keys(GIANTS).length)); grid = mk('div', 'dex');
+  for (const k of giantKeys) { const G = GIANTS[k], own = !!(D.gown || {})[k], n = (D.gclue || {})[k] | 0, cell = mk('button', 'dcell'), cv = document.createElement('canvas'); cv.width = 200; cv.height = 116; giantThumb(cv, k, own);
     cell.append(cv, mk('b', '', own || n ? G.name : '？？？'), mk('small', '', own ? G.era : G.need && ownN < G.need ? '先捕獲 ' + G.need + ' 隻巨獸' : '線索 ' + n + '/3'));
     cell.addEventListener('click', () => own || n ? dexOpen({t:'giant', k}) : toast(D.built ? '深海探測時有機會撿到牠的線索' : '先建造深海研究站，才能追蹤深海巨獸')); grid.appendChild(cell); }
-  sheetBody.appendChild(grid); }
+  if (giantKeys.length) host.appendChild(grid); return deepKeys.length + giantKeys.length; }
 function renderDexDetail(sel){
   const back = mk('button', 'chipbtn dexback', '← 回圖鑑'); back.addEventListener('click', dexBack); sheetBody.appendChild(back);
   const box = mk('div', 'dexd'); sheetBody.appendChild(box); const hero = document.createElement('canvas'); hero.className = 'dexhero'; hero.width = 640; hero.height = 340;
@@ -8124,10 +8401,38 @@ function renderDex(){
   if (dexSel) return renderDexDetail(dexSel);
   const all = Object.keys(SPECIES).filter(k => !SPECIES[k].hidden), found = all.filter(k => state.dex[k]).length, rareN = all.reduce((s, k) => s + (state.dex[k] ? state.dex[k].r.length : 0), 0);
   const head = mk('div', 'dexhead'); { const D = deepS(); head.append('已發現 ', mk('b', '', found + ' / ' + all.length), ' 種・稀有花色 ', mk('b', '', String(rareN)), ' 種・深海 ', mk('b', '', Object.keys(D.seen || {}).length + ' / ' + Object.keys(DSP).length), '・巨獸 ', mk('b', '', Object.keys(D.gown || {}).length + ' / ' + Object.keys(GIANTS).length), '。點格子看已解鎖的花色和基因。'); } sheetBody.appendChild(head);
+  const controls = mk('div', 'dexsearch'), label = mk('label', '', '搜尋圖鑑'), input = document.createElement('input');
+  label.htmlFor = 'dexSearch'; input.id = 'dexSearch'; input.type = 'search'; input.placeholder = '名稱、特色、花色或取得方式'; input.autocomplete = 'off'; input.maxLength = 120; input.value = dexFilter.query; input.setAttribute('enterkeyhint', 'search');
+  const filters = mk('div', 'dexfilters');
+  const select = (id, title, key, options) => { const l = mk('label', '', title), s = document.createElement('select'); l.htmlFor = id; s.id = id;
+    for (const [value, name] of options) { const o = mk('option', '', name); o.value = value; s.appendChild(o); } s.value = dexFilter[key];
+    s.addEventListener('change', () => { dexFilter[key] = s.value; refresh(); }); l.appendChild(s); filters.appendChild(l); return s; };
+  const kind = select('dexKind', '生物分類', 'kind', [['all','全部生物'],['fish','魚種'],['inv','小生物'],['deep','深海生物'],['giant','深海巨獸']]);
+  const discovery = select('dexDiscovery', '收集狀態', 'discovery', [['all','全部狀態'],['found','已發現'],['missing','未發現']]);
+  const clear = mk('button', 'chipbtn', '重設搜尋'); clear.type = 'button'; filters.appendChild(clear);
+  const status = mk('p', 'dexstatus'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite'); status.setAttribute('aria-atomic', 'true');
+  const host = mk('div'); host.id = 'dexResults'; input.setAttribute('aria-controls', host.id);
+  const refresh = () => { const n = renderDexResults(host), total = all.length + Object.keys(DSP).length + Object.keys(GIANTS).length;
+    status.textContent = '顯示 ' + n + ' / ' + total + ' 種' + (dexFilter.query.trim() ? '・關鍵字「' + dexFilter.query.trim() + '」' : '') + '。未發現的生物以剪影呈現。';
+    clear.disabled = !dexFilter.query && dexFilter.kind === 'all' && dexFilter.discovery === 'all'; };
+  let composing = false;
+  input.addEventListener('compositionstart', () => { composing = true; });
+  input.addEventListener('compositionend', () => { composing = false; dexFilter.query = input.value; refresh(); });
+  input.addEventListener('input', () => { dexFilter.query = input.value; if (!composing) refresh(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); dexFilter.query = input.value; refresh(); } });
+  clear.addEventListener('click', () => { dexFilter.query = ''; dexFilter.kind = dexFilter.discovery = 'all'; input.value = ''; kind.value = discovery.value = 'all'; refresh(); input.focus(); });
+  controls.append(label, input, filters, status); sheetBody.append(controls, host); refresh();
+  const p = mk('p', 'foot'); p.textContent = '可搜尋名稱、英文代號、特色、花色、基因和取得方式；以空格分開關鍵字可縮小範圍。點已發現的生物可查看花色與基因，回圖鑑時會保留搜尋條件。'; sheetBody.appendChild(p);
+}
+function renderDexResults(host){
+  host.innerHTML = ''; let count = 0; const renderedKeys = new Set();
   const groups = [['魚', SHOP_FISH], ['小生物', INVS], ['季節限定', SEASONAL], ['神秘魚種', MYSTERY], ['特殊生物（來客限定）', SPECIALS], ['野外生物（探險限定）', WILD], ['外星生物（外星訪客限定）', ALIENS], ['劇情限定', STORYS], ['傳說生物', MYTHS], ['不速之客', PESTS]];
   for (const [label, keys] of groups) {
-    sheetBody.appendChild(mk('div', 'dexgrp', label)); const grid = mk('div', 'dex');
-    for (const k of keys) {
+    const matched = keys.filter(k => !SPECIES[k].hidden && !renderedKeys.has(k) && dexMatches('sp', k, label));
+    if (!matched.length) continue; count += matched.length;
+    host.appendChild(mk('div', 'dexgrp', label + '・' + matched.length + ' 種')); const grid = mk('div', 'dex');
+    for (const k of matched) {
+      renderedKeys.add(k);
       const S = SPECIES[k], e = state.dex[k], cell = mk('button', 'dcell'), cnv = document.createElement('canvas'); cnv.width = 200; cnv.height = 116;
       drawFishThumb(cnv, k, palette(k, 11, e ? e.m[0] : 0), 0, {puffK:0}, .78); if (!e) silhouette(cnv);
       const dots = mk('div', 'dots'); for (const rk of Object.keys(RARES)) { const i = document.createElement('i'); if (e && e.r.includes(rk)) i.style.background = RARES[rk].col; i.title = RARES[rk].name; dots.appendChild(i); }
@@ -8135,10 +8440,11 @@ function renderDex(){
       cell.addEventListener('click', () => e ? dexOpen({t:'sp', k}) : toast(e ? (genesFor(k).length ? S.name + ' 基因：' + genesFor(k).map(G => ((e.t || []).includes(G.k) ? '✓' : '？') + geneNameAll(G)).join(' ') : S.name + '：' + S.desc) : S.season ? (S.raised ? '冬天買鰻線回來養大，牠就會變成日本鰻' : '只有' + SEASONS[S.season].full + '會在水族店「今日」分頁販售') : S.story ? '完成「' + NPCS[STORY[S.story].npc].name + '」的劇情〈' + STORY[S.story].title + '〉才會得到' : S.myth ? '好感度滿分的成年錦鯉，每天可以挑戰一次躍龍門，成功就會化身成龍' : S.moon ? '滿月那幾天的晚上關燈，有機會漂進來，要趁牠漂走前點牠' : S.pest ? '在特定情況下會自己跑進魚缸' : S.wild ? '派魚去' + wildSites(k) + '探險時可能遇到' : S.mystery ? (S.hybrid ? '傳說兩種慈鯛配對會生出牠…' : '只有抽禮包才遇得到') : S.special ? '偶爾來店裡的' + NPCS[S.npc].role + ' ' + NPCS[S.npc].name + ' 才有賣' : shopHint(k) === '輪流進貨' ? '還沒進貨，留意水族店的「今日」分頁' : '水族店現在就買得到'));
       grid.appendChild(cell);
     }
-    sheetBody.appendChild(grid);
+    host.appendChild(grid);
   }
-  dexDeepSections();
-  const p = mk('p', 'foot'); p.textContent = '每種魚都有自己的基因，例如孔雀魚的緞帶、鬥魚的半月、金魚的熊貓，所有魚都可能出現白子。基因照顯性、隱性的規則遺傳給寶寶，每個基因每窩約有 2.5% 機率突變（繁殖秘方 3 倍）。另外還有稀有色：墨黑、白金（稀有），彩虹、星河（傳說）。點格子可以看這種魚的基因收集進度。'; sheetBody.appendChild(p);
+  count += dexDeepSections(host);
+  if (!count) host.appendChild(mk('p', 'dexempty', '找不到符合條件的生物。\n試試更短的名稱、特色關鍵字，或按「重設搜尋」查看全部。'));
+  return count;
 }
 
 /* ---------- Modes ---------- */
@@ -8215,6 +8521,7 @@ document.querySelectorAll('.dock-btn').forEach(b => b.addEventListener('click', 
 }));
 $('#modeDone').addEventListener('click', exitMode);
 $('#qpill').addEventListener('click', () => openSheet('today'));
+$('#tankSwitch').addEventListener('click', openTankShop);
 $('#injpill').addEventListener('click', () => { listTab = 'kitchen'; openSheet('list'); });
 $('#ghPay').addEventListener('click', payHeal);
 $('#ghLook').addEventListener('click', () => $('#ghost').classList.add('mini'));
@@ -8685,6 +8992,7 @@ function renderCodeTab(box){
 
 /* ---------- Boot ---------- */
 function initRuntime(){
+  for (const key of Object.keys(rt)) delete rt[key]; Object.assign(rt, freshRuntime());
   rt.fish = state.fish.map(d => makeRunner(d, false));
   rt.coins = state.sand.map(s => ({x:s.x * W, y:0, nx:s.x, v:s.v, rest:true, age:rand(6), wob:rand(6), pulse:0}));
   PST.clear(); PFX.length = 0; rt.food = []; rt.bubbles = []; rt.fx = []; rt.flyers = []; rt.emotes = []; rt.ripples = []; rt.geo.clear(); rt.emit.clear(); rt.schools = {}; rt.sel = null; rt.drag = null; rt.court = null; rt.feeders = []; rt.shocks = []; rt.jets = []; rt.stars = []; rt.flies = []; rt.chest.clear(); rt.lowO2 = false; refreshPlants(); rt.plank = []; rt.plankT.clear(); rt.trap.clear(); rt.snap.clear();
