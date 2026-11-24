@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.12">
+<meta name="application-version" content="2026.11.25.13">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -3697,16 +3697,19 @@ function drawSharkModel(c,L,t,open,P,giant=false){
  c.restore();
 }
 function drawMeg(c,L,t,open){drawSharkModel(c,L,t,open,{b1:'#35434e',b2:'#81919a',sharkStyle:'mega'},true);}
-function drawMegFront(c, cx, cy, s, open, w){ const rx = w * .5 * s, ry = w * .29 * s;
-  c.fillStyle = lg(c,0,cy-ry,0,cy+ry,[[0,'#34434e'],[1,'#8799a4']]); for (const sx of [-1, 1]) { c.beginPath(); c.moveTo(cx + sx * rx * .6, cy + ry * .3); c.lineTo(cx + sx * rx * 1.7, cy + ry * 1.25); c.lineTo(cx + sx * rx * .8, cy + ry * .75); c.fill(); }
-  c.beginPath(); c.moveTo(cx - rx * .04, cy - ry * .8); c.lineTo(cx, cy - ry * 1.9); c.lineTo(cx + rx * .04, cy - ry * .8); c.fill();
-  c.fillStyle = lg(c, 0, cy - ry, 0, cy + ry, [[0,'#4a5660'],[.45,'#6c7882'],[.55,'#d4d8d4'],[1,'#c0c4c0']]); c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, TAU); c.fill();
-  c.fillStyle = '#05070a'; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(cx + sx * rx * .8, cy - ry * .1, rx * .045, ry * .08, 0, 0, TAU); c.fill(); c.fillStyle = 'rgba(255,255,255,.6)'; dot(c, cx + sx * rx * .79, cy - ry * .14, rx * .012); c.fillStyle = '#05070a'; }
-  c.fillStyle = 'rgba(30,36,40,.6)'; for (const sx of [-1, 1]) { c.beginPath(); c.ellipse(cx + sx * rx * .22, cy - ry * .32, rx * .05, ry * .025, sx * .4, 0, TAU); c.fill(); }
-  const mx = rx * .62, my = ry * (.1 + .42 * open), mcy = cy + ry * .38; c.fillStyle = '#8a3040'; c.beginPath(); c.ellipse(cx, mcy, mx * 1.06, my + ry * .05, 0, 0, TAU); c.fill();
-  c.fillStyle = rg(c, cx, mcy, 0, cx, mcy, mx, [[0,'#050002'],[.7,'#2a0810'],[1,'#5a1824']]); c.beginPath(); c.ellipse(cx, mcy, mx, my, 0, 0, TAU); c.fill();
-  c.fillStyle = '#f2ece0'; for (const row of [0, 1]) { const k = row ? .82 : 1, n = 16; for (let i = 0; i < n; i++) { const a0 = Math.PI + (i + .5) / n * Math.PI, a1 = (i + .5) / n * Math.PI, tl = ry * (.1 - row * .03) * (.8 + .2 * Math.sin(i));
-      for (const [a, dir] of [[a0, 1], [a1, -1]]) { const x = cx + Math.cos(a) * mx * k, y = mcy + Math.sin(a) * my * k, bw = mx * .09 * k; c.beginPath(); c.moveTo(x - bw, y); c.lineTo(x, y + dir * tl); c.lineTo(x + bw, y); c.fill(); } } } }
+function drawMegFront(c,cx,cy,s,open,w){
+ c.save();c.translate(cx,cy);c.scale(w*s,w*s);const H=.23+open*.09;
+ const path=(pts)=>{c.beginPath();c.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)c.lineTo(...pts[i]);c.closePath();};
+ c.fillStyle=lg(c,0,-.5,0,.4,[[0,'#172b38'],[1,'#647c87']]);path([[-.075,-.19],[.025,-.52],[.14,-.16]]);c.fill();
+ for(const d of [-1,1]){c.save();c.scale(d,1);c.beginPath();c.moveTo(.29,.04);c.bezierCurveTo(.52,.05,.75,.27,.91,.39);c.quadraticCurveTo(.57,.34,.28,.22);c.closePath();c.fill();c.restore();}
+ c.fillStyle=lg(c,0,-.31,0,H+.1,[[0,'#233644'],[.43,'#637984'],[.57,'#8c9ca0'],[.7,'#c5d0ce'],[1,'#a5b6b7']]);c.beginPath();c.moveTo(-.48,.01);c.bezierCurveTo(-.49,-.19,-.25,-.31,0,-.29);c.bezierCurveTo(.25,-.31,.49,-.19,.48,.01);c.bezierCurveTo(.47,.20,.28,H+.09,0,H+.09);c.bezierCurveTo(-.28,H+.09,-.47,.20,-.48,.01);c.fill();
+ for(const d of [-1,1]){c.save();c.scale(d,1);c.strokeStyle='rgba(15,34,45,.55)';c.lineWidth=.008;for(let i=0;i<5;i++){c.beginPath();c.moveTo(.39+i*.013,-.045+i*.006);c.quadraticCurveTo(.44+i*.008,.04,.40+i*.009,.12);c.stroke();}c.fillStyle='#10191e';c.beginPath();c.ellipse(.372,-.103,.024,.018,-.2,0,TAU);c.fill();c.fillStyle='#a9c4cf';dot(c,.366,-.109,.005);c.fillStyle='#263944';c.beginPath();c.ellipse(.16,-.13,.035,.009,-.25,0,TAU);c.fill();c.restore();}
+ const mx=.34,my=.018+open*.175, y=.092+open*.045;
+ c.fillStyle='#5b383e';c.beginPath();c.ellipse(0,y,mx+.018,my+.018,0,0,TAU);c.fill();
+ c.fillStyle=rg(c,0,y,0,0,y,mx,[[0,'#03070a'],[.75,'#241318'],[1,'#663c40']]);c.beginPath();c.ellipse(0,y,mx,my,0,0,TAU);c.fill();
+ c.save();c.clip();for(const row of [1,0])for(const d of [-1,1])for(let i=0;i<13;i++){const a=(i+.5)/13*Math.PI,x=Math.cos(a)*mx*(row?.82:.97),yy=y+d*Math.sin(a)*my*(row?.72:.97),bw=.018*(row?.72:1),len=Math.min(my*.82,.055)*(.55+.45*Math.sin(a))*(row?.65:1);c.fillStyle=row?'#a8b5b4':'#e7e6d8';c.beginPath();c.moveTo(x-bw,yy);c.lineTo(x-bw*.65,yy-d*len*.43);c.lineTo(x,yy-d*len);c.lineTo(x+bw*.65,yy-d*len*.43);c.lineTo(x+bw,yy);c.closePath();c.fill();}c.restore();
+ c.restore();
+}
 function drawMosa(c, L, t, open){ const H = L * .11, sw = Math.sin(t * 1.4);
   c.fillStyle = '#34423e'; c.save(); c.translate(-L * .46, 0); c.rotate(sw * .1); c.beginPath(); c.moveTo(0, -H * .2); c.quadraticCurveTo(-L * .06, -H * .5, -L * .1, -H * .9); c.quadraticCurveTo(-L * .07, 0, -L * .04, H * .1); c.quadraticCurveTo(-L * .08, H * .9, -L * .13, H * 1.6); c.quadraticCurveTo(-L * .04, H * .8, 0, H * .2); c.fill(); c.restore();
   for (const [x, a] of [[.22, .7], [-.18, .8]]) { c.save(); c.translate(L * x, H * .3); c.rotate(a + Math.sin(t * 1.2 + x * 9) * .25); c.fillStyle = '#3a4a46'; c.beginPath(); c.ellipse(-L * .05, H * .3, L * .07, H * .3, .6, 0, TAU); c.fill(); c.restore(); }
@@ -3747,8 +3750,17 @@ const GSCENE = {
     c.save(); c.globalAlpha = al; c.translate(w * .5, my); c.rotate(rot); drawMosa(c, L, t, op); c.restore(); },
   megalodon(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, cyc = 14, u = (t % cyc) / cyc, dir = Math.floor(t / cyc) % 2 ? -1 : 1, L = w * 2.3;
     if (!A || p > .9) { const al = A ? 1 - (p - .9) * 10 : 1; const x = dir > 0 ? lerp(-L * .7, w + L * .7, u) : lerp(w + L * .7, -L * .7, u); c.save(); if (A) c.globalAlpha = 1 - al; c.translate(x, h * .46 + Math.sin(t * .3) * 22); c.scale(dir, 1); drawMeg(c, L, t, Math.max(0, Math.sin(t * .6)) * .3); c.restore(); }
-    if (A && p <= .9) { const q = Math.min(1, p / .7), s = lerp(.05, 1.75, easeIn(q)); c.save(); c.globalAlpha = Math.min(1, q * 4) * (p > .78 ? 1 - (p - .78) / .12 : 1); drawMegFront(c, w * .5, h * .46, s, Math.min(1, q * 1.4), w); c.restore();
-      if (p >= .7 && !G.hit) { G.hit = 1; G.shake = 1; G.crack = 3; G.cx = w * .5 + rand(-40, 40); G.cy = h * .44; } }
+    if(A&&p<=.94){
+      const q=clamp((p-.23)/.43,0,1), retreat=clamp((p-.69)/.25,0,1);
+      const scale=(.12+.18*clamp(p/.23,0,1)+1.28*q*q)*(1-.75*retreat);
+      const op=p<.35?.06: p<.62?clamp((p-.35)/.27,0,1):p<.69?1-clamp((p-.62)/.07,0,1):.03;
+      const x=w*(.5+.16*(1-q)*Math.sin(p*9)),y=h*(.51+.12*(1-q));
+      c.save();c.globalAlpha=Math.max(0,Math.min(1,p*9)*(1-retreat)); 
+      if(q>.08&&retreat<.1){c.strokeStyle='rgba(158,222,240,'+(.25*q)+')';c.lineWidth=1.5;for(let i=0;i<22;i++){const a=i*2.399+t*.18,r=w*(.15+.55*((i*.137+q)%1));c.beginPath();c.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);c.lineTo(x+Math.cos(a)*(r+q*w*.18),y+Math.sin(a)*(r+q*w*.18));c.stroke();}}
+      drawMegFront(c,x,y,scale,op,w);c.restore();
+      if(p>=.66&&!G.hit){G.hit=1;G.shake=.85;G.crack=2.2;G.cx=w*.5;G.cy=h*.51;for(let i=0;i<24;i++)G.parts.push({x:w*.5,y:h*.51,vx:rand(-170,170),vy:rand(-140,80),t:0,life:rand(.45,1.1),kind:'debris'});}
+      if(p>=.66&&p<.85){const f=(p-.66)/.19;c.save();c.strokeStyle='rgba(190,235,250,'+(.6*(1-f))+')';c.lineWidth=3*(1-f)+1;for(let i=0;i<2;i++){c.beginPath();c.ellipse(w*.5,h*.51,w*(.12+f*.8+i*.09),Math.max(1,w*(.08+f*.46+i*.05)),0,0,TAU);c.stroke();}c.restore();}
+    }
     if (!A) G.hit = 0; },
   scylla(c, w, h, t, G){ const A = G.act, p = A ? A.t / A.dur : 0, k = A ? Math.sin(Math.PI * Math.min(1, p * 1.2)) : 0;
     c.fillStyle = '#0e1612'; c.beginPath(); c.moveTo(w * .72, 0); c.quadraticCurveTo(w * .66, h * .4, w * .76, h); c.lineTo(w, h); c.lineTo(w, 0); c.fill(); c.fillStyle = '#020403'; c.beginPath(); c.ellipse(w * .9, h * .52, w * .09, h * .16, 0, 0, TAU); c.fill();
@@ -3802,7 +3814,7 @@ const GSCENE = {
       c.fillStyle = 'rgba(255,230,150,' + (.12 * k).toFixed(3) + ')'; for (let i = 0; i < 5; i++) { const x = w * (.1 + i * .2); c.beginPath(); c.moveTo(x - 20, 0); c.lineTo(x + 20, 0); c.lineTo(x + 60, h); c.lineTo(x - 30, h); c.fill(); }
       if (Math.random() < .6) G.parts.push({x:rand(0, w), y:h + 10, vx:rand(-10, 10), vy:rand(-160, -60), t:0, life:rand(2, 3.5), kind:'gold'}); } },
 };
-const GDUR = {dunkle:2.4, mosa:3.6, megalodon:3.2, scylla:2.8, kraken:4, charybdis:7, leviathan:3.4, kun:5};
+const GDUR = {dunkle:2.4, mosa:3.6, megalodon:4.5, scylla:2.8, kraken:4, charybdis:7, leviathan:3.4, kun:5};
 function giantBg(c, w, h, t){ c.fillStyle = lg(c, 0, 0, 0, h, [[0,'#020a16'],[1,'#000206']]); c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(30,60,90,.08)'; c.beginPath(); c.moveTo(w * .35, 0); c.lineTo(w * .6, 0); c.lineTo(w * .9, h); c.lineTo(w * .05, h); c.fill(); }
 function giantFrame(c, w, h, dt, t){ const M = deepUI, D = deepS(), k = D.gcur;
   if (!k || !GIANTS[k]) { c.fillStyle = 'rgba(170,220,255,.5)'; c.font = '600 15px ' + FONT; c.textAlign = 'center'; c.fillText('巨獸觀測窗目前沒有巨獸', w / 2, h * .42); c.font = '13px ' + FONT; c.fillText('潛水探測時有機會撿到巨獸的線索', w / 2, h * .42 + 22); c.fillText('集滿 3 個線索就能在「巨獸檔案」追蹤牠', w / 2, h * .42 + 42); return; }
