@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.1">
+<meta name="application-version" content="2026.11.25.2">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1996,11 +1996,39 @@ function preyFor(pd){
 }
 function visitWindow(){ const d = new Date(), slot = Math.floor(d.getHours() / 4); return {key:dayKey() + '#' + slot, end:new Date(d.getFullYear(), d.getMonth(), d.getDate(), (slot + 1) * 4).getTime()}; }
 /* Player-specific visitor picks per four-hour slot, stable on reload. */
-function currentVisitor(){
+function baseVisitor(){
   const w = visitWindow(), R0 = state.visitRot && state.visitRot.key === w.key ? state.visitRot : null;
   if (R0 && R0.n > 0) { const n = pickNext(w.key, R0); return n ? {npc:n, key:w.key + '/' + R0.n, end:w.end} : null; }
   if (state.firstVisit && state.firstVisit.key === w.key) return Object.assign({npc:state.firstVisit.npc}, w);
   const n = pickVisitor(w.key); return n ? Object.assign({npc:n}, w) : null;
+}
+function currentVisitor(){
+ const v=baseVisitor(), w=visitWindow(), q=state.npcConflict;
+ if(v && q && q.key===w.key && q.winner && v.npc===q.primary) return {npc:q.winner,key:q.winner===v.npc?v.key:w.key+'/conflict',end:w.end};
+ return v;
+}
+function conflictNow(){
+ const v=baseVisitor(),w=visitWindow(),q=state.npcConflict;
+ if(!v || (q && q.key===w.key) || (state.firstVisit && state.firstVisit.key===w.key) || NPCS[v.npc].cat) return null;
+ const R=rng(hashStr('conflict-'+personalSeed()+'-'+w.key)),slot=+w.key.split('#')[1];
+ if(R()>=.28)return null;
+ const pool=NPC_KEYS.filter(k=>k!==v.npc&&!NPCS[k].cat&&(!NPCS[k].slots||NPCS[k].slots.includes(slot)));
+ if(!pool.length)return null;
+ return {key:w.key,primary:v.npc,other:pool[Math.floor(R()*pool.length)],topic:Math.floor(R()*4)};
+}
+function resolveConflict(winner){
+ const q=conflictNow();if(!q||![q.primary,q.other].includes(winner))return;
+ const loser=winner===q.primary?q.other:q.primary;
+ state.npcConflict={...q,winner,loser};
+ state.npcPersonalRep=state.npcPersonalRep||{};
+ for(const [k,n] of [[winner,10],[loser,-15]])state.npcPersonalRep[k]=clamp((state.npcPersonalRep[k]||0)+n,-100,100);
+ const a=facOf(winner),b=facOf(loser),ch={};if(a)ch[a]=(ch[a]||0)+5;if(b)ch[b]=(ch[b]||0)-8;addRep(ch);
+ markDirty();saveNow();rt.hudT=0;toast(NPCS[loser].name+'生氣地離開了');renderShop();
+}
+function renderConflict(q){
+ const card=mk('div','evcard');card.append(mk('h3','','⚡ 水族店爭執事件'),mk('p','sub',['兩人對稀有生物的飼養方式意見不同。','兩人對魚隻交易價格產生爭執。','兩人對水族店的經營理念互不相讓。','兩人都認為自己的收藏方式更好。'][q.topic]));
+ for(const k of [q.primary,q.other]){const N=NPCS[k],row=mk('div','npc'),av=document.createElement('canvas');av.width=av.height=144;(N.alien?drawAlienAvatar:drawAvatar)(av.getContext('2d'),N,144);const info=mk('div'),btn=mk('button','chipbtn','支持'+N.name);info.append(mk('h3','',N.name),mk('p','sub','個人聲望 '+((state.npcPersonalRep||{})[k]||0)),btn);btn.addEventListener('click',()=>resolveConflict(k));row.append(av,info);card.append(row);}
+ card.append(mk('p','foot','支持者聲望 +10，另一方 -15 並離開；陣營聲望亦會變動。'));sheetBody.append(card);
 }
 /* Visitors with an unfinished story line are three times as likely to be picked. */
 const visitWt = k => { const q = storyOfNpc(k); return q && !(state.story[q] && state.story[q].done) ? 3 : 1; };
@@ -5773,7 +5801,7 @@ function facGift(f){ const G = FAC_GIFT[f]; state.facGift[f] = 1; let extra = ''
   logEv(FACTIONS[f].name + '的好感達到 50，送來「' + DECOS[G.deco].name + '」'); setTimeout(() => celebrate({kind:'deco', k:G.deco, tier:2, head:FACTIONS[f].name, title:'好感達到 50！', text:G.text + extra}), 600); }
 const hasDeco = k => state.deco.some(dc => dc.k === k);
 function repTier(v){ return v <= -60 ? ['敵視', '#ff6a5a'] : v <= -30 ? ['冷淡', '#ffa07a'] : v < 30 ? ['普通', '#c8d4da'] : v < 70 ? ['友好', '#8ad8a8'] : ['崇敬', '#ffd866']; }
-function npcPriceK(npc){ const f = facOf(npc); if (!f) return 1; const v = repOf(f); return v >= 70 ? .8 : v >= 30 ? .9 : v <= -30 ? 1.3 : 1; }
+function npcPriceK(npc){ const f = facOf(npc); const v = clamp((f?repOf(f):0)+((state.npcPersonalRep||{})[npc]||0),-100,100); return v >= 70 ? .8 : v >= 30 ? .9 : v <= -30 ? 1.3 : 1; }
 const npcPrice = (npc, k) => Math.round(SPECIES[k].price * npcPriceK(npc));
 const npcRefuse = npc => { const f = facOf(npc); return !!f && repOf(f) <= -60; };
 const isTwNative = d => (SPECIES[d.sp].tags || []).some(t => /原生|特有/.test(t));
@@ -7971,6 +7999,8 @@ function buyNpcItem(item){
   state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; bumpCoins(); markDirty(); renderShop();
 }
 function renderVisit(v){
+  const conflict=conflictNow();if(conflict){renderConflict(conflict);return;}
+  sheetBody.appendChild(mk('p','sub','個人聲望：'+((state.npcPersonalRep||{})[v.npc]||0)));
   const N = NPCS[v.npc], card = mk('div', N.alien ? 'npc alien' : 'npc'), av = document.createElement('canvas'); av.width = 144; av.height = 144; (N.alien ? drawAlienAvatar : N.cat ? drawCatAvatar : drawAvatar)(av.getContext('2d'), N, 144);
   const info = mk('div'), h = mk('h3', '', N.name); h.appendChild(mk('span', 'tag sp', N.role));
   const left = mk('p', 'sub'), b = mk('b', '', fmtHMS(v.end - Date.now())); b.id = 'visitLeft'; left.append('還會待 ', b, N.mode === 'buy' ? '・只收購不賣' : N.mode === 'show' ? '・每次限報名一隻' : N.mode === 'temple' ? '・可以擲筊問神明' : N.mode === 'kid' ? '・帶了一隻魚來' : N.mode === 'cat' ? '・肚子好像餓了' : N.mode === 'chef' ? '・收購食用魚和食材' : '・每樣限量');
