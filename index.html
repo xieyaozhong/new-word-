@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.24.2">
+<meta name="application-version" content="2026.11.24.3">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -878,6 +878,7 @@ Object.assign(SPECIES, {
   seedshrimp:{name:'介形蟲', kind:'inv', expansion:true, idraw:'seedshrimp', price:55, len:24, interval:100, value:1, zone:'low', speed:.45, scav:true, tags:['微型生物','豆子殼','新夥伴'], traits:['一對小殼包住身體，像一顆會划水的芝麻','水質乾淨時，長大的個體會繁殖出小夥伴'], morphs:['琥珀','乳白'], desc:'躲在兩片小殼裡的微型甲殼動物，用細小的腳一划一划地前進。'},
   asellus:{name:'水虱', kind:'inv', expansion:true, idraw:'asellus', crawl:true, price:90, len:30, interval:90, value:1, zone:'bottom', speed:.2, rests:true, scav:true, tags:['底層','清底沙','新夥伴'], traits:['用七對小腳在底沙上爬，吃掉沉底的剩飼料','成對長大後會照顧一窩小寶寶'], morphs:['褐甲','銀灰'], desc:'扁平、分節的小甲殼動物，長長的觸鬚總是在探路。'}
 });
+Object.assign(SPECIES, {octopus:{name:'夢幻章魚',kind:'inv',idraw:'octopus',expansion:true,price:1800,len:62,interval:65,value:12,zone:'bottom',speed:.48,rests:true,cond:['cave'],tags:['章魚','八腕','新夥伴','幻想海洋'],traits:['遊戲幻想章魚，可與淡水生物共居；現實章魚多為海水生物','喜歡洞穴，八條腕足會獨立擺動','成年雌雄可自然繁殖，遺傳基因並可能突變'],morphs:["珊瑚紅","海砂褐","深海藍","紫羅蘭","翡翠","琥珀金","墨黑","珍珠白","櫻花粉","冰晶青","夕陽橘","星夜靛"],desc:'柔軟的外套膜與八條靈活腕足，擁有豐富的色彩與遺傳花紋。'}});
 const EXPANSION_SPECIES = Object.keys(SPECIES).filter(k => SPECIES[k].expansion);
 Object.assign(GENE_TXT, {
   celestialdanio:'galaxy:密星:D:galaxy, red:火鰭:R:red', kubotai:'green:翠綠:R:green, swift:疾游:D:swift', espei:'gold:金鑽:R:xanth, long:長鰭:R:longfin',
@@ -894,6 +895,7 @@ for (const [k, s] of Object.entries({neon:'swift:疾光:D:swift', guppy:'opal:�
   piranha:'calm:吃素:R:calm', tigerfish:'calm:溫馴:R:calm', flowerhorn:'lucky:招財頭:D:lucky', axolotl:'copper:紅銅:R:copper', medaka:'flake:金箔:D:flake', elephant:'ghost:幽靈:R:ghost',
   glasscat:'opal:虹彩:D:opal', stingray:'maze:迷宮紋:D:maze', knife:'lines:條紋:D:lines', mudskipper:'cyan:青藍:R:cyan', tilapia:'hardy:強健:D:hardy', opsari:'swift:疾游:D:swift'}))
   if (SPECIES[k]) GENE_TXT[k] = (GENE_TXT[k] ? GENE_TXT[k] + ', ' : '') + s;
+GENE_TXT.octopus = "albino:白子:R:albino, ink:墨晶:R:melano, gold:黃金:R:xanth, blue:深海藍:R:blue, ruby:赤焰:R:red, violet:紫晶:R:violet, jade:翡翠:R:green, copper:赤銅:D:copper, cyan:冰海:R:cyan, pink:櫻花:R:pink, pearl:珍珠白:R:leuc, silver:銀甲:D:metal, ring:藍環紋:D:eyespot, stripe:斑馬紋:D:stripes, galaxy:星河:D:galaxy, mosaic:馬賽克:D:mosaic, snow:雪點:D:snow, opal:虹彩:D:opal, maze:迷宮紋:D:maze, web:薄紗腕:I:veil, longarm:長腕:D:longfin, giant:巨型:D:giant, dwarf:迷你:R:dwarf, goldEye:金瞳:D:goldEye, blueEye:藍瞳:R:blueEye, swift:疾游:D:swift, rich:聚寶:D:rich, hardy:強健:D:hardy, glow:微光:D:glow, ghost:幽靈:R:ghost";
 const DOM_LABEL = {D:'顯性', R:'隱性', I:'不完全顯性'};
 const GENES = {};
 for (const sp of Object.keys(SPECIES)) { const S0 = SPECIES[sp]; if ((S0.kind !== 'fish' && !GENE_TXT[sp]) || S0.hidden || S0.alien || S0.myth || S0.story || S0.nogene || S0.moon) continue;
@@ -1668,6 +1670,7 @@ Object.assign(PAL, {
   seedshrimp:[{b1:'#997235',b2:'#e8ca88',leg:'rgba(240,215,153,.9)'},{b1:'#c7c8ab',b2:'#f5f2d9',leg:'rgba(242,240,210,.9)'}],
   asellus:[{b1:'#655640',b2:'#b4a488',leg:'rgba(147,129,100,.9)',plate:'#4b4235'},{b1:'#637783',b2:'#bdcdd1',leg:'rgba(151,177,189,.9)',plate:'#41515b'}]
 });
+PAL.octopus = [{"b1":"#803a42","b2":"#f6a28b","sucker":"#f5d9c4"},{"b1":"#79583d","b2":"#e5c28e","sucker":"#f5d9c4"},{"b1":"#244a82","b2":"#83c9ed","sucker":"#f5d9c4"},{"b1":"#613c85","b2":"#d8a8ed","sucker":"#f5d9c4"},{"b1":"#276b61","b2":"#9de8b9","sucker":"#f5d9c4"},{"b1":"#a16b23","b2":"#ffe09a","sucker":"#f5d9c4"},{"b1":"#20283e","b2":"#75809d","sucker":"#f5d9c4"},{"b1":"#a5a5b7","b2":"#fff1e5","sucker":"#f5d9c4"},{"b1":"#a64f79","b2":"#ffc3db","sucker":"#f5d9c4"},{"b1":"#327c93","b2":"#baf5f7","sucker":"#f5d9c4"},{"b1":"#ad502d","b2":"#ffbc71","sucker":"#f5d9c4"},{"b1":"#34305f","b2":"#a7a2ff","sucker":"#f5d9c4"}];
 function palette(sp, seed, m){
   const R = rng(seed), list = PAL[sp];
   let patches = null;
@@ -2665,6 +2668,12 @@ for (const [sp, t] of [['hemimyzon','hillstream'], ['shovelnose','shovel'], ['pa
 
 /* New small creatures */
 const IDRAW = {
+  octopus(c,P,L,ph){c.save();c.lineCap='round';c.lineJoin='round';const H=L*.26;
+    for(let i=0;i<8;i++){const a=(i-3.5)*.22, x=L*a*.65, end=L*a*.76*FK, wave=Math.sin(ph*1.4+i*.9)*L*.075; c.beginPath();c.moveTo(x*.42,H*.22);c.bezierCurveTo(x*.8,H*.85,end+wave,H*1.75,end,H*1.9);c.strokeStyle=P.b1;c.lineWidth=L*.075;c.stroke();c.strokeStyle=P.b2;c.lineWidth=L*.035;c.stroke();for(let j=1;j<=4;j++){const t=j/5;dot(c,x*.42*(1-t)+end*t+wave*Math.sin(t*Math.PI)*.55,H*(.22+1.68*t),L*.013);}}
+    c.fillStyle=lg(c,0,-H*1.45,0,H*.6,[[0,P.b2],[1,P.b1]]);c.beginPath();c.ellipse(0,-H*.43,L*.235,H*1.02,0,0,TAU);c.fill();
+    for(let j=0;j<9;j++){c.fillStyle=P.b2;dot(c,Math.sin(j*2.4)*L*.17,-H*.45+Math.cos(j*2.4)*H*.65,L*.012);}
+    for(const k of [-1,1]){c.fillStyle=P.eyeW;dot(c,k*L*.115,-H*.12,L*.046);c.fillStyle=P.iris;dot(c,k*L*.115,-H*.12,L*.029);c.fillStyle='#ffffff';dot(c,k*L*.115-L*.009,-H*.15,L*.009);}c.restore();},
+
   triops(c, P, L, ph){ const H = L * .22;
     c.strokeStyle = P.tail; c.lineWidth = Math.max(.5, L * .012); for (const s of [-1, 1]) { c.beginPath(); c.moveTo(-L * .38, 0); c.quadraticCurveTo(-L * .55, s * L * .04 + Math.sin(ph + s) * L * .02, -L * .72, s * L * .07 + Math.sin(ph * 1.3 + s) * L * .03); c.stroke(); }
     for (let i = 0; i < 7; i++) { c.fillStyle = i % 2 ? P.b1 : P.tail; c.beginPath(); c.ellipse(-L * (.06 + i * .045), H * .05, L * .03, H * (.42 - i * .035), 0, 0, TAU); c.fill(); }
@@ -2757,6 +2766,7 @@ Object.assign(BROOD, {
   seedshrimp:{need:1, lay:[180, 320], hatch:[20, 35], n:[1, 2], max:6, layTxt:'介形蟲在底沙間留下了小小的卵', hatchTxt:'底沙間游出了 {n} 隻小介形蟲'},
   asellus:{need:2, lay:[220, 360], hatch:[30, 50], n:[1, 3], max:6, layTxt:'水虱媽媽把小寶寶藏進腹部的育兒袋', hatchTxt:'育兒袋裡爬出了 {n} 隻小水虱'}
 });
+BROOD.octopus={need:2,lay:[240,420],hatch:[45,90],n:[1,3],max:8,layTxt:'{mom} 在洞穴中守護章魚卵',hatchTxt:'章魚卵孵出了 {n} 隻小章魚'};
 function broodTick(mins, quiet, out){
   const now = Date.now(); if (!Array.isArray(state.ib)) state.ib = [];
   for (const b of [...state.ib]) { if (now < b.at) continue; state.ib = state.ib.filter(x => x !== b); const B = BROOD[b.sp]; if (!B || !SPECIES[b.sp]) continue;
