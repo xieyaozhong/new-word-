@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.7">
+<meta name="application-version" content="2026.11.25.8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1996,10 +1996,31 @@ const isInv = d => SPECIES[d.sp].kind === 'inv';
 const noFood = d => (SPECIES[d.sp].kind === 'inv' && !SPECIES[d.sp].eats) || !!SPECIES[d.sp].nofeed;
 function condFactor(d){ const c = SPECIES[d.sp].cond; let f = 1; if (c) for (const k of c) if (!CONDS[k].ok(d.sp)) f *= CONDS[k].pen; if (d.st && d.st > Date.now()) f *= .75; return f; }
 const baseLen = d => SPECIES[d.sp].len * (.5 + .5 * growRatio(d)) * ((geneFx(d) || {size:1}).size);
+function predatorRank(d){return baseLen(d)*(d.pers==='brave'?1.15:1)*(SPECIES[d.sp].sharkMeal?1.15:1);}
+function predatorEligible(d){const S=SPECIES[d.sp];return !d.box&&S.kind==='fish'&&(S.livefood||S.hunt?.on==='fish');}
+function predatorRoot(d){let seen=new Set();while(d.predMaster&&!seen.has(d.id)){seen.add(d.id);const m=state.fish.find(f=>f.id===d.predMaster&&predatorEligible(f));if(!m){delete d.predMaster;break;}d=m;}return d.id;}
+function predatorAllied(a,b){return predatorRoot(a)===predatorRoot(b);}
+function predatorWarTick(dt){
+ rt.predWarT=(rt.predWarT||0)-dt;if(rt.predWarT>0)return;rt.predWarT=1;
+ const pool=rt.fish.filter(r=>predatorEligible(r.d));for(const r of pool){r.predEnemy=null;r.predFollow=null;if(r.d.predMaster){const m=pool.find(q=>q.d.id===r.d.predMaster);if(m)r.predFollow=m;else{delete r.d.predMaster;markDirty();}}}
+ const active=pool.filter(r=>!r.d.predMaster);
+ for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++){
+ const a=active[i],b=active[j];if(a.d.sp===b.d.sp||predatorAllied(a.d,b.d)||a.predEnemy||b.predEnemy)continue;
+ const key=[a.d.id,b.d.id].sort().join('|');state.predDuels=state.predDuels||{};let duel=state.predDuels[key];
+ if(!duel){duel=state.predDuels[key]={a:a.d.id,b:b.d.id,age:0,submit:Math.random()<.06};toast(a.d.name+' 與 '+b.d.name+' 展開領地戰！');logEv(a.d.name+' 與 '+b.d.name+' 展開領地戰');markDirty();}
+ a.predEnemy=b;b.predEnemy=a;a.prey=b.prey=null;duel.age++;
+ if(Math.hypot(a.x-b.x,a.y-b.y)>Math.max(35*U,(fishLen(a)+fishLen(b))*.45))continue;
+ const ar=predatorRank(a.d),br=predatorRank(b.d);a.d.predHP=Math.max(0,(a.d.predHP??100)-Math.max(3,9*br/ar));b.d.predHP=Math.max(0,(b.d.predHP??100)-Math.max(3,9*ar/br));a.eat=b.eat=.35;
+ rt.emotes.push({type:'bang',x:(a.x+b.x)/2,y:(a.y+b.y)/2,t:0,life:1});
+ if(duel.submit&&Math.min(a.d.predHP,b.d.predHP)<=45){const master=ar>=br?a:b,sub=master===a?b:a;sub.d.predMaster=master.d.id;sub.d.predHP=100;master.d.predHP=100;sub.predEnemy=master.predEnemy=null;delete state.predDuels[key];toast(sub.d.name+' 臣服於 '+master.d.name);logEv(sub.d.name+' 成為 '+master.d.name+' 的從屬');}
+ else if(a.d.predHP<=0||b.d.predHP<=0){const loser=a.d.predHP===b.d.predHP?(ar>=br?b:a):a.d.predHP<b.d.predHP?a:b,winner=loser===a?b:a;winner.d.predHP=100;winner.predEnemy=null;removeCreature(loser.d);delete state.predDuels[key];toast(loser.d.name+' 在領地戰中死亡');logEv(winner.d.name+' 擊敗 '+loser.d.name+'，成為領地勝者');markDirty();return;}
+ markDirty();
+ }
+}
 function preyFor(pd){
   const h = SPECIES[pd.sp].hunt; if (!h) return null;
   const maxLen = baseLen(pd) * h.ratio;
-  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : h.on === 'pest' ? SPECIES[d.sp].snail && SPECIES[d.sp].pest : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
+  const list = state.fish.filter(d => d !== pd && d.sp !== pd.sp && !predatorAllied(pd,d) && !d.box && d.id !== pd.friend && !SPECIES[d.sp].special && !SPECIES[d.sp].mystery && (h.on === 'shrimp' ? SPECIES[d.sp].shrimp : h.on === 'snail' ? SPECIES[d.sp].snail : h.on === 'pest' ? SPECIES[d.sp].snail && SPECIES[d.sp].pest : SPECIES[d.sp].kind === 'fish') && baseLen(d) < maxLen);
   list.sort((a, b) => (a.sp === 'pestsnail' ? 0 : 1) - (b.sp === 'pestsnail' ? 0 : 1) || (a.rare ? 1 : 0) - (b.rare ? 1 : 0) || baseLen(a) - baseLen(b));
   return list[0] || null;
 }
@@ -5265,6 +5286,7 @@ function update(dt){
   if (rt.kissT <= 0) { rt.kissT = rand(3, 6); const ks = rt.fish.filter(r => r.sp.kiss);
     if (rt.lightK > .5) for (let i = 0; i < ks.length; i++) for (let j = i + 1; j < ks.length; j++) { const a = ks[i], b = ks[j];
       if (Math.hypot(a.x - b.x, a.y - b.y) < 60 * U) { a.eat = b.eat = .5; rt.emotes.push({type:'heart', x:(a.x + b.x) / 2, y:Math.min(a.y, b.y) - 18 * U, t:0, life:1.4}); } } }
+  predatorWarTick(dt);
   for (const r of rt.fish) updateFish(r, dt, sleep);
   for (const r of rt.feeders) updateFish(r, dt, sleep);
   for (let i = rt.shocks.length - 1; i >= 0; i--) { const q = rt.shocks[i]; q.t += dt; if (q.t > .7) rt.shocks.splice(i, 1); }
@@ -5351,6 +5373,8 @@ function updateFish(r, dt, sleep){
   if (r.puff > 0) r.puff -= dt; r.puffK += ((r.puff > 0 ? 1 : 0) - r.puffK) * Math.min(1, dt * 6);
   let spd = 34 * U * sp.speed * (r.fx ? r.fx.spd || 1 : 1) * (d.pers === 'playful' ? 1.2 : d.pers === 'lazy' ? .8 : 1) * (sleep ? .32 : 1) * (!nf && d.full <= 0 ? .55 : 1) * (1 - Math.min(.4, tStress(d) * .08));
   let busy = false;
+  if(r.predEnemy&&rt.fish.includes(r.predEnemy)&&!r.predEnemy.d.box){r.tx=r.predEnemy.x;r.ty=r.predEnemy.y;spd=Math.max(spd,105*U*sp.speed);busy=true;r.flee=null;}
+  else if(r.predFollow&&rt.fish.includes(r.predFollow)&&Math.hypot(r.x-r.predFollow.x,r.y-r.predFollow.y)>90*U){r.tx=r.predFollow.x-r.predFollow.face*50*U;r.ty=r.predFollow.y+15*U;spd=Math.max(spd,45*U);busy=true;}
   if (r.flee && !sp.snail) { r.fleeT = (r.fleeT || 0) - dt; const a = r.flee;
     if (r.fleeT <= 0 || !rt.fish.includes(a)) r.flee = null;
     else { const ddx = r.x - a.x, ddy = r.y - a.y, dd = Math.hypot(ddx, ddy) || 1; r.tx = clamp(r.x + ddx / dd * 140 * U, 20, W - 20); r.ty = clamp(r.y + ddy / dd * 70 * U, surfaceY + 20 * U, sandTop - 10 * U); spd = Math.max(spd, 60 * U * sp.speed); busy = true; } }
@@ -8314,6 +8338,7 @@ function renderFishCard(){
     gs.append(mk('p', '', '這個品種可能出現：' + genesFor(d.sp).map(G => geneNameAll(G) + '（' + DOM_LABEL[G.dom] + '）').join('、') + '。顯性只要爸媽其中一方給就會顯現；隱性要爸媽都給才會顯現；不完全顯性給一份是一種樣子、給兩份更明顯。每窩寶寶也有小機率突變出新基因。'));
     box.append(gs);
   }
+  if(predatorEligible(d)){const master=state.fish.find(f=>f.id===d.predMaster),subs=state.fish.filter(f=>f.predMaster===d.id);box.append(mk('p','trait','領地戰體力：'+Math.ceil(d.predHP??100)+'%｜'+(master?'從屬於 '+master.name:subs.length?'支配者・從屬 '+subs.length+' 隻':'獨立掠食者')));}
   if (!inv) {
     const br = mk('div', 'breed'); br.append(mk('h4', '', '配對繁殖'));
     const bt = mk('p'); bt.id = 'bText'; const bb = mk('button', 'btn', '撮合配對'); bb.id = 'bBtn'; const bl = mk('div'); bl.id = 'bList'; bl.style.cssText = 'display:flex;flex-direction:column;gap:6px';
