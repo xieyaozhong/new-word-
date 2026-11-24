@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.24.1">
+<meta name="application-version" content="2026.11.24.2">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1259,8 +1259,8 @@ function dailyStock(){
   return stockCache;
 }
 const priceOf = k => Math.round(SPECIES[k].price * (dailyStock().sale === k ? .8 : 1) * (todayEv() === 'sale' ? .85 : 1));
-const inShop = k => !!SPECIES[k]?.expansion || CORE.includes(k) || dailyStock().items.includes(k) || seasonSp().includes(k);
-const shopHint = k => SPECIES[k]?.expansion ? '新夥伴專區' : CORE.includes(k) ? '水族店常駐' : dailyStock().items.includes(k) ? '今天有賣' : '輪流進貨';
+const inShop = k => CORE.includes(k) || dailyStock().items.includes(k) || seasonSp().includes(k);
+const shopHint = k => CORE.includes(k) ? '水族店常駐' : dailyStock().items.includes(k) ? '今天有賣' : '輪流進貨';
 function msToMidnight(){ const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); return m - d; }
 function fmtHMS(ms){ const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 3600) + ':' + String(Math.floor(t / 60) % 60).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
 const DECOS = {
@@ -7976,18 +7976,17 @@ function renderAfterShop(v){ const list = npcAfter(v.npc), N = NPCS[v.npc]; if (
 function renderShop(){
   $('#sheetTitle').textContent = '水族店';
   const visitor = currentVisitor(); if (shopTab === 'visit' && !visitor) shopTab = 'today';
-  setTabs([['today','今日'],['new','新夥伴'],['tanks','魚缸']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易所 ●' : '交易所']]), shopTab);
+  setTabs([['today','今日'],['tanks','魚缸']].concat(visitor ? [['visit','★ 來客']] : [], [['fish','魚'],['inv','小生物'],['plant','水草'],['deco','造景'],['gear','設備'],['pack','禮包'],['trade', TR.giftN ? '交易所 ●' : '交易所']]), shopTab);
   if (shopTab === 'today' && state.shopDay !== dayKey()) { state.shopDay = dayKey(); markDirty(); }
   if (shopTab === 'visit') { state.metNpc = true; if (NPCS[visitor.npc].alien) state.metAlien = true; if (state.seenVisit !== visitor.key) { state.seenVisit = visitor.key; markDirty(); } }
   const keep = sheetBody.scrollTop; sheetBody.innerHTML = '';
   const wallet = mk('div', 'wallet');
-  const extra = shopTab === 'tanks' ? '已開設 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸' : shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' || shopTab === 'new' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備只升級目前魚缸，主題解鎖全缸共用' : shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
+  const extra = shopTab === 'tanks' ? '已開設 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸' : shopTab === 'visit' ? '魚 ' + fishCount() + ' / ' + capF() + '・活餌 ' + feederStock() + ' 隻' : shopTab === 'today' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'fish' ? '魚 ' + fishCount() + ' / ' + capF() + ' 隻' : shopTab === 'inv' ? '小生物 ' + invCount() + ' / ' + capI() + ' 隻' : shopTab === 'trade' ? '魚 ' + fishCount() + ' / ' + capF() + '・小生物 ' + invCount() + ' / ' + capI() : shopTab === 'gear' ? '設備只升級目前魚缸，主題解鎖全缸共用' : shopTab === 'deco' || shopTab === 'plant' ? '造景 ' + state.deco.length + ' / ' + MAXDECO + ' 件・舒適度 ' + comfort() : '繁殖秘方 ×' + state.items.charm + '・再抽 ' + (PITY - state.pity) + ' 次保證神秘魚種';
   wallet.innerHTML = coinSvg + '你有 <b>' + state.coins.toLocaleString('zh-TW') + '</b> 金幣・'; wallet.append(extra, '・目前：' + tankRoom().name);
   sheetBody.appendChild(wallet);
   if (shopTab === 'tanks') { renderTankShop(); sheetBody.scrollTop = keep; return; }
-  if (shopTab === 'new') sheetBody.appendChild(mk('p', 'restock', '新夥伴到店了！這裡固定供應新加入的魚與小生物，也會參加每日輪替特價。圖鑑搜尋「新夥伴」可以一次找到牠們。'));
   if (shopTab === 'today') { rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
-    rs.append('今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
+    rs.append('新舊夥伴一起輪替，今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'trade') { renderTrade(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'gear') { renderGear(); sheetBody.scrollTop = keep; return; }
@@ -8005,7 +8004,7 @@ function renderShop(){
     const p = mk('p', 'foot'); p.textContent = '神秘魚種只能從禮包抽到：' + MYSTERY.map(k => SPECIES[k].name).join('、') + '。禮包裡的魚不受每日進貨限制。不管抽哪一種禮包，連續 ' + PITY + ' 次沒抽到神秘魚種，下一次一定會中。繁殖秘方會在下一窩寶寶自動使用。'; sheetBody.appendChild(p);
     sheetBody.scrollTop = keep; return;
   }
-  const keys = shopTab === 'new' ? Object.keys(SPECIES).filter(k => SPECIES[k].expansion) : shopTab === 'today' ? seasonSp().concat(dailyStock().items) : shopTab === 'fish' ? SHOP_FISH.filter(k => CORE.includes(k)) : shopTab === 'inv' ? INVS.filter(k => CORE.includes(k)) : Object.keys(DECOS).filter(k => !DECOS[k].award && !DECOS[k].wild && !DECOS[k].npc && !DECOS[k].plant && (!DECOS[k].fest || (festival() || {}).k === DECOS[k].fest) && (!DECOS[k].season || DECOS[k].season === season()));
+  const keys = shopTab === 'today' ? seasonSp().concat(dailyStock().items) : shopTab === 'fish' ? SHOP_FISH.filter(k => CORE.includes(k)) : shopTab === 'inv' ? INVS.filter(k => CORE.includes(k)) : Object.keys(DECOS).filter(k => !DECOS[k].award && !DECOS[k].wild && !DECOS[k].npc && !DECOS[k].plant && (!DECOS[k].fest || (festival() || {}).k === DECOS[k].fest) && (!DECOS[k].season || DECOS[k].season === season()));
   for (const k of keys) {
     const it = shopTab === 'deco' ? DECOS[k] : SPECIES[k];
     const row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96;
