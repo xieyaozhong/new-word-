@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.24.4">
+<meta name="application-version" content="2026.11.25.1">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1250,14 +1250,15 @@ const ROT_FISH = SHOP_FISH.filter(k => !CORE.includes(k)), ROT_INV = INVS.filter
 const STOCK_FISH = 10, STOCK_INV = 4;
 let stockCache = null;
 function dayKey(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-/* Same picks for everyone on the same calendar day, so the stock is stable across reloads and devices. */
+/* Player-specific stock, stable across reloads and synced saves. */
+function personalSeed(){ return state.pid || String(state.created || 'aquarium'); }
 function dailyStock(){
-  const key = dayKey(); if (stockCache && stockCache.key === key) return stockCache;
-  const R = rng(hashStr('stock-' + key));
+  const key = dayKey(), owner = personalSeed(); if (stockCache && stockCache.key === key && stockCache.owner === owner) return stockCache;
+  const R = rng(hashStr('stock-' + owner + '-' + key));
   const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (R() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const items = shuf(ROT_FISH).slice(0, STOCK_FISH).sort((a, b) => SPECIES[a].price - SPECIES[b].price).concat(shuf(ROT_INV).slice(0, STOCK_INV).sort((a, b) => SPECIES[a].price - SPECIES[b].price));
   const sale = items[(R() * items.length) | 0], plants = shuf(ROT_PLANT).slice(0, STOCK_PLANT).sort((a, b) => DECOS[a].price - DECOS[b].price);
-  stockCache = {key, items, sale, plants, psale:plants[(R() * plants.length) | 0]}; stockCache.pvar = pickVarStock(R);
+  stockCache = {key, owner, items, sale, plants, psale:plants[(R() * plants.length) | 0]}; stockCache.pvar = pickVarStock(R);
   return stockCache;
 }
 const priceOf = k => Math.round(SPECIES[k].price * (dailyStock().sale === k ? .8 : 1) * (todayEv() === 'sale' ? .85 : 1));
@@ -1994,7 +1995,7 @@ function preyFor(pd){
   return list[0] || null;
 }
 function visitWindow(){ const d = new Date(), slot = Math.floor(d.getHours() / 4); return {key:dayKey() + '#' + slot, end:new Date(d.getFullYear(), d.getMonth(), d.getDate(), (slot + 1) * 4).getTime()}; }
-/* A visitor may turn up in each 4-hour slot of the day; the pick is seeded by the slot so it is the same on every reload and device. */
+/* Player-specific visitor picks per four-hour slot, stable on reload. */
 function currentVisitor(){
   const w = visitWindow(), R0 = state.visitRot && state.visitRot.key === w.key ? state.visitRot : null;
   if (R0 && R0.n > 0) { const n = pickNext(w.key, R0); return n ? {npc:n, key:w.key + '/' + R0.n, end:w.end} : null; }
@@ -2004,7 +2005,7 @@ function currentVisitor(){
 /* Visitors with an unfinished story line are three times as likely to be picked. */
 const visitWt = k => { const q = storyOfNpc(k); return q && !(state.story[q] && state.story[q].done) ? 3 : 1; };
 /* After a visitor finishes a story chapter they leave and someone else walks in for the rest of the slot. */
-function pickNext(key, R0){ const R = rng(hashStr('npc-next-' + key + '-' + R0.n)), slot = +key.split('#')[1], ok = k => !R0.gone.includes(k) && (!NPCS[k].slots || NPCS[k].slots.includes(slot));
+function pickNext(key, R0){ const R = rng(hashStr('npc-next-' + personalSeed() + '-' + key + '-' + R0.n)), slot = +key.split('#')[1], ok = k => !R0.gone.includes(k) && (!NPCS[k].slots || NPCS[k].slots.includes(slot));
   if (R() < .12) { const al = []; for (const k of ALIEN_NPCS) if (ok(k)) for (let i = 0; i < visitWt(k); i++) al.push(k); if (al.length) return al[(R() * al.length) | 0]; }
   const pool = []; for (const k of NPC_KEYS) if (!NPCS[k].alien && ok(k)) for (let i = 0; i < visitWt(k); i++) pool.push(k); return pool.length ? pool[(R() * pool.length) | 0] : null; }
 function rotateVisitor(npc){ const v = currentVisitor(); if (!v || v.npc !== npc) return ''; const w = visitWindow();
@@ -2012,7 +2013,7 @@ function rotateVisitor(npc){ const v = currentVisitor(); if (!v || v.npc !== npc
   state.visitRot.gone.push(npc); state.visitRot.n++; markDirty(); const nv = currentVisitor(); rt.hudT = 0;
   setTimeout(() => { if (sheetKind === 'shop') { if (!nv && shopTab === 'visit') shopTab = 'today'; renderShop(); } }, 30);
   return ' ' + NPCS[npc].name + '辦完事，心滿意足地離開了' + (nv ? '；接著' + NPCS[nv.npc].name + '走進了水族店！' : '。'); }
-function pickVisitor(key){ const R = rng(hashStr('npc-' + key)), wt = visitWt;
+function pickVisitor(key){ const R = rng(hashStr('npc-' + personalSeed() + '-' + key)), wt = visitWt;
   if (R() < .12) { const al = []; for (const k of ALIEN_NPCS) for (let i = 0; i < wt(k); i++) al.push(k); return al[(R() * al.length) | 0]; }
   const slot = +key.split('#')[1], pool = [];
   for (const k of NPC_KEYS) if (!NPCS[k].alien && (!NPCS[k].slots || NPCS[k].slots.includes(slot))) for (let i = 0; i < wt(k); i++) pool.push(k);
