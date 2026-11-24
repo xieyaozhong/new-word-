@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.25.16">
+<meta name="application-version" content="2026.11.25.17">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -901,7 +901,7 @@ for (const [k, s] of Object.entries({neon:'swift:疾光:D:swift', guppy:'opal:�
   glasscat:'opal:虹彩:D:opal', stingray:'maze:迷宮紋:D:maze', knife:'lines:條紋:D:lines', mudskipper:'cyan:青藍:R:cyan', tilapia:'hardy:強健:D:hardy', opsari:'swift:疾游:D:swift'}))
   if (SPECIES[k]) GENE_TXT[k] = (GENE_TXT[k] ? GENE_TXT[k] + ', ' : '') + s;
 GENE_TXT.octopus = "albino:白子:R:albino, ink:墨晶:R:melano, gold:黃金:R:xanth, blue:深海藍:R:blue, ruby:赤焰:R:red, violet:紫晶:R:violet, jade:翡翠:R:green, copper:赤銅:D:copper, cyan:冰海:R:cyan, pink:櫻花:R:pink, pearl:珍珠白:R:leuc, silver:銀甲:D:metal, ring:藍環紋:D:eyespot, stripe:斑馬紋:D:stripes, galaxy:星河:D:galaxy, mosaic:馬賽克:D:mosaic, snow:雪點:D:snow, opal:虹彩:D:opal, maze:迷宮紋:D:maze, web:薄紗腕:I:veil, longarm:長腕:D:longfin, giant:巨型:D:giant, dwarf:迷你:R:dwarf, goldEye:金瞳:D:goldEye, blueEye:藍瞳:R:blueEye, swift:疾游:D:swift, rich:聚寶:D:rich, hardy:強健:D:hardy, glow:微光:D:glow, ghost:幽靈:R:ghost";
-for(const k of ['blacktipshark','blueshark','tigershark','whiteshark','hammerhead','goblinshark']) GENE_TXT[k]=[GENE_TXT[k],'giant:巨型:D:giant, strong:強壯:D:strong, hardy:堅韌:D:hardy, swift:疾游:D:swift, dwarf:迷你:R:dwarf, rage:狂暴:D:rage, regen:再生:D:regen, dominate:統御:D:dominate, hunter:掠食:D:hunter'].filter(Boolean).join(', ');
+for(const k of ['blacktipshark','blueshark','tigershark','whiteshark','hammerhead','goblinshark']) GENE_TXT[k]=[GENE_TXT[k],'giant:巨型:D:giant, strong:強壯:D:strong, hardy:堅韌:D:hardy, swift:疾游:D:swift, dwarf:迷你:R:dwarf, rage:狂暴:D:rage, regen:再生:D:regen, dominate:統御:D:dominate, hunter:掠食:D:hunter, broadjaw:寬顎:I:broadjaw, streamlined:流線體型:I:streamlined, thickskin:厚皮:D:thickskin, stamina:耐力:D:stamina, keen:敏銳感知:D:keen, reflex:快速反應:D:reflex, longbody:修長:I:longbody, compact:短壯:R:compact, resilient:傷口癒合:D:resilient, blueeye:藍眼:R:blueEye'].filter(Boolean).join(', ');
 const DOM_LABEL = {D:'顯性', R:'隱性', I:'不完全顯性'};
 const GENES = {};
 for (const sp of Object.keys(SPECIES)) { const S0 = SPECIES[sp]; if ((S0.kind !== 'fish' && !GENE_TXT[sp]) || S0.hidden || S0.alien || S0.myth || S0.story || S0.nogene || S0.moon) continue;
@@ -1770,6 +1770,11 @@ function geneFx(d){
     case 'long': fx.sx *= 1.15; fx.sy *= .9; break;
     case 'giant': fx.size *= lv===2?1.5:1.25; break;
     case 'strong': fx.sy *= lv===2?1.35:1.2; break;
+    case 'broadjaw': fx.sy *= lv===2?1.13:1.07; break;
+    case 'streamlined': fx.sy *= lv===2?.85:.93; break;
+    case 'thickskin': fx.sy *= 1.07; break;
+    case 'longbody': fx.sx *= lv===2?1.25:1.12; break;
+    case 'compact': fx.sx *= .86; fx.sy *= 1.18; break;
     case 'dwarf': fx.size *= .8; break;
     case 'glow': fx.glow = true; break;
     case 'blueEye': fx.iris = '#2f8fff'; break;
@@ -2022,6 +2027,16 @@ function sharkStats(d){
  case 'regen':regen+=.7*n;break;
  case 'dominate':dom+=.07*n;break;
  case 'hunter':crit+=.15*n;reach+=.12*n;break;
+ case 'broadjaw':atk+=.24*n;reach+=.08*n;break;
+ case 'streamlined':spd+=.18*n;dodge+=.08*n;break;
+ case 'thickskin':armor+=.24*n;break;
+ case 'stamina':spd+=.12*n;armor+=.10*n;break;
+ case 'keen':crit+=.12*n;reach+=.08*n;break;
+ case 'reflex':dodge+=.16*n;break;
+ case 'longbody':reach+=.15*n;spd+=.06*n;break;
+ case 'compact':armor+=.18*n;atk+=.12*n;break;
+ case 'resilient':regen+=.45*n;break;
+ case 'blueEye':case 'albino':break;
  case 'ghost':dodge+=.12*n;break;
  case 'lucky':crit+=.1*n;break;
  default:crit+=.025*n;break;
@@ -2032,13 +2047,13 @@ function sharkHit(a,b,A,B){
  if((a.battleNext||0)>rt.t||(a.battleStun||0)>rt.t)return;
  const dist=Math.hypot(a.x-b.x,a.y-b.y),range=Math.max(35*U,(fishLen(a)+fishLen(b))*.45)*A.p[3]*A.reach;
  if(dist>range)return;
- a.battleNext=rt.t+A.p[2]/A.spd;a.eat=.42;
+ a.battleNext=rt.t+A.p[2]/A.spd;a.eat=A.p[5]==='jaw'?.48:A.p[5]==='triple'?.65:A.p[5]==='slash'?.28:.42;
  const miss=Math.random()<B.dodge,critical=Math.random()<A.crit;
  const power=clamp(Math.sqrt(predatorRank(a.d)/Math.max(1,predatorRank(b.d))),.55,1.8);
  const damage=miss?0:A.p[1]*A.atk*power/B.armor*(critical?1.6:1)*(1+A.rage*(1-(a.d.predHP??100)/100));
  b.d.predHP=Math.max(0,(b.d.predHP??100)-damage);
  if(!miss&&A.p[5]==='ring')b.battleStun=rt.t+1.1;
- if(rt.emotes.length<48)rt.emotes.push({type:'sharkbattle',x:b.x,y:b.y,t:0,life:.8,style:A.p[5],col:A.p[4],angle:Math.atan2(b.y-a.y,b.x-a.x),size:Math.min(85*U,Math.max(20*U,fishLen(a)*.55)),label:miss?'閃避':(critical?'暴擊 ':'')+Math.round(damage)});
+
 }
 
 function predatorRank(d){return baseLen(d)*(d.pers==='brave'?1.15:1)*(SPECIES[d.sp].sharkMeal?1.15:1);}
@@ -7646,7 +7661,7 @@ function draw(){
   c.globalAlpha = 1;
   for (const e of rt.emotes) { const q = e.t / e.life, a = q < .2 ? q / .2 : 1 - (q - .2) / .8, y = e.y - q * 22 * U;
     c.globalAlpha = Math.max(0, a);
-    if(e.type==='sharkbattle'){c.save();c.translate(e.x,e.y);c.rotate(e.angle);c.strokeStyle=e.col;c.lineWidth=Math.max(1,3*U*(1-q));const z=e.size*(.35+q*.8);c.beginPath();if(e.style==='ring'){c.ellipse(0,0,z,z*.75,0,0,TAU);}else if(e.style==='dash'||e.style==='jaw'){for(let i=-1;i<=1;i++){c.moveTo(-z,i*z*.22);c.lineTo(z*.45,i*z*.12);}}else{for(let i=0;i<(e.style==='triple'?3:2);i++){c.moveTo(-z*.4,-z*.6+i*z*.35);c.quadraticCurveTo(z*.7,0+i*z*.2,-z*.25,z*.6+i*z*.15);}}c.stroke();c.restore();c.fillStyle=e.col;c.textAlign='center';c.font='bold '+Math.round(13*U)+'px '+FONT;c.fillText(e.label,e.x,y-12*U);}
+    if(e.type==='sharkbattle'){}
     else if (e.type === 'z') { c.font = Math.round(14 * U) + 'px ' + FONT; c.fillStyle = '#d8e6ff'; c.textAlign = 'center'; c.fillText('z', e.x + Math.sin(q * 6) * 4 * U, y); }
     else if (e.type === 'bang') { c.fillStyle = 'rgba(255,255,255,.92)'; dot(c, e.x, y, 8 * U); c.fillStyle = '#e8402a'; c.font = '700 ' + Math.round(13 * U) + 'px ' + FONT; c.textAlign = 'center'; c.fillText('!', e.x, y + 4.5 * U); }
     else if (e.type === 'heart') { const s = 7 * U; c.fillStyle = '#ff7f9c'; c.beginPath(); c.moveTo(e.x, y + s * .9); c.bezierCurveTo(e.x - s * 1.6, y - s * .2, e.x - s * .7, y - s * 1.4, e.x, y - s * .5); c.bezierCurveTo(e.x + s * .7, y - s * 1.4, e.x + s * 1.6, y - s * .2, e.x, y + s * .9); c.fill(); }
