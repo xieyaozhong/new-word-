@@ -1802,12 +1802,14 @@ const rt = freshRuntime();
 
 function newCreature(sp, o){
   o = o || {}; const S = SPECIES[sp], seed = (Math.random() * 1e9) | 0;
-  return {id:uid(), sp, name:o.name || pickName(), born:Date.now(), full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : (o.full || 70), grow:o.grow || 0, seed,
-    pers:S.kind === 'fish' && !S.alien ? pickArr(PERS_KEYS) : '', aff:0, pa:S.pearl ? Date.now() + rand(12, 24) * 3.6e6 : 0, sex:o.sex || (Math.random() < .5 ? 'm' : 'f'), m:Number.isInteger(o.m) ? o.m : (Math.random() * PAL[sp].length) | 0, rare:o.rare || '', gen:o.gen || 1, par:o.par || null, cd:o.cd || 0, g:o.g || randomGenes(sp)};
+  const pers = S.kind === 'fish' && !S.alien ? pickArr(PERS_KEYS) : '';
+  return {id:uid(), sp, name:o.name || pickName(sp, pers), born:Date.now(), full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : (o.full || 70), grow:o.grow || 0, seed,
+    pers, aff:0, pa:S.pearl ? Date.now() + rand(12, 24) * 3.6e6 : 0, sex:o.sex || (Math.random() < .5 ? 'm' : 'f'), m:Number.isInteger(o.m) ? o.m : (Math.random() * PAL[sp].length) | 0, rare:o.rare || '', gen:o.gen || 1, par:o.par || null, cd:o.cd || 0, g:o.g || randomGenes(sp)};
 }
 function newState(){
   const now = Date.now();
-  const mk = (sp, name, grow, sex) => { const seed = (Math.random() * 1e9) | 0; return {id:uid(), sp, name, born:now, full:55, grow, seed, sex, m:palette(sp, seed)._m, rare:'', gen:1, par:null, cd:0, g:legacyGenes(sp, seed)}; };
+  const starterNames = new Set();
+  const mk = (sp, name, grow, sex) => { const seed = (Math.random() * 1e9) | 0; const pers = SPECIES[sp].kind === 'fish' ? pickArr(PERS_KEYS) : ''; name = pickName(sp, pers, starterNames); starterNames.add(name); return {id:uid(), sp, name, pers, born:now, full:55, grow, seed, sex, m:palette(sp, seed)._m, rare:'', gen:1, par:null, cd:0, g:legacyGenes(sp, seed)}; };
   const dc = (k, x, d) => ({id:uid(), k, x, d, flip:Math.random() < .5, seed:(Math.random() * 1e9) | 0});
   const s = { v:2, created:now, t:now, savedAt:0, coins:50, dirt:9,
     fish:[mk('guppy','豆花',8,'f'), mk('guppy','芒果',6,'m'), mk('neon','珍珠',4,'f'), mk('neon','仙草',4,'m'), mk('neon','愛玉',4,'f'), mk('cherry','小卷',4,'f')],
@@ -1819,7 +1821,7 @@ function newState(){
 }
 function dexAddTo(s, d){ const e = s.dex[d.sp] || (s.dex[d.sp] = {m:[], r:[], t:[]}); if (!e.t) e.t = []; if (!e.m.includes(d.m)) e.m.push(d.m); if (d.rare && !e.r.includes(d.rare)) e.r.push(d.rare); for (const {G} of traitsOf(d)) if (!e.t.includes(G.k)) e.t.push(G.k); }
 const dexAdd = d => { const isNew = !state.dex[d.sp]; dexAddTo(state, d); if (isNew) logEv('第一次養到「' + SPECIES[d.sp].name + '」，圖鑑多了一種'); };
-function snapParent(p){ p = p || {}; return {id:String(p.id || ''), name:String(p.name || '').slice(0, 8), sp:SPECIES[p.sp] ? p.sp : 'guppy', m:Math.max(0, p.m | 0), rare:RARES[p.rare] ? p.rare : '', gen:Math.max(1, p.gen | 0), g:cleanGenes(SPECIES[p.sp] ? p.sp : 'guppy', p.g)}; }
+function snapParent(p){ p = p || {}; return {id:String(p.id || ''), name:String(p.name || '').slice(0, 32), sp:SPECIES[p.sp] ? p.sp : 'guppy', m:Math.max(0, p.m | 0), rare:RARES[p.rare] ? p.rare : '', gen:Math.max(1, p.gen | 0), g:cleanGenes(SPECIES[p.sp] ? p.sp : 'guppy', p.g)}; }
 function migrate(s, skipTanks){
   s.v = 2;
   s.coins = Math.max(0, Math.floor(+s.coins || 0));
@@ -1828,7 +1830,7 @@ function migrate(s, skipTanks){
     const m = Number.isInteger(f.m) && f.m >= 0 && f.m < PAL[f.sp].length ? f.m : palette(f.sp, seed)._m;
     const g = genesFor(f.sp).length ? (f.g && typeof f.g === 'object' ? cleanGenes(f.sp, f.g) : legacyGenes(f.sp, seed)) : {};
     if (f.rare === 'albino' && S.kind === 'fish') g.albino = 2;
-    return {id:String(f.id || uid()), sp:f.sp, name:String(f.name || '小魚').slice(0, 8), born:+f.born || Date.now(),
+    return {id:String(f.id || uid()), sp:f.sp, name:String(f.name || '小魚').slice(0, 32), born:+f.born || Date.now(),
       full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : clamp(+f.full || 0, 0, 100), grow:clamp(+f.grow || 0, 0, GROW_MAX), seed,
       sex:f.sex === 'm' || f.sex === 'f' ? f.sex : '', m, rare:RARES[f.rare] ? f.rare : '', gen:Math.max(1, (+f.gen || 1) | 0),
       par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ra:S.roe ? (+f.ra || 0) : 0, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
@@ -6205,7 +6207,7 @@ const sizeK = d => .35 + .65 * growRatio(d);
 const wholePrice = (d, k) => Math.round(FOOD[d.sp].v * sizeK(d) * (k || 1));
 const ingValue = B => Math.round(FOOD[B.sp].v * B.k * B.steps.reduce((a, x) => a * KSTEP[x].mult, 1));
 const ingName = B => SPECIES[B.sp].name + '・' + (B.steps.length ? KSTEP[B.steps[B.steps.length - 1]].out : '整尾');
-function cleanIng(B){ return B && FOOD[B.sp] && Array.isArray(B.steps) ? {id:String(B.id || uid()), sp:B.sp, name:String(B.name || '').slice(0, 8), k:clamp(+B.k || .5, .1, 1), steps:B.steps.filter(x => KSTEP[x] && CAT_STEPS[FOOD[B.sp].c].includes(x)), t:+B.t || Date.now()} : null; }
+function cleanIng(B){ return B && FOOD[B.sp] && Array.isArray(B.steps) ? {id:String(B.id || uid()), sp:B.sp, name:String(B.name || '').slice(0, 32), k:clamp(+B.k || .5, .1, 1), steps:B.steps.filter(x => KSTEP[x] && CAT_STEPS[FOOD[B.sp].c].includes(x)), t:+B.t || Date.now()} : null; }
 function protK(inj){ let k = 1; for (const [t, m] of Object.entries(PROT)) if (state.tools[t] && m[inj]) k *= m[inj]; return k; }
 function stepRisk(sp, B, sk){ const F = FOOD[sp], S = KSTEP[sk]; let risk, inj;
   if (!B) { risk = (F.fight || 0) * (sk === 'ice' ? .6 : 1); inj = F.fi; } else if (sk === 'xcut' && F.x) [risk, inj] = F.x; else { risk = S.risk || 0; inj = S.inj; }
@@ -6402,7 +6404,7 @@ function installCard(){ if (!PWA_OK || isStandalone() || state.pwaHide) return n
 let seaTab = 'pick', seaDraft = '', seaGift = '', seaCoins = 50, seaReply = '', seaReplyTxt = '';
 function bottleDay(){ const k = dayKey(); if (!state.bottle || state.bottle.day !== k) state.bottle = {day:k, thrown:0, picked:0}; return state.bottle; }
 const mailUnread = () => state.mail.filter(m => !m.r).length;
-const giftText = g => !g ? '' : g.coins ? g.coins + ' 金幣' : g.fish && SPECIES[g.fish.sp] ? '一隻' + SPECIES[g.fish.sp].name + '（' + fbText(g.fish.name, 8) + '）' : '';
+const giftText = g => !g ? '' : g.coins ? g.coins + ' 金幣' : g.fish && SPECIES[g.fish.sp] ? '一隻' + SPECIES[g.fish.sp].name + '（' + fbText(g.fish.name, 32) + '）' : '';
 async function throwBottle(){ const B = bottleDay(), msg = fbText(seaDraft, 80); if (FB.busy) return;
   if (!msg) { toast('先寫點什麼吧'); return; } if (B.thrown >= BOTTLE_THROW) { toast('今天的瓶子丟完了，明天再來'); return; }
   let gift = null, d = null;
@@ -6524,7 +6526,7 @@ async function mkBid(id, amt){ if (FB.busy) return; if (state.coins < amt) { toa
       if (why) return; A.bid = amt; A.bidder = FB.uid; A.bname = myNick(); A.n = (A.n | 0) + 1; if (A.ends - now < 120e3) A.ends = now + 120e3; return A; });
     const A = r.committed && r.snapshot.exists() ? r.snapshot.val() : null;
     if (!A || A.bidder !== FB.uid || A.bid !== amt) { toast(why || '出價沒有成功，請再試一次'); FB.mkT = 0; return; }
-    state.coins -= amt; state.bids[id] = amt; FB.view[id] = A; mkOpen = ''; bumpCoins(); markDirty(); logEv('在交易所出價 ' + amt + ' 金幣標 ' + fbText(A.fish.name, 8)); toast('出價成功！被超過時金幣會自動退回'); FB.mk = FB.mk.map(([k, v]) => k === id ? [k, A] : [k, v]); }
+    state.coins -= amt; state.bids[id] = amt; FB.view[id] = A; mkOpen = ''; bumpCoins(); markDirty(); logEv('在交易所出價 ' + amt + ' 金幣標 ' + fbText(A.fish.name, 32)); toast('出價成功！被超過時金幣會自動退回'); FB.mk = FB.mk.map(([k, v]) => k === id ? [k, A] : [k, v]); }
   catch (e) { fbFail(e, '出價'); } finally { FB.busy = false; renderShop(); } }
 async function mkCancel(id){ if (FB.busy) return; FB.busy = true; let back = null;
   try { const r = await fbTx('auctions/' + id, A => { back = null; if (!A) return A; if (A.seller !== FB.uid || A.buyer || (A.n | 0) > 0) return; back = A; return null; });
@@ -6534,7 +6536,7 @@ async function mkCancel(id){ if (FB.busy) return; FB.busy = true; let back = nul
 async function mkSettle(quiet){ if (!FB.db || FB.settling) return; FB.settling = true; let changed = false;
   try { const now = Date.now();
     for (const id of Object.keys(state.bids)) { const amt = state.bids[id], A = await fbGet('auctions/' + id); FB.view[id] = A;
-      if (!A || A.bidder !== FB.uid) { delete state.bids[id]; state.coins += amt; changed = true; toast(A ? '「' + fbText(A.fish && A.fish.name, 8) + '」被別人出更高價了，退回 ' + amt + ' 金幣' : '拍賣取消了，退回 ' + amt + ' 金幣'); continue; }
+      if (!A || A.bidder !== FB.uid) { delete state.bids[id]; state.coins += amt; changed = true; toast(A ? '「' + fbText(A.fish && A.fish.name, 32) + '」被別人出更高價了，退回 ' + amt + ' 金幣' : '拍賣取消了，退回 ' + amt + ' 金幣'); continue; }
       if (A.ends > now) continue; if (A.got) { delete state.bids[id]; changed = true; continue; }
       const d = unpackFish(A.fish, false); if (!d) { delete state.bids[id]; state.coins += amt; changed = true; continue; }
       if (roomFor(d.sp)) { FB.wait = id; continue; } let ok = false;
@@ -6547,7 +6549,7 @@ async function mkSettle(quiet){ if (!FB.db || FB.settling) return; FB.settling =
       if (sold) { const pay = k === 'auction' ? {c:L.bid} : (L.pay || {}); let got = null;
         if (pay.f) { got = unpackFish(pay.f, false); if (got && roomFor(got.sp)) { FB.wait = id; continue; } }
         let ok = false; const r = await fbTx('auctions/' + id, X => { ok = false; if (!X) return X; if (X.paid) return; X.paid = true; ok = true; return X; });
-        if (r.committed && ok) { const net = pay.c ? Math.floor(pay.c * (1 - MK_FEE)) : 0, buyer = fbText(k === 'auction' ? L.bname : L.bname, 10), nm = fbText(L.fish.name, 8);
+        if (r.committed && ok) { const net = pay.c ? Math.floor(pay.c * (1 - MK_FEE)) : 0, buyer = fbText(k === 'auction' ? L.bname : L.bname, 10), nm = fbText(L.fish.name, 32);
           if (net) state.coins += net; if (got) addCreature(got); state.stats.trades = (state.stats.trades | 0) + 1; if (k === 'auction') state.stats.aucSold = (state.stats.aucSold | 0) + 1;
           logEv('交易所成交：' + nm + (got ? ' 換到了 ' + got.name : ' 賣給「' + buyer + '」，實拿 ' + net + ' 金幣'));
           celebrate(got ? {kind:'fish', d:got, sp:got.sp, tier:Math.max(1, tierOf(got)), head:'交易所', title:'交換成功！', text:'「' + buyer + '」用' + labelOf(got) + '「' + got.name + '」換走了你的 ' + nm + '，牠已經放進魚缸了。'}
@@ -8264,7 +8266,21 @@ function renderShop(){
     sheetBody.appendChild(mk('p', 'foot', '這裡是常駐款。另外 ' + rot.length + ' 種' + (shopTab === 'fish' ? '魚' : '小生物') + '每天輪流出現在「今日」分頁' + (today.length ? '，今天有：' + today.join('、') + '。' : '。'))); }
   sheetBody.scrollTop = keep;
 }
-function pickName(){ const used = new Set(state.fish.map(f => f.name)); const free = NAMES.filter(n => !used.has(n)); return free.length ? pickArr(free) : '小魚' + (state.fish.length + 1); }
+function pickName(sp, pers, extraUsed){
+  const S = SPECIES[sp] || {}, species = S.name || '小魚';
+  const used = new Set([...(state && state.fish || []).map(f => f.name), ...(extraUsed || [])]);
+  const traits = {glutton:['貪吃','吞吞','飽飽','宵夜','美食家','大胃王'],shy:['害羞','躲躲','靜靜','月影','膽小','隱士'],playful:['跳跳','旋風','蹦蹦','閃電','冒險家','淘氣'],lazy:['慢慢','睡不醒','懶洋洋','午睡','發呆','夢遊'],showoff:['閃耀','華麗','星光','舞台','明星','花俏'],brave:['無畏','勇者','破浪','守護','劍聖','先鋒']};
+  const p = traits[pers] || ['神祕','悠游','好奇','星海','奇妙','自在'];
+  const themed = /鯊/.test(species) ? ['深淵','巨浪','海皇','利齒','鐵鰭','海怪'] : /章魚|烏賊|魷魚/.test(species) ? ['墨汁','八爪','觸手','海底','墨影'] : /孔雀/.test(species) ? ['彩虹','羽扇','霓虹','花尾'] : /鬥魚/.test(species) ? ['緋紅','劍影','戰旗','烈焰'] : /金魚/.test(species) ? ['金玉','泡泡','琉璃','圓圓'] : /蝦|蟹/.test(species) ? ['小鉗','甲殼','珊瑚','沙沙'] : [species,'水晶','浪花','銀鱗'];
+  const titles = ['伯爵','教授','船長','大公','騎士','魔法師','小王子','女王','店長','博士','旅人','守衛','團長','先生','小姐','吟遊詩人','特派員'];
+  const fantasy = ['銀河','極光','月光','流星','薄霧','星塵','琥珀','暮色','雲朵','永夜','晨曦','水晶'];
+  for(let i=0;i<40;i++){
+    const t=pickArr(themed), q=pickArr(p), food=pickArr(NAMES), title=pickArr(titles), f=pickArr(fantasy);
+    const n=pickArr([q+'的'+t+title,t+q+food,q+t+title,t+q,f+t+q,q+food+'・'+t,t+'界的'+q+title,q+'的'+species+title]);
+    if(!used.has(n)) return n;
+  }
+  return species+pickArr(p)+'・'+uid().slice(-6);
+}
 function addCreature(d){ state.fish.push(d); const r = makeRunner(d, true); rt.fish.push(r); countCache(); dexAdd(d);
   for (let i = 0; i < 10; i++) rt.bubbles.push({x:r.x + rand(-14, 14) * U, y:r.y + rand(0, 30) * U, r:rand(1.5, 4) * U, vy:rand(40, 90) * U, ph:rand(6)}); return r; }
 function buyCreature(k){
@@ -8391,7 +8407,7 @@ function renderFishCard(){
   sheetBody.innerHTML = '';
   const box = mk('div', 'fcard');
   const pc = document.createElement('canvas'); pc.className = 'portrait'; pc.id = 'portrait';
-  const nb = mk('label', 'namebox'); nb.appendChild(mk('span', 'sr', '名字')); const inp = document.createElement('input'); inp.id = 'fname'; inp.maxLength = 8; inp.autocomplete = 'off'; inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', '名字，可以修改'); inp.value = d.name; nb.appendChild(inp);
+  const nb = mk('label', 'namebox'); nb.appendChild(mk('span', 'sr', '名字')); const inp = document.createElement('input'); inp.id = 'fname'; inp.maxLength = 32; inp.autocomplete = 'off'; inp.setAttribute('enterkeyhint', 'done'); inp.setAttribute('aria-label', '名字，可以修改'); inp.value = d.name; nb.appendChild(inp);
   const chips = mk('div', 'chips'); chips.id = 'fchips';
   const stat = (lab, id) => { const s = mk('div', 'stat'); s.append(mk('span', '', lab)); const b = mk('div', 'bar'); const i = document.createElement('i'); i.id = 's' + id; b.appendChild(i); s.append(b); const l = mk('span'); l.id = 'l' + id; s.append(l); return s; };
   box.append(pc, nb, chips);
@@ -8463,7 +8479,7 @@ function renderFishCard(){
     box.append(sec);
   }
   box.append(rb); sheetBody.appendChild(box);
-  const commit = () => { const v = inp.value.trim().slice(0, 8); if (v && v !== d.name) { d.name = v; markDirty(); toast('改名為「' + v + '」'); } else inp.value = d.name; };
+  const commit = () => { const v = inp.value.trim().slice(0, 32); if (v && v !== d.name) { d.name = v; markDirty(); toast('改名為「' + v + '」'); } else inp.value = d.name; };
   inp.addEventListener('change', commit); inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
   const portraitDpr=Math.min(DPR,1.5);pc.width = Math.round(pc.clientWidth * portraitDpr) || 450; pc.height = Math.round(150 * portraitDpr);
   renderTankTransfer(d);
@@ -8874,10 +8890,10 @@ function roomFor(sp, out){ const S = SPECIES[sp], o = out && SPECIES[out.sp], sa
   if (S.limit && countSp(sp) - (out && out.sp === sp ? 1 : 0) >= S.limit) return '一缸只能養 ' + S.limit + ' 隻' + S.name;
   if (S.kind === 'inv' ? invCount() - same >= capI() : fishCount() + pendingBabies() - same >= capF()) return S.kind === 'inv' ? '小生物已經滿了' : '魚缸已經滿了';
   return ''; }
-function packFish(d){ return {sp:d.sp, name:String(d.name || '').slice(0, 8), born:+d.born || Date.now(), grow:+d.grow || 0, seed:d.seed | 0, sex:d.sex === 'm' ? 'm' : 'f', m:d.m | 0, rare:d.rare || '', gen:(d.gen | 0) || 1, g:cleanGenes(d.sp, d.g), pers:d.pers || '', aff:Math.round(d.aff || 0)}; }
+function packFish(d){ return {sp:d.sp, name:String(d.name || '').slice(0, 32), born:+d.born || Date.now(), grow:+d.grow || 0, seed:d.seed | 0, sex:d.sex === 'm' ? 'm' : 'f', m:d.m | 0, rare:d.rare || '', gen:(d.gen | 0) || 1, g:cleanGenes(d.sp, d.g), pers:d.pers || '', aff:Math.round(d.aff || 0)}; }
 function unpackFish(o, own){ if (!o || typeof o !== 'object' || !tradeSp(o.sp)) return null; const S = SPECIES[o.sp];
   const d = newCreature(o.sp, {grow:clamp(+o.grow || 0, 0, GROW_MAX), sex:o.sex === 'm' ? 'm' : 'f', m:Number.isInteger(o.m) && o.m >= 0 && o.m < PAL[o.sp].length ? o.m : 0, rare:RARES[o.rare] ? o.rare : '', gen:clamp((+o.gen || 1) | 0, 1, 999), g:cleanGenes(o.sp, o.g)});
-  d.seed = (+o.seed || 1) | 0; d.name = cleanStr(o.name, 8) || d.name; d.born = clamp(+o.born || Date.now(), 0, Date.now()); if (d.pers && PERS[o.pers]) d.pers = o.pers;
+  d.seed = (+o.seed || 1) | 0; d.name = cleanStr(o.name, 32) || d.name; d.born = clamp(+o.born || Date.now(), 0, Date.now()); if (d.pers && PERS[o.pers]) d.pers = o.pers;
   if (own) d.aff = clamp(+o.aff || 0, 0, 100); else d.tr = 1; return d; }
 function tradeDesc(d){ const tr = traitsOf(d).map(t => geneName(t.G, t.lv)), car = carriersOf(d).length, g = growRatio(d);
   return (isInv(d) ? '' : (d.sex === 'm' ? '公' : '母') + '・') + (g >= 1 ? '成年' : g >= .4 ? '亞成' : '幼年') + (d.gen > 1 ? '・第 ' + d.gen + ' 代' : '') + (tr.length ? '・基因：' + tr.join('、') : '') + (car ? '・帶 ' + car + ' 個隱性基因' : ''); }
