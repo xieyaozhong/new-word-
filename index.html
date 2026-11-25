@@ -8389,7 +8389,7 @@ function socialTick(dt){
  if(kind==='coin'){for(const r of [a,b])r.d.socialCoinUntil=now+180000;}
  if(kind==='food'){for(const r of [a,b])if(!noFood(r.d))r.d.full=Math.min(100,r.d.full+5);}
  if(kind==='clean')state.dirt=Math.max(0,state.dirt-2);
- if(kind==='color'||kind==='mimic'){const col=kind==='mimic'?'#e8a55a':pickArr(['#52d8f2','#be8df4','#f1b36c','#79e5af']);for(const r of (kind==='mimic'?[a]:[a,b])){r.d.socialColor=col;r.d.socialColorUntil=now+120000;}}
+ if(kind==='color'||kind==='mimic'){const col=kind==='mimic'?([runnerPal(b).b1,runnerPal(b).b2].find(c=>typeof c==='string'&&/^#[0-9a-f]{6}$/i.test(c))||'#e8a55a'):pickArr(['#52d8f2','#be8df4','#f1b36c','#79e5af']);for(const r of (kind==='mimic'?[a]:[a,b])){r.d.socialColor=col;r.d.socialColorUntil=now+120000;}}
  if(kind==='soothe'){b.d.st=0;b.d.socialStressUntil=0;b.flee=null;b.fleeT=0;b.stun=0;}
  if(kind==='rival'){b.d.socialStressUntil=now+90000;b.flee=a;b.fleeT=3;rt.emotes.push({type:'bang',x:b.x,y:b.y-fishLen(b)*.4,t:0,life:1.2});}
  if(kind==='race'||kind==='calm'||kind==='mimic'){a.socialFollow=b;a.socialFollowUntil=rt.t+8;}
