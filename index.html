@@ -554,6 +554,9 @@ const FONT = '"LXGW WenKai TC","Kaiti TC","STKaiti",serif';
 
 /* ---------- Creatures ---------- */
 const SPECIES = {
+  moonlantern:{name:'月燈魚',kind:'fish',wild:true,draw:'tetra',price:1800,len:48,interval:42,value:18,zone:'mid',speed:.9,school:true,nightBoost:true,tags:['沉月深淵限定','群游','夜行'],morphs:['冰藍','紫月'],desc:'身側像一串月光燈籠，夜間特別活躍。'},
+  abyssribbon:{name:'幽影帶魚',kind:'fish',wild:true,draw:'eel',price:3200,len:110,interval:48,value:28,zone:'low',speed:.65,nocturnal:true,tags:['沉月深淵限定','夜行'],morphs:['銀影','幽紫'],desc:'細長的身體像飄浮在深海中的銀色絲帶。'},
+  crystalfin:{name:'星晶蝶魚',kind:'fish',wild:true,draw:'tetra',price:4800,len:65,interval:48,value:35,zone:'mid',speed:.7,tags:['沉月深淵限定','稀有'],morphs:['星藍','玫瑰晶'],desc:'透明晶翼般的魚鰭映出深海微光。'},
   neon:    {name:'紅蓮燈', kind:'fish', price:30,  len:40, interval:60, value:1,  zone:'mid',    speed:1.15, school:true, glow:true, tags:['群游'], morphs:['經典'], desc:'喜歡成群結隊，關燈後身上的藍線會發光。'},
   zebra:   {name:'斑馬魚', kind:'fish', price:35,  len:42, interval:50, value:1,  zone:'top',    speed:1.4,  school:true, tags:['上層','好動'], morphs:['原生','金斑馬','藍長鰭'], desc:'全身橫條紋，游得飛快，很容易繁殖。'},
   guppy:   {name:'孔雀魚', kind:'fish', price:40,  len:52, interval:45, value:2,  zone:'mid',    speed:1,    live:true, tags:['胎生'], morphs:['火焰','藍禮服','黃金','粉晶','白皇'], desc:'尾巴像一把小扇子，會直接生出小魚。'},
@@ -1087,8 +1090,12 @@ const WTYPE = {
 const FRIEND_OK = ['tilapia','koi','mosquito','opsari','kuhua','culter','chili','snakehead','marbled','mudskipper','fiddler','slider','goldfish','medaka','guppy','ghost','cherry','apple','crayfish','frog','turtle','microcrab','tadpole','paradise','bitterling','sawacrab'];
 const DECO_OK = ['pavilion','pebbles','shells','windmill','anchor','coral','canoe','rock','wood','bridge','vallis','moss','waterfern','bacopa'];
 const regionData = r => r && r.builtin === 'taichung' ? TAICHUNG : r && r.src === 'claude' && r.sites ? r : null;
+function expeditionSites(R){
+  if(!R) return {};
+  return {...R.sites, moonabyss:{name:'沉月深淵',type:'幻想深海',lat:R.home.lat-.14,lon:R.home.lon-.19,danger:.12,sick:.035,fc:.48,dc:.55,coinK:1.8,friends:[['moonlantern',6],['abyssribbon',3],['crystalfin',1]],decos:['moonrelic','abysscrystal','pearlcompass'],desc:'虛構的深海秘境，月光在海底裂谷凝成晶體，沉沒文明的遺物散落其間。',tales:['跟著月燈魚穿過一片幽藍光海。','在沉沒石門旁發現古老符文。','一條銀色長影從晶體峽谷游過。'],death:'在深海裂谷迷失了方向'}};
+}
 function applyRegion(r){ const R = regionData(r); if (!R) { HOME = null; SITES = {}; GEO = null; return; }
-  HOME = {lat:R.home.lat, lon:R.home.lon, name:R.name}; SITES = R.sites; GEO = R.geo; KX = 111.32 * Math.cos(HOME.lat * Math.PI / 180); }
+  HOME = {lat:R.home.lat, lon:R.home.lon, name:R.name}; SITES = expeditionSites(R); GEO = R.geo; KX = 111.32 * Math.cos(HOME.lat * Math.PI / 180); }
 const numIn = (x, lo, hi) => { x = +x; return Number.isFinite(x) && x >= lo && x <= hi ? x : null; };
 const cleanStr = (x, n) => typeof x === 'string' ? x.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, n) : '';
 const kmFrom = (h, la, lo) => Math.hypot((lo - h.lon) * 111.32 * Math.cos(h.lat * Math.PI / 180), (la - h.lat) * 110.57);
@@ -1277,6 +1284,9 @@ const shopHint = k => CORE.includes(k) ? '水族店常駐' : dailyStock().items.
 function msToMidnight(){ const d = new Date(), m = new Date(d); m.setHours(24, 0, 0, 0); return m - d; }
 function fmtHMS(ms){ const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 3600) + ':' + String(Math.floor(t / 60) % 60).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
 const DECOS = {
+  moonrelic:{name:'沉月方尖碑',price:2200,comfort:20,w:58,h:100,wild:true,desc:'沉沒文明留下的月形符文石碑。'},
+  abysscrystal:{name:'深淵星晶簇',price:1600,comfort:16,w:78,h:65,wild:true,desc:'在深海裂縫形成的藍紫色晶體。'},
+  pearlcompass:{name:'古代珍珠羅盤',price:3000,comfort:22,w:68,h:48,wild:true,desc:'沉月深淵的古老航海收藏品。'},
   marimo: {name:'毬藻',   price:30,  comfort:6,  w:32,  h:30,  desc:'毛茸茸的綠色小球。'},
   rock:   {name:'青龍石', price:60,  comfort:6,  w:84,  h:52,  desc:'水草造景常用的灰色紋路石。'},
   vallis: {name:'苦草',   price:80,  comfort:10, w:76,  h:190, plant:true, desc:'細長的葉子會跟著水流擺動，魚喜歡在附近產卵。'},
@@ -1471,6 +1481,9 @@ Object.assign(BASE, {
 });
 
 const PAL = {
+  moonlantern:[{b1:'#174d78',b2:'#b9faff',fin:'rgba(100,220,255,.65)',lat:'#aaffff'},{b1:'#583487',b2:'#efd5ff',fin:'rgba(195,125,255,.65)',lat:'#ffceff'}],
+  abyssribbon:[{b1:'#23384d',b2:'#c7e6f3',fin:'rgba(130,190,220,.7)',belly:'#e6faff',mottle:'rgba(30,70,110,.45)'},{b1:'#36244f',b2:'#b7a0e9',fin:'rgba(170,120,230,.7)',belly:'#e9dcff',mottle:'rgba(70,30,100,.4)'}],
+  crystalfin:[{b1:'#346b9e',b2:'#d8f9ff',fin:'rgba(120,230,255,.7)',lat:'#eaffff'},{b1:'#a14d8b',b2:'#ffe1f7',fin:'rgba(255,150,220,.7)',lat:'#fff0fa'}],
   guppy:[{t1:'#ff9b3d',t2:'#ff3f6c'},{t1:'#52c6ff',t2:'#7a5cff'},{t1:'#ffd447',t2:'#ff7a37'},{t1:'#ff63a8',t2:'#39d2c6'},{t1:'#f4f4f4',t2:'#ff4f4f'}],
   neon:[{}], cory:[{}], oto:[{}], rasbora:[{}], rummy:[{}], loach:[{}], gourami:[{}], pleco:[{}], puffer:[{}], ghost:[{}], cherry:[{}], amano:[{}],
   goldfish:[{b1:'#e2500c',b2:'#ffb35c',f1:'rgba(255,135,45,.95)',f2:'rgba(255,195,125,.3)'},{b1:'#efe8df',b2:'#ffffff',f1:'rgba(255,255,255,.92)',f2:'rgba(255,235,225,.28)',patch:'#e23a1f'},{b1:'#e3a015',b2:'#ffe08a',f1:'rgba(255,200,80,.92)',f2:'rgba(255,232,165,.3)'}],
@@ -1839,7 +1852,7 @@ function migrate(s, skipTanks){
   s.fish = (Array.isArray(s.fish) ? s.fish : []).filter(f => f && SPECIES[f.sp]).map(cleanFish);
   s.region = storedRegion(s.region);
   if (!s.region && (s.expoLast || (Array.isArray(s.trips) && s.trips.length) || (Array.isArray(s.expoLog) && s.expoLog.length))) s.region = {builtin:'taichung'};
-  const RS = (regionData(s.region) || {}).sites || {};
+  const RS = expeditionSites(regionData(s.region));
   s.trips = (Array.isArray(s.trips) ? s.trips : []).filter(t => t && RS[t.site] && t.d && SPECIES[t.d.sp] && t.out).slice(0, MAXTRIPS).map(t => ({id:String(t.id || uid()), site:t.site, start:+t.start || Date.now(), end:+t.end || Date.now(), d:cleanFish(t.d),
     out:{dead:t.out.dead ? 1 : 0, coins:Math.max(0, t.out.coins | 0), deco:DECOS[t.out.deco] ? t.out.deco : '', friend:SPECIES[t.out.friend] ? t.out.friend : '', sick:t.out.sick ? 1 : 0, tale:Math.max(0, t.out.tale | 0)}}));
   s.expoLog = (Array.isArray(s.expoLog) ? s.expoLog : []).filter(e => e && typeof e.txt === 'string').slice(0, 8).map(e => ({t:+e.t || 0, txt:e.txt.slice(0, 160)}));
@@ -4602,6 +4615,14 @@ function drawDecoShape(c, dc, t){
   c.lineCap = 'round'; c.lineJoin = 'round';
   if (PDRAW[dc.k]) { PDRAW[dc.k](c, g, t, dc); return; }
   switch (dc.k) {
+    case 'moonrelic': {
+      c.fillStyle='#23354c'; c.beginPath(); c.moveTo(-25,0);c.lineTo(-18,-77);c.lineTo(0,-98);c.lineTo(18,-77);c.lineTo(25,0);c.closePath();c.fill();
+      c.strokeStyle='#6ed8ed';c.lineWidth=2;c.stroke();c.beginPath();c.arc(0,-56,12,.6,5.7);c.stroke();c.beginPath();c.moveTo(0,-38);c.lineTo(0,-12);c.stroke();break;}
+    case 'abysscrystal': {
+      for(let i=0;i<5;i++){const x=(i-2)*14,h=30+30*(1-Math.abs(i-2)/3);c.fillStyle=i%2?'#7866bf':'#397fa8';c.beginPath();c.moveTo(x-10,0);c.lineTo(x-8,-h+12);c.lineTo(x,-h);c.lineTo(x+9,-h+12);c.lineTo(x+11,0);c.closePath();c.fill();c.strokeStyle='#b2edff';c.lineWidth=1.5;c.stroke();}break;}
+    case 'pearlcompass': {
+      c.fillStyle='#80613a';c.beginPath();c.ellipse(0,-19,32,19,0,0,Math.PI*2);c.fill();c.strokeStyle='#e9c98b';c.lineWidth=3;c.stroke();c.fillStyle='#d8e9ee';c.beginPath();c.ellipse(0,-19,24,13,0,0,Math.PI*2);c.fill();c.fillStyle='#315b75';c.beginPath();c.moveTo(0,-31);c.lineTo(5,-19);c.lineTo(0,-7);c.lineTo(-5,-19);c.closePath();c.fill();break;}
+
     case 'vallis':
       for (const b of g.blades) { const seg = 9, Lp = [], Rp = [], Cp = []; let px = b.dx, py = 0;
         for (let i = 0; i <= seg; i++) { const q = i / seg, a = b.lean * q + Math.sin(t * .9 + b.ph + q * 1.8) * .16 * q, wd = b.w * (1 - q * .72) / 2 * (b.tw ? Math.cos(q * b.tw + b.tp) : 1);
