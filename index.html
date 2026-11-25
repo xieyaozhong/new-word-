@@ -5581,14 +5581,28 @@ function drawRunner(r){
     ctx.fillStyle = rg(ctx, 0, 0, 0, 0, 0, L * .75, [[0,alpha(aura, a)],[1,alpha(aura, 0)]]); ctx.fillRect(-L, -L, L * 2, L * 2); ctx.restore(); }
   if (sp.camo) ctx.globalAlpha = Math.hypot(r.vx, r.vy) < 6 * U ? .45 : .9;
   paintFish(ctx, r.d.sp, P, L, r.phase, r.amp, r, r.fx, r.d.seed);
-  if (r.d.ich) drawIch(ctx, L, r.d.seed);
+  if (r.d.ich) drawIch(ctx, L, r.d.seed, r.d.ich);
   if (tier2 || r.d.rare === 'metal') drawStars(ctx, P, L, rt.t, r.d.rare === 'metal' ? 3 : 7);
   ctx.restore();
   if (r.bur) ctx.restore();
 }
-function drawIch(c, L, seed){
-  c.fillStyle = 'rgba(255,255,255,.95)';
-  for (let i = 0; i < 11; i++) { const a = ((seed * (i + 7) * 2654435761) >>> 0) / 4294967296, b = ((seed * (i + 3) * 40503) >>> 0) % 1000 / 1000; dot(c, L * (.3 - a * .62), L * (b - .5) * .2, Math.max(.9, L * .015)); }
+function drawIch(c, L, seed, infectedAt){
+  const age = Math.max(0, Date.now() - infectedAt);
+  const severity = Math.min(1, age / (6 * 3600000));
+  const count = Math.round(12 + 24 * severity);
+  let n = (Number(seed) >>> 0) || 1;
+  const rnd = () => { n = (Math.imul(n, 1664525) + 1013904223) >>> 0; return n / 4294967296; };
+  c.save();
+  for (let i = 0; i < count; i++) {
+    const x = L * (-.23 + rnd() * .48);
+    const y = L * (rnd() - .5) * .15 * Math.sqrt(Math.max(.1, 1 - Math.pow(x / (L * .29), 2)));
+    const radius = Math.max(1.25, L * (.018 + rnd() * .009));
+    c.fillStyle = 'rgba(35,48,60,.72)';
+    dot(c, x, y, radius + .65);
+    c.fillStyle = '#fffdf5';
+    dot(c, x, y, radius);
+  }
+  c.restore();
 }
 function ichTick(){
   const now = Date.now(), healthy = state.fish.filter(f => !f.ich && !isInv(f) && !f.box && !(geneFx(f) || {}).hardy), sick = state.fish.filter(f => f.ich && !f.box);
