@@ -2102,6 +2102,8 @@ function preyFor(pd){
 }
 function visitWindow(){ const d = new Date(), slot = Math.floor(d.getHours() / 4); return {key:refreshKey() + '#' + slot, end:new Date(d.getFullYear(), d.getMonth(), d.getDate(), (slot + 1) * 4).getTime()}; }
 /* Player-specific visitor picks per four-hour slot, stable on reload. */
+function npcDead(k){return k==='chang' && !!(state.story&&state.story.moreau&&state.story.moreau.done);}
+function npcZombie(k){return k==='lin' && !!(state.story&&state.story.moreau&&state.story.moreau.done);}
 function baseVisitor(){
   const w = visitWindow(), R0 = state.visitRot && state.visitRot.key === w.key ? state.visitRot : null;
   if (R0 && R0.n > 0) { const n = pickNext(w.key, R0); return n ? {npc:n, key:w.key + '/' + R0.n, end:w.end} : null; }
@@ -2110,15 +2112,15 @@ function baseVisitor(){
 }
 function currentVisitor(){
  const v=baseVisitor(), w=visitWindow(), q=state.npcConflict;
- if(v && q && q.key===w.key && q.winner && v.npc===q.primary) return {npc:q.winner,key:q.winner===v.npc?v.key:w.key+'/conflict',end:w.end};
- return v;
+ if(v && q && q.key===w.key && q.winner && !npcDead(q.winner) && v.npc===q.primary) return {npc:q.winner,key:q.winner===v.npc?v.key:w.key+'/conflict',end:w.end};
+ return v && !npcDead(v.npc) ? v : null;
 }
 function conflictNow(){
  const v=baseVisitor(),w=visitWindow(),q=state.npcConflict;
  if(!v || (q && q.key===w.key) || (state.firstVisit && state.firstVisit.key===w.key) || NPCS[v.npc].cat) return null;
  const R=rng(hashStr('conflict-'+personalSeed()+'-'+w.key)),slot=+w.key.split('#')[1];
  if(R()>=.28)return null;
- const pool=NPC_KEYS.filter(k=>k!==v.npc&&!NPCS[k].cat&&(!NPCS[k].slots||NPCS[k].slots.includes(slot)));
+ const pool=NPC_KEYS.filter(k=>k!==v.npc&&!npcDead(k)&&!NPCS[k].cat&&(!NPCS[k].slots||NPCS[k].slots.includes(slot)));
  if(!pool.length)return null;
  return {key:w.key,primary:v.npc,other:pool[Math.floor(R()*pool.length)],topic:Math.floor(R()*4)};
 }
@@ -2139,7 +2141,7 @@ function renderConflict(q){
 /* Visitors with an unfinished story line are three times as likely to be picked. */
 const visitWt = k => { const q = storyOfNpc(k); return q && !(state.story[q] && state.story[q].done) ? 3 : 1; };
 /* After a visitor finishes a story chapter they leave and someone else walks in for the rest of the slot. */
-function pickNext(key, R0){ const R = rng(hashStr('npc-next-' + personalSeed() + '-' + key + '-' + R0.n)), slot = +key.split('#')[1], ok = k => !R0.gone.includes(k) && (!NPCS[k].slots || NPCS[k].slots.includes(slot));
+function pickNext(key, R0){ const R = rng(hashStr('npc-next-' + personalSeed() + '-' + key + '-' + R0.n)), slot = +key.split('#')[1], ok = k => !npcDead(k) && !R0.gone.includes(k) && (!NPCS[k].slots || NPCS[k].slots.includes(slot));
   if (R() < .12) { const al = []; for (const k of ALIEN_NPCS) if (ok(k)) for (let i = 0; i < visitWt(k); i++) al.push(k); if (al.length) return al[(R() * al.length) | 0]; }
   const pool = []; for (const k of NPC_KEYS) if (!NPCS[k].alien && ok(k)) for (let i = 0; i < visitWt(k); i++) pool.push(k); return pool.length ? pool[(R() * pool.length) | 0] : null; }
 function rotateVisitor(npc){ const v = currentVisitor(); if (!v || v.npc !== npc) return ''; const w = visitWindow();
@@ -2150,11 +2152,11 @@ function rotateVisitor(npc){ const v = currentVisitor(); if (!v || v.npc !== npc
 function pickVisitor(key){ const R = rng(hashStr('npc-' + personalSeed() + '-' + key)), wt = visitWt;
   if (R() < .12) { const al = []; for (const k of ALIEN_NPCS) for (let i = 0; i < wt(k); i++) al.push(k); return al[(R() * al.length) | 0]; }
   const slot = +key.split('#')[1], pool = [];
-  for (const k of NPC_KEYS) if (!NPCS[k].alien && (!NPCS[k].slots || NPCS[k].slots.includes(slot))) for (let i = 0; i < wt(k); i++) pool.push(k);
+  for (const k of NPC_KEYS) if (!npcDead(k) && !NPCS[k].alien && (!NPCS[k].slots || NPCS[k].slots.includes(slot))) for (let i = 0; i < wt(k); i++) pool.push(k);
   return R() < .55 ? pool[(R() * pool.length) | 0] : null; }
 function nextVisit(npc){ const now = new Date();
   for (let i = 0; i < 42; i++) { const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(now.getHours() / 4) * 4 + i * 4), key = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate() + '~' + (state.chronoRefresh||0) + '#' + Math.floor(t.getHours() / 4);
-    const who = i === 0 ? (currentVisitor() || {}).npc : state.firstVisit && state.firstVisit.key === key ? state.firstVisit.npc : pickVisitor(key); if (who === npc) return {t, now:i === 0}; }
+    if(npcDead(npc))return null; const who = i === 0 ? (currentVisitor() || {}).npc : state.firstVisit && state.firstVisit.key === key ? state.firstVisit.npc : pickVisitor(key); if (who === npc) return {t, now:i === 0}; }
   return null; }
 function nextVisitText(npc){ const nv = nextVisit(npc), N = NPCS[npc]; if (!nv) return N.name + '這個禮拜好像沒空來店裡，過幾天再看看。'; if (nv.now) return N.name + '現在就在水族店！';
   const t = nv.t, d0 = new Date(); d0.setHours(0, 0, 0, 0); const dd = Math.round((new Date(t.getFullYear(), t.getMonth(), t.getDate()) - d0) / 864e5), h = t.getHours();
@@ -5987,6 +5989,17 @@ const npcRefuse = npc => { const f = facOf(npc); return !!f && repOf(f) <= -60; 
 const isTwNative = d => (SPECIES[d.sp].tags || []).some(t => /原生|特有/.test(t));
 const adultOf = d => growRatio(d) >= 1;
 const STORY = {
+ moreau:{npc:'moreau',title:'禁忌演化：第零號感染者',doneText:'已完結・世界命運永久改變',ch:[
+ {name:'匿名委託',say:'「林博士不肯支持我的研究。你願意成為資助者嗎？」',goal:'投入 20,000 金幣',type:'pay',cost:20000,after:'莫爾交給你一份沒有署名的研究契約。'},
+ {name:'活體圖譜',say:'「我需要多樣性，不是數量。」',goal:'同時飼養 12 種健康魚類',type:'check',prog:()=>[new Set(state.fish.filter(d=>SPECIES[d.sp].kind==='fish'&&!d.zombie&&!d.ich).map(d=>d.sp)).size,12],after:'林博士發現了研究契約，要求莫爾停止。'},
+ {name:'異常血統',say:'「自然選擇太慢了。」',goal:'交出 3 隻具有至少 3 種顯性特徵的健康成魚',type:'give',n:3,pred:d=>SPECIES[d.sp].kind==='fish'&&!SPECIES[d.sp].story&&!d.zombie&&!d.ich&&adultOf(d)&&traitsOf(d).length>=3,after:'樣本被送進封閉研究室，張醫師開始追查。'},
+ {name:'深淵回聲',say:'「沉月深淵的魚有我想要的秘密。」',goal:'交出 2 隻沉月深淵成魚',type:'give',n:2,pred:d=>['moonlantern','abyssribbon','crystalfin'].includes(d.sp)&&adultOf(d)&&!d.zombie,after:'研究室傳來不明聲響。'},
+ {name:'漫長觀測',say:'「不要急，觀察才是研究的核心。」',goal:'本章開始後等待 24 小時並完成 10 次探險出發',type:'check',base:()=>({t:Date.now(),n:state.stats.sent|0}),prog:b=>[Math.min(10,Math.max(0,(state.stats.sent|0)-(b.n|0)),Math.floor(Math.max(0,Date.now()-(b.t||Date.now()))/8640000)),10],after:'張醫師發現一份被隱藏的感染紀錄。'},
+ {name:'封鎖令',say:'「研究所被封鎖了。我需要最後一筆資金。」',goal:'投入 80,000 金幣',type:'pay',cost:80000,after:'林博士親自前往研究所，試圖阻止實驗。'},
+ {name:'零號樣本',say:'「它們已經不再是普通的魚了。」',goal:'同時持有 5 隻殭屍魚',type:'check',prog:()=>[state.fish.filter(d=>d.zombie).length,5],after:'警報響起。張醫師趕往現場救援。'},
+ {name:'最後的隔離',say:'「我們必須把剩下的魚救回來。」',goal:'目前魚缸沒有殭屍魚，且至少有 8 隻健康魚',type:'check',prog:()=>[state.fish.some(d=>d.zombie)?0:state.fish.filter(d=>SPECIES[d.sp].kind==='fish'&&!d.ich).length,8],after:'魚缸恢復平靜，但研究所已失去聯絡。'},
+ {name:'不可逆的黎明',say:'「這是最後的決定。林博士將永久轉化為殭屍，張醫師將永久死亡。完成後無法復原。」',goal:'支付 150,000 金幣並確認永久結局',type:'pay',cost:150000,btn:'確認永久結局・150,000 金幣',after:'張醫師為阻止災難而犧牲。林博士被轉化為殭屍，仍會偶爾出現在水族店。莫爾留下了研究紀錄，卻再也沒有提起那一夜。',rw:{coins:30000}}
+ ]},
   lan:{npc:'lan', fac:'cons', title:'找回溪流的聲音', unlock:['sakura', 2], ch:[
     {name:'溪流的寶石', say:'「紅斑吻鰕虎只住在台灣的溪流裡，很多地方都已經看不到了。你願意先幫我照顧兩隻嗎？」', goal:'養 2 隻紅斑吻鰕虎（可以跟阿蘭買，或去大甲溪探險遇到）', type:'check', prog:() => [countSp('goby'), 2], rw:{coins:150, rep:{cons:15}}, after:'阿蘭蹲在魚缸前看了好久：「牠們在你這裡看起來很健康！」'},
     {name:'溪流調查', say:'「我們想知道溪流現在的狀況。可以派一隻健康的魚陪調查隊去看看嗎？」', goal:'派魚去探險 1 次', type:'check', base:() => ({n:state.stats.sent | 0}), prog:b => [(state.stats.sent | 0) - (b.n | 0), 1], rw:{coins:200, rep:{cons:15}}, after:'調查報告寄來了，阿蘭說你的魚是調查隊裡最勇敢的一隻。'},
@@ -6119,7 +6132,7 @@ const storyOfNpc = npc => Object.keys(STORY).find(k => STORY[k].npc === npc);
 const storyNow = () => { const v = currentVisitor(), k = v && storyOfNpc(v.npc); return k && chapterReady(k) ? k : ''; };
 const reStory = () => { if (sheetKind === 'shop') renderShop(); else if (sheetKind === 'list') renderList(); };
 const storyHere = k => { const v = currentVisitor(); return !!v && v.npc === STORY[k].npc; };
-function advanceStory(k, choice){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch]; if (s.done || storyLocked(k) || !storyHere(k)) return;
+function advanceStory(k, choice){ const Q = STORY[k], s = storyState(k), C = Q.ch[s.ch]; if (s.done || npcDead(Q.npc) || npcZombie(Q.npc) || storyLocked(k) || !storyHere(k)) return;
   const blocked = storyRewardBlock(k); if (blocked) { toast(blocked); return; }
   let after = C.after || '', rp = Object.assign({}, (C.rw && C.rw.rep) || {});
   if (C.type === 'check') { const [a, b] = C.prog(s.b); if (a < b) return; }
@@ -6137,7 +6150,7 @@ function finishChapter(k, after, rp){ const Q = STORY[k], s = storyState(k), C =
   const rs = addRep(rp); state.stats.chapters = (state.stats.chapters | 0) + 1;
   logEv('〈' + Q.title + '〉' + C.name + '完成' + (rs ? '（' + rs + '）' : ''));
   s.ch++; s.n = 0; s.b = {}; const leave = rotateVisitor(Q.npc);
-  if (s.ch >= Q.ch.length) { s.done = 1; state.stats.stories = (state.stats.stories | 0) + 1; if (!Q.unlock) { logEv('完成劇情〈' + Q.title + '〉'); celebrate({kind:'tool', k:'yanagi', tier:3, head:'劇情完結', title:'〈' + Q.title + '〉完結', text:after + (rw.coins ? ' 獲得 ' + rw.coins + ' 金幣。' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏：' + npcAfter(Q.npc).map(anyName).join('、') + '。' + leave}); } else { const [sp, n] = Q.unlock, got = [];
+  if (s.ch >= Q.ch.length) { s.done = 1; if(k==='moreau'){logEv('張醫師永久死亡；林博士永久轉化為殭屍');state.firstVisit=null;state.npcConflict=null;} state.stats.stories = (state.stats.stories | 0) + 1; if (!Q.unlock) { logEv('完成劇情〈' + Q.title + '〉'); celebrate({kind:'tool', k:'yanagi', tier:3, head:'劇情完結', title:'〈' + Q.title + '〉完結', text:after + (rw.coins ? ' 獲得 ' + rw.coins + ' 金幣。' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏：' + npcAfter(Q.npc).map(anyName).join('、') + '。' + leave}); } else { const [sp, n] = Q.unlock, got = [];
     for (let i = 0; i < n; i++) { const d = newCreature(sp, {grow:18, sex:n > 1 ? (i ? 'f' : 'm') : undefined}); addCreature(d); got.push(d); }
     logEv('完成劇情〈' + Q.title + '〉，得到' + SPECIES[sp].name + '：' + got.map(d => d.name).join('、'));
     celebrate({kind:'fish', d:got[0], sp, tier:3, head:'劇情限定', title:'〈' + Q.title + '〉完結', text:after + (C.endText ? ' ' + C.endText : '') + ' 得到' + SPECIES[sp].name + (n > 1 ? '一對' : '') + '：' + got.map(d => '「' + d.name + '」').join('、') + '。' + (rs ? '（' + rs + '）' : '') + ' 以後' + NPCS[Q.npc].name + '來店裡時，會賣只有你買得到的私藏。' + leave}); } }
@@ -6149,12 +6162,13 @@ function renderStory(){
   for (const [f, F] of Object.entries(FACTIONS)) { const v = repOf(f), [tn, tc] = repTier(v), row = mk('div', 'fac'), top = mk('div', 'fhead'), tg = mk('span', 'ftier', tn + ' ' + (v > 0 ? '+' : '') + v); tg.style.color = tc; top.append(mk('b', '', F.name), tg);
     const bar = mk('div', 'fbar'), fill = mk('i'); fill.style.left = (v < 0 ? 50 + v / 2 : 50) + '%'; fill.style.width = Math.abs(v) / 2 + '%'; fill.style.background = v < 0 ? '#ff7a6a' : F.col; bar.appendChild(fill);
     row.append(top, bar, mk('small', '', F.desc + '成員：' + F.npcs.map(n => NPCS[n].name).join('、') + '。' + (state.facGift[f] ? '已收到「' + DECOS[FAC_GIFT[f].deco].name + '」。' : '好感 50 會送你「' + DECOS[FAC_GIFT[f].deco].name + '」。') + (v >= 70 ? '跟他們買東西打 8 折。' : v >= 30 ? '跟他們買東西打 9 折。' : v <= -60 ? '他們不肯跟你做生意。' : v <= -30 ? '跟他們買東西要多付 30%，劇情也暫停了。' : ''))); sheetBody.appendChild(row); }
-  sheetBody.appendChild(mk('h4', 'sec', '劇情'));
+  if(npcDead('chang'))sheetBody.appendChild(mk('p','foot','世界紀錄：張醫師已永久死亡；林博士已永久轉化為殭屍。')); sheetBody.appendChild(mk('h4', 'sec', '劇情'));
   for (const k of ['xiaocheng','heteacher','amu', ...Object.keys(STORY).filter(k => !['xiaocheng','heteacher','amu'].includes(k))]) renderStoryCard(k); }
 function renderStoryCard(k){ sheetBody.appendChild(storyCard(k, false)); }
 function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.npc], card = mk('div', 'story' + (s.done ? ' done' : '') + (act ? ' here' : '')), av = document.createElement('canvas'); av.width = 112; av.height = 112; av.className = 'sav';
   (N.alien ? drawAlienAvatar : drawAvatar)(av.getContext('2d'), N, 112);
   const hd = mk('div', 'shead'), ht = mk('div'); ht.append(mk('b', '', '〈' + Q.title + '〉'), mk('small', '', N.name + '・' + N.role + (Q.fac ? '・' + FACTIONS[Q.fac].name : '') + '・' + (s.done ? '已完結' : '第 ' + (s.ch + 1) + ' / ' + Q.ch.length + ' 章'))); hd.append(av, ht); card.appendChild(hd);
+  if(npcDead(Q.npc)||npcZombie(Q.npc)){card.appendChild(mk('p','goal no',npcDead(Q.npc)?'永久死亡・劇情封存':'永久感染・劇情封存'));return card;}
   if (s.done) { const C = Q.ch[Q.ch.length - 1]; card.appendChild(mk('p', 'say', (C.type === 'choice' && s.pick >= 0 ? C.choices[s.pick].after : C.after) + (C.endText ? ' ' + C.endText : ''))); card.appendChild(mk('p', 'goal ok', Q.unlock ? '✓ 已得到' + SPECIES[Q.unlock[0]].name : '✓ ' + (Q.doneText || '已完成'))); return card; }
   const C = Q.ch[s.ch]; card.append(mk('h5', '', '第 ' + (s.ch + 1) + ' 章・' + C.name), mk('p', 'say', C.say));
   { const blocked = C.type !== 'give' && storyRewardBlock(k); if (blocked) card.appendChild(mk('p', 'goal no', blocked)); }
@@ -6164,7 +6178,7 @@ function storyCard(k, act){ const Q = STORY[k], s = storyState(k), N = NPCS[Q.np
   if (!act) { const here = storyHere(k); card.appendChild(mk('p', 'when' + (here ? ' now' : ''), (here ? '🛎 ' : '🕒 ') + nextVisitText(Q.npc)));
     if (here) { const b = mk('button', 'btn', '到水族店找' + N.name); b.addEventListener('click', () => { shopTab = 'visit'; openSheet('shop'); }); card.appendChild(b); }
     return card; }
-  if (C.type === 'check' || C.type === 'pay') { const b = mk('button', 'btn', C.type === 'pay' ? (C.req && !C.req() ? C.reqText : C.btn || '付 ' + C.cost.toLocaleString('zh-TW') + ' 金幣') : ready ? '完成這一章' : '還沒達成'); b.disabled = !ready; b.addEventListener('click', () => advanceStory(k)); card.appendChild(b); }
+  if (C.type === 'check' || C.type === 'pay') { const b = mk('button', 'btn', C.type === 'pay' ? (C.req && !C.req() ? C.reqText : C.btn || '付 ' + C.cost.toLocaleString('zh-TW') + ' 金幣') : ready ? '完成這一章' : '還沒達成'); b.disabled = !ready; b.addEventListener('click', () => {if(k==='moreau'&&s.ch===Q.ch.length-1&&!b.dataset.ok){b.dataset.ok='1';b.textContent='再次確認：永久死亡與轉化';return;}advanceStory(k);}); card.appendChild(b); }
   else if (C.type === 'choice') { C.choices.forEach((o, i) => { const b = mk('button', 'btn' + (i ? ' ghost' : ''), o.label + '（' + o.cost + ' 金幣）'); b.disabled = state.coins < o.cost; b.addEventListener('click', () => { if (b.dataset.ok) advanceStory(k, i); else { b.dataset.ok = '1'; b.textContent = '確定「' + o.label + '」？再按一次'; } }); card.appendChild(b); }); card.appendChild(mk('p', 'sub', '兩個選擇都會完結這段劇情，但不同派系的反應會完全不同。')); }
   else { const ms = state.fish.filter(C.pred); if (!ms.length) card.appendChild(mk('p', 'sub', '現在缸裡沒有符合的魚。'));
     else { const pk = mk('div', 'opick'); for (const d of ms) { const b = mk('button', 'chipbtn' + (rt.stPick === d.id ? ' on' : ''), rt.stPick === d.id ? '確定交出 ' + d.name + '？' : d.name + '・' + labelOf(d)); b.addEventListener('click', () => { if (rt.stPick === d.id) giveStory(k, d); else { rt.stPick = d.id; reStory(); } }); pk.appendChild(b); } card.appendChild(pk); } }
@@ -8191,11 +8205,12 @@ function buyNpcItem(item){
 function renderVisit(v){
   const conflict=conflictNow();if(conflict){renderConflict(conflict);return;}
   sheetBody.appendChild(mk('p','sub','個人聲望：'+((state.npcPersonalRep||{})[v.npc]||0)));
-  const N = NPCS[v.npc], card = mk('div', N.alien ? 'npc alien' : 'npc'), av = document.createElement('canvas'); av.width = 144; av.height = 144; (N.alien ? drawAlienAvatar : N.cat ? drawCatAvatar : drawAvatar)(av.getContext('2d'), N, 144);
+  const N = npcZombie(v.npc) ? {...NPCS[v.npc],name:'殭屍・林博士',role:'第零號感染者',skin:'#82966a',hair:'#43543e',coat:'#526451',lines:['……魚……研究……']} : NPCS[v.npc], card = mk('div', N.alien ? 'npc alien' : 'npc'), av = document.createElement('canvas'); av.width = 144; av.height = 144; (N.alien ? drawAlienAvatar : N.cat ? drawCatAvatar : drawAvatar)(av.getContext('2d'), N, 144);
   const info = mk('div'), h = mk('h3', '', N.name); h.appendChild(mk('span', 'tag sp', N.role));
   const left = mk('p', 'sub'), b = mk('b', '', fmtHMS(v.end - Date.now())); b.id = 'visitLeft'; left.append('還會待 ', b, N.mode === 'buy' ? '・只收購不賣' : N.mode === 'show' ? '・每次限報名一隻' : N.mode === 'temple' ? '・可以擲筊問神明' : N.mode === 'kid' ? '・帶了一隻魚來' : N.mode === 'cat' ? '・肚子好像餓了' : N.mode === 'chef' ? '・收購食用魚和食材' : '・每樣限量');
   info.append(h, mk('p', 'say', '「' + N.lines[hashStr(v.key) % N.lines.length] + '」'), left); card.append(av, info); sheetBody.appendChild(card);
-  if(v.npc==='moreau'){renderVirusShop();return;}
+  if(v.npc==='moreau'){sheetBody.appendChild(storyCard('moreau',true));renderVirusShop();return;}
+  if(npcZombie(v.npc)){sheetBody.append(mk('h3','sec','感染者・林博士'),mk('p','say','「……魚……還記得……」'),mk('p','foot','林博士已永久轉化，無法再提供原本的商品與研究任務。'));return;}
   if (N.mode === 'buy') { { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } } renderCollector(v); renderAfterShop(v); return; }
   { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } }
   if (npcRefuse(v.npc)) { sheetBody.appendChild(mk('p', 'foot', N.name + '對你很不滿，不肯跟你做生意。（' + FACTIONS[facOf(v.npc)].name + '的好感要回到 -60 以上）')); return; }
