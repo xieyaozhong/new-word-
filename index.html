@@ -947,6 +947,7 @@ const STORYS = Object.keys(SPECIES).filter(k => SPECIES[k].story), SEASONAL = Ob
 const MYTHS = Object.keys(SPECIES).filter(k => SPECIES[k].myth || SPECIES[k].moon);
 const WILD = Object.keys(SPECIES).filter(k => SPECIES[k].wild), PESTS = Object.keys(SPECIES).filter(k => SPECIES[k].pest);
 const NPCS = {
+  moreau:{name:'莫爾博士',role:'病毒學家',items:[],coat:'#394d49',acc:'glasses',hair:'#b8b9b4',skin:'#d9c3a7',lines:['突變並不保證成功，請先隔離實驗魚。','小心，今天店裡的魚可能帶有殭屍病毒。','這些都是虛構的遊戲病毒。']},
   lin:   {name:'林博士', role:'魚類學家', items:['cavefish','bichir'], coat:'#f2f4f2', acc:'glasses', hair:'#2a2a2a', skin:'#f0c8a8',
           lines:['這些是研究室養出來的特殊個體，飼養條件比較嚴格。','恐龍魚是活化石，牠們的祖先比恐龍還早出現。','洞穴魚沒有眼睛，但身體兩側的感覺非常敏銳。']},
   adi:   {name:'阿迪', role:'印尼移工', items:['archer','tigerfish'], coat:'#3f8a5a', acc:'cap', capc:'#1f3f6a', hair:'#1e1a18', skin:'#c98e62',
@@ -1846,7 +1847,7 @@ function migrate(s, skipTanks){
     return {id:String(f.id || uid()), sp:f.sp, name:String(f.name || '小魚').slice(0, 32), born:+f.born || Date.now(),
       full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : clamp(+f.full || 0, 0, 100), grow:clamp(+f.grow || 0, 0, GROW_MAX), seed,
       sex:f.sex === 'm' || f.sex === 'f' ? f.sex : '', m, rare:RARES[f.rare] ? f.rare : '', gen:Math.max(1, (+f.gen || 1) | 0),
-      par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ra:S.roe ? (+f.ra || 0) : 0, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
+      par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ra:S.roe ? (+f.ra || 0) : 0, zombie:S.kind==='fish' && !!f.zombie, rage:!!f.rage, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
       pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0, ms:f.ms | 0, zz:ZZ[f.zz] ? f.zz : '', friend:typeof f.friend === 'string' ? f.friend : '', tr:f.tr ? 1 : 0};
   };
   s.fish = (Array.isArray(s.fish) ? s.fish : []).filter(f => f && SPECIES[f.sp]).map(cleanFish);
@@ -2197,7 +2198,7 @@ function syncAlgae(){ const want = Math.round(state.dirt / 100 * MAXA);
 function addDirt(n){ state.dirt = Math.min(100, state.dirt + n); syncAlgae(); }
 
 /* Breeding */
-function breedBlock(d){
+function breedBlock(d){ if(d.zombie) return '殭屍感染魚不能繁殖';
   if (isInv(d)) return '小生物不會在這個缸裡繁殖';
   if (d.ich) return '生病了（白點病），治好才能配對';
   if (SPECIES[d.sp].alien) return '外星生物沒辦法用地球的方式繁殖';
@@ -5217,6 +5218,7 @@ function drawCharm(c, x, y, s){
 /* ---------- Runtime actors ---------- */
 const fishLen = r => r.sp.len * U * (.5 + .5 * growRatio(r.d)) * r.z * (r.fx ? r.fx.size : 1);
 function runnerPal(r){
+  if(r.d.zombie) return {...r.pal,b1:'#435b43',b2:'#a1b58a',fin:'rgba(82,110,70,.75)',iris:'#ff553d'};
   const rare = r.d.rare; if (!rare) return r.pal;
   if (rare === 'rainbow') { if (!r.palR || rt.t - r.palT > .08) { r.palR = rarePal(r.pal, 'rainbow', rt.t + (r.d.seed % 7)); r.palT = rt.t; } return r.palR; }
   return r.palR || (r.palR = rarePal(r.pal, rare, 0));
@@ -5391,6 +5393,7 @@ function update(dt){
     if (rt.lightK > .5) for (let i = 0; i < ks.length; i++) for (let j = i + 1; j < ks.length; j++) { const a = ks[i], b = ks[j];
       if (Math.hypot(a.x - b.x, a.y - b.y) < 60 * U) { a.eat = b.eat = .5; rt.emotes.push({type:'heart', x:(a.x + b.x) / 2, y:Math.min(a.y, b.y) - 18 * U, t:0, life:1.4}); } } }
   predatorWarTick(dt);
+  virusTick(dt);
   for (const r of rt.fish) updateFish(r, dt, sleep);
   for (const r of rt.feeders) updateFish(r, dt, sleep);
   for (let i = rt.shocks.length - 1; i >= 0; i--) { const q = rt.shocks[i]; q.t += dt; if (q.t > .7) rt.shocks.splice(i, 1); }
@@ -5605,6 +5608,7 @@ function drawRunner(r){
   if (sp.camo) ctx.globalAlpha = Math.hypot(r.vx, r.vy) < 6 * U ? .45 : .9;
   paintFish(ctx, r.d.sp, P, L, r.phase, r.amp, r, r.fx, r.d.seed);
   if (r.d.ich) drawIch(ctx, L, r.d.seed, r.d.ich);
+  if(r.d.zombie){ctx.save();ctx.fillStyle='#e54836';dot(ctx,L*.24,-L*.055,Math.max(2,L*.028));ctx.strokeStyle='#697b43';ctx.lineWidth=Math.max(1,L*.014);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(L*(-.18+i*.12),-L*.055);ctx.lineTo(L*(-.22+i*.12),L*.055);ctx.stroke();}ctx.restore();}
   if (tier2 || r.d.rare === 'metal') drawStars(ctx, P, L, rt.t, r.d.rare === 'metal' ? 3 : 7);
   ctx.restore();
   if (r.bur) ctx.restore();
@@ -7330,7 +7334,7 @@ function wpick(list){ let x = Math.random() * list.reduce((a, q) => a + q[1], 0)
 const pct = x => x < .01 ? '<1%' : Math.round(x * 100) + '%';
 const riskCls = x => x < .04 ? 'lo' : x < .1 ? 'mid' : 'hi';
 const valueK = d => clamp(.7 + Math.sqrt(SPECIES[d.sp].value) * .12, .8, 2);
-function tripBlock(d){
+function tripBlock(d){ if(d.zombie) return '殭屍感染魚禁止探險';
   if (isInv(d)) return '小生物不能去探險';
   if (d.box) return '在隔離盒裡，先放出來';
   if (SPECIES[d.sp].alien) return '外星生物不適應地球的河川';
@@ -8181,7 +8185,7 @@ function buyNpcItem(item){
   if (item === 'feeder10') { if (state.coins < 40) return; state.coins -= 40; state.items.feeder += 10; toast('跟' + NPCS[v.npc].name + '買了 10 隻活餌魚'); }
   else if (ITEMS[item]) { const it = ITEMS[item]; if (state.coins < it.price || (it.fish && fishCount() + it.fish > capF()) || (it.tool && state.tools[item])) return; state.coins -= it.price; state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; toast(it.give()); bumpCoins(); markDirty(); renderShop(); return; }
   else { const sp = SPECIES[item], pp = npcPrice(v.npc, item); if (npcRefuse(v.npc) || state.coins < pp || (sp.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) || (sp.limit && countSp(item) >= sp.limit)) return;
-    state.coins -= pp; { const fz = facOf(v.npc); if (fz === 'star') addRep({star:2, cons:-1}); else if (fz) addRep({[fz]:1}); } const d = newCreature(item, {grow:sp.alien ? GROW_MAX : 12}); addCreature(d); toast(d.name + '（' + sp.name + '）入缸了，記得看飼養條件'); }
+    state.coins -= pp; { const fz = facOf(v.npc); if (fz === 'star') addRep({star:2, cons:-1}); else if (fz) addRep({[fz]:1}); } const d = newCreature(item, {grow:sp.alien ? GROW_MAX : 12}); shopVirus(d); addCreature(d); toast(d.name + '（' + sp.name + '）入缸了，記得看飼養條件'); }
   state.npcBuy.n[item] = (state.npcBuy.n[item] || 0) + 1; state.stats.npc++; bumpCoins(); markDirty(); renderShop();
 }
 function renderVisit(v){
@@ -8191,6 +8195,7 @@ function renderVisit(v){
   const info = mk('div'), h = mk('h3', '', N.name); h.appendChild(mk('span', 'tag sp', N.role));
   const left = mk('p', 'sub'), b = mk('b', '', fmtHMS(v.end - Date.now())); b.id = 'visitLeft'; left.append('還會待 ', b, N.mode === 'buy' ? '・只收購不賣' : N.mode === 'show' ? '・每次限報名一隻' : N.mode === 'temple' ? '・可以擲筊問神明' : N.mode === 'kid' ? '・帶了一隻魚來' : N.mode === 'cat' ? '・肚子好像餓了' : N.mode === 'chef' ? '・收購食用魚和食材' : '・每樣限量');
   info.append(h, mk('p', 'say', '「' + N.lines[hashStr(v.key) % N.lines.length] + '」'), left); card.append(av, info); sheetBody.appendChild(card);
+  if(v.npc==='moreau'){renderVirusShop();return;}
   if (N.mode === 'buy') { { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } } renderCollector(v); renderAfterShop(v); return; }
   { const SK = storyOfNpc(v.npc); if (SK && !storyState(SK).done) { sheetBody.appendChild(mk('h4', 'sec', '📖 劇情〈' + STORY[SK].title + '〉')); sheetBody.appendChild(storyCard(SK, true)); } }
   if (npcRefuse(v.npc)) { sheetBody.appendChild(mk('p', 'foot', N.name + '對你很不滿，不肯跟你做生意。（' + FACTIONS[facOf(v.npc)].name + '的好感要回到 -60 以上）')); return; }
@@ -8312,11 +8317,28 @@ function pickName(sp, pers, extraUsed){
 }
 function addCreature(d){ state.fish.push(d); const r = makeRunner(d, true); rt.fish.push(r); countCache(); dexAdd(d);
   for (let i = 0; i < 10; i++) rt.bubbles.push({x:r.x + rand(-14, 14) * U, y:r.y + rand(0, 30) * U, r:rand(1.5, 4) * U, vy:rand(40, 90) * U, ph:rand(6)}); return r; }
+const VIRUSES={
+ titan:{name:'泰坦病毒',price:1200,death:.18,fx:['giant','size','bulk']},
+ prism:{name:'幻彩病毒',price:900,death:.12,fx:['glow','cyan','xanth','opal','ruby','green']},
+ rage:{name:'狂暴病毒',price:1500,death:.22,fx:['strong','speed','giant']},
+ reverse:{name:'逆序病毒',price:800,death:.15,fx:[]},
+ chaos:{name:'混沌病毒',price:2400,death:.35,fx:[]},
+ zombie:{name:'殭屍病毒',price:1800,death:.25,fx:[]}
+};
+function shopVirus(d){if(SPECIES[d.sp].kind==='fish' && (currentVisitor()||{}).npc==='moreau' && Math.random()<.12){d.zombie=true;logEv(d.name+' 帶著殭屍病毒入缸');setTimeout(()=>toast('警告：'+d.name+' 感染殭屍病毒！'),500);}}
+function virusApply(d,k){const V=VIRUSES[k];if(!V||!state.fish.includes(d)||state.coins<V.price||d.zombie||(currentVisitor()||{}).npc!=='moreau')return;state.coins-=V.price;bumpCoins();
+ if(Math.random()<V.death){removeCreature(d);logEv(d.name+' 因虛構病毒實驗死亡');toast(d.name+' 突變失敗，死亡了');}
+ else if(k==='zombie'){d.zombie=true;toast(d.name+' 變成殭屍魚！');}
+ else{let all=genesFor(d.sp),pool=all.filter(g=>V.fx.includes(g.fx)||V.fx.includes(g.k));if(!pool.length)pool=all;d.g=d.g||{};let n=k==='chaos'?3:1;for(let i=0;i<n&&pool.length;i++){let G=pickArr(pool);if(k==='reverse')d.g[G.k]=2-(d.g[G.k]||0);else d.g[G.k]=2;pool=pool.filter(x=>x!==G);}if(k==='prism'&&!all.length)d.m=(d.m+1)%PAL[d.sp].length;if(k==='rage')d.rage=true;const r=rt.fish.find(x=>x.d===d);if(r){r.fx=geneFx(d);r.pal=palWithGenes(palette(d.sp,d.seed,d.m),r.fx);r.palR=null;}dexAdd(d);toast(d.name+' 發生突變！');}markDirty();renderShop();}
+function renderVirusShop(){sheetBody.append(mk('p','foot','虛構病毒實驗：可能永久失去魚隻。博士在店期間，普通購魚有 12% 機率感染殭屍病毒。'));
+ const sel=document.createElement('select');sel.className='trsel';sel.appendChild(new Option('選擇實驗魚',''));for(const d of state.fish.filter(d=>SPECIES[d.sp].kind==='fish'&&!d.zombie))sel.appendChild(new Option(d.name+'・'+SPECIES[d.sp].name,d.id));sheetBody.append(sel);
+ for(const [k,V] of Object.entries(VIRUSES)){const row=mk('div','item'),info=mk('div'),b=mk('button','buy',V.price+' 金幣');info.append(mk('h3','',V.name),mk('p','sub','死亡風險 '+Math.round(V.death*100)+'%'));b.disabled=state.coins<V.price;confirmBtn(b,V.price+' 金幣',()=>{const d=state.fish.find(x=>x.id===sel.value);if(!d){toast('請先選擇實驗魚');return;}virusApply(d,k);});row.append(info,b);sheetBody.append(row);}}
+function virusTick(dt){rt.virusT=(rt.virusT||0)-dt;if(rt.virusT>0)return;rt.virusT=.2;const pool=rt.fish.filter(r=>r.sp.kind==='fish'&&!r.d.box);for(const r of pool){if(!r.d.zombie&&!r.d.rage)continue;const targets=pool.filter(q=>q!==r&&(r.d.zombie?!q.d.zombie:true));if(!targets.length)continue;let q=targets.reduce((a,b)=>Math.hypot(a.x-r.x,a.y-r.y)<Math.hypot(b.x-r.x,b.y-r.y)?a:b);let dx=q.x-r.x,dy=q.y-r.y,dist=Math.hypot(dx,dy);r.tx=q.x;r.ty=q.y;r.wait=0;if(dist>1){r.vx+=dx/dist*18*U;r.vy+=dy/dist*18*U;}if(dist<Math.max(12*U,(fishLen(r)+fishLen(q))*.22)&&(r.virusBite||0)<Date.now()){r.virusBite=Date.now()+2500;r.eat=.4;q.d.full=Math.max(0,q.d.full-8);if(r.d.zombie){if(Math.random()<.65){q.d.zombie=true;logEv(q.d.name+' 被轉化成殭屍魚');toast(q.d.name+' 被感染了！');}else if(Math.random()<.15){removeCreature(q.d);logEv(q.d.name+' 死於殭屍魚攻擊');}}markDirty();}}}
 function buyCreature(k){
   const sp = SPECIES[k], price = priceOf(k);
   if (!inShop(k) || state.coins < price || (sp.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) || (sp.limit && countSp(k) >= sp.limit)) return;
   state.coins -= price; state.stats.buys++;
-  const d = newCreature(k, {grow:sp.kind === 'inv' ? 8 : 0}); addCreature(d);
+  const d = newCreature(k, {grow:sp.kind === 'inv' ? 8 : 0}); shopVirus(d); addCreature(d);
   toast(d.name + '（' + (d.sex === 'm' ? '公' : '母') + '・' + sp.morphs[d.m] + sp.name + '）入缸了'); markDirty(); renderShop();
 }
 function newDeco(k){
@@ -8440,6 +8462,7 @@ function renderFishCard(){
   const chips = mk('div', 'chips'); chips.id = 'fchips';
   const stat = (lab, id) => { const s = mk('div', 'stat'); s.append(mk('span', '', lab)); const b = mk('div', 'bar'); const i = document.createElement('i'); i.id = 's' + id; b.appendChild(i); s.append(b); const l = mk('span'); l.id = 'l' + id; s.append(l); return s; };
   box.append(pc, nb, chips);
+  if(d.zombie){const z=mk('div','breed'),b=mk('button','btn','使用解毒劑・800 金幣');z.append(mk('h4','','殭屍病毒感染'),mk('p','trait','會追咬其他魚並轉化牠們。隔離盒可阻止攻擊。'),b);b.disabled=state.coins<800;b.addEventListener('click',()=>{if(state.coins<800)return;state.coins-=800;d.zombie=false;bumpCoins();markDirty();renderFishCard();});box.append(z);}
   if(SHARK_BATTLE[d.sp]){const a=sharkStats(d);box.append(mk('p','trait','專屬技能：'+a.p[0]+'｜攻擊 '+Math.round(a.p[1]*a.atk)+'｜耐力 '+Math.round(a.armor*100)+'%｜閃避 '+Math.round(a.dodge*100)+'%｜暴擊 '+Math.round(a.crit*100)+'%｜回復 '+a.regen.toFixed(1)+'/秒'));}
   if (!noFood(d)) box.append(stat('飽足', 'Full'));
   box.append(stat('心情', 'Hap'), stat('成長', 'Grow'));
@@ -8908,7 +8931,7 @@ let tradeTab = 'market', tradePick = '', tradeMode = 'sell', tradePrice = '', tr
 const TRADE_MAX = 5, TRADE_DAYS = 7, CODE_SALT = 'pocket-aquarium-trade-v1';
 function genPid(){ const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let x = ''; for (let i = 0; i < 8; i++) x += A[(Math.random() * A.length) | 0]; return x.slice(0, 4) + '-' + x.slice(4); }
 const tradeSp = sp => { const S = SPECIES[sp]; return !!S && !S.story && !S.myth && !S.hidden && !S.pest && sp !== 'feeder'; };
-function tradeBlock(d){ const S = SPECIES[d.sp];
+function tradeBlock(d){ if(d.zombie) return '殭屍感染魚禁止交易'; const S = SPECIES[d.sp];
   if (!tradeSp(d.sp)) return S.story ? '劇情限定的生物不能交易' : '這種生物不能交易';
   if (d.box) return '在隔離盒裡，先放出來'; if (d.ich) return '生病了，治好才能交易';
   if (rt.court && (rt.court.m.d === d || rt.court.f.d === d)) return '正在約會';
