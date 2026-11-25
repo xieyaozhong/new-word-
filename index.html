@@ -1847,7 +1847,7 @@ function migrate(s, skipTanks){
     return {id:String(f.id || uid()), sp:f.sp, name:String(f.name || '小魚').slice(0, 32), born:+f.born || Date.now(),
       full:(S.kind === 'inv' && !S.eats) || S.nofeed ? 100 : clamp(+f.full || 0, 0, 100), grow:clamp(+f.grow || 0, 0, GROW_MAX), seed,
       sex:f.sex === 'm' || f.sex === 'f' ? f.sex : '', m, rare:RARES[f.rare] ? f.rare : '', gen:Math.max(1, (+f.gen || 1) | 0),
-      par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ra:S.roe ? (+f.ra || 0) : 0, zombie:S.kind==='fish' && !!f.zombie, rage:!!f.rage, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
+      par:Array.isArray(f.par) ? f.par.slice(0, 2).map(x => String(x).slice(0, 8)) : null, cd:+f.cd || 0, st:+f.st || 0, g, pa:S.pearl ? (+f.pa || Date.now() + 12 * 3.6e6) : 0, ra:S.roe ? (+f.ra || 0) : 0, socialUntil:+f.socialUntil||0, nanoColor:clamp(f.nanoColor|0,0,5), zombie:S.kind==='fish' && !!f.zombie, rage:!!f.rage, ich:S.kind === 'fish' ? (+f.ich || 0) : 0, aw:clamp(f.aw | 0, 0, 3),
       pers:S.kind === 'fish' && !S.alien ? (PERS[f.pers] ? f.pers : PERS_KEYS[Math.abs(seed) % PERS_KEYS.length]) : '', aff:clamp(+f.aff || 0, 0, 100), pet:+f.pet || 0, leap:typeof f.leap === 'string' ? f.leap : '', box:f.box === 2 ? 2 : f.box ? 1 : 0, ms:f.ms | 0, zz:ZZ[f.zz] ? f.zz : '', friend:typeof f.friend === 'string' ? f.friend : '', tr:f.tr ? 1 : 0};
   };
   s.fish = (Array.isArray(s.fish) ? s.fish : []).filter(f => f && SPECIES[f.sp]).map(cleanFish);
@@ -2183,7 +2183,7 @@ function happinessWith(d, full, dirt){
   const shy = d.pers === 'shy' ? (state.deco.filter(x => DECOS[x.k].plant).length >= 2 ? .06 : -.06) : 0;
   let cs = 1 - dirt / 100 * .85; if (SPECIES[d.sp].picky && dirt > 30) cs *= .55;
   const cm = .4 + comfort() / 100 * .6;
-  return clamp((fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)) * (d.zz === 'plant' ? 1.08 : 1) * (friendOf(d) ? 1.06 : 1) * (hasDeco('consbadge') && isTwNative(d) ? 1.1 : 1) * ((d.clnAt || 0) > Date.now() - 36e5 ? 1.05 : 1), 0, 1);
+  return clamp(((d.socialUntil||0)>Date.now()?.18:0)+(fs * .5 + cs * .3 + cm * .2 + shy + sch) * condFactor(d) * (d.ich ? .5 : 1) * (rt.hive && isNative(d) && !shieldOn() ? .75 : 1) * (1 - .3 * Math.min(1, rt.crowd || 0)) * (rt.lowO2 && SPECIES[d.sp].kind === 'fish' ? .75 : 1) * (1 - Math.min(.45, tStress(d) * .1)) * (d.zz === 'plant' ? 1.08 : 1) * (friendOf(d) ? 1.06 : 1) * (hasDeco('consbadge') && isTwNative(d) ? 1.1 : 1) * ((d.clnAt || 0) > Date.now() - 36e5 ? 1.05 : 1), 0, 1);
 }
 const happiness = d => happinessWith(d, d.full, state.dirt);
 function countCache(){ let a = 0, nf = 0, ni = 0; for (const f of state.fish) { a += SPECIES[f.sp].algae || 0; if (isInv(f)) ni++; else nf++; } rt.algaeRate = a; rt.nFish = nf; rt.nInv = ni; rt.hive = state.fish.some(f => f.sp === 'hivemind'); }
@@ -5219,7 +5219,9 @@ function drawCharm(c, x, y, s){
 
 /* ---------- Runtime actors ---------- */
 const fishLen = r => r.sp.len * U * (.5 + .5 * growRatio(r.d)) * r.z * (r.fx ? r.fx.size : 1);
+const NANO_COLORS=['#3aff8a','#36dfff','#bc7aff','#ff9b39','#ff62a8','#f8f46c'];
 function runnerPal(r){
+  if(r.d.sp==='nanoshrimp' && r.d.nanoColor){const col=NANO_COLORS[r.d.nanoColor];return {...r.pal,b1:col,b2:'#e4e8ea',dot:col,led:col,aura:col};}
   if(r.d.zombie) return {...r.pal,b1:'#435b43',b2:'#a1b58a',fin:'rgba(82,110,70,.75)',iris:'#ff553d'};
   const rare = r.d.rare; if (!rare) return r.pal;
   if (rare === 'rainbow') { if (!r.palR || rt.t - r.palT > .08) { r.palR = rarePal(r.pal, 'rainbow', rt.t + (r.d.seed % 7)); r.palT = rt.t; } return r.palR; }
@@ -5396,6 +5398,7 @@ function update(dt){
       if (Math.hypot(a.x - b.x, a.y - b.y) < 60 * U) { a.eat = b.eat = .5; rt.emotes.push({type:'heart', x:(a.x + b.x) / 2, y:Math.min(a.y, b.y) - 18 * U, t:0, life:1.4}); } } }
   predatorWarTick(dt);
   virusTick(dt);
+  socialTick(dt);
   for (const r of rt.fish) updateFish(r, dt, sleep);
   for (const r of rt.feeders) updateFish(r, dt, sleep);
   for (let i = rt.shocks.length - 1; i >= 0; i--) { const q = rt.shocks[i]; q.t += dt; if (q.t > .7) rt.shocks.splice(i, 1); }
@@ -5515,7 +5518,7 @@ function updateFish(r, dt, sleep){
   }
   if (sp.shock && rt.lightK > .2) { r.shockT = (r.shockT == null ? rand(15, 30) : r.shockT) - dt;
     if (r.shockT <= 0) { r.shockT = rand(30, 60); rt.shocks.push({x:r.x, y:r.y, t:0}); let hit = 0;
-      for (const o of rt.fish) { if (o === r || Math.hypot(o.x - r.x, o.y - r.y) > 130 * U) continue; o.stun = 1.4; o.stunBy = r; o.d.st = Date.now() + 10 * 60e3; hit++; rt.emotes.push({type:'bang', x:o.x, y:o.y - fishLen(o) * .4, t:0, life:1.2}); }
+      for (const o of rt.fish) { if (o === r || Math.hypot(o.x - r.x, o.y - r.y) > 130 * U) continue; if(o.d.box)continue; if(o.d.sp==='nanoshrimp'){o.d.nanoColor=((o.d.nanoColor||0)+1+Math.floor(Math.random()*5))%6;o.d.socialUntil=Date.now()+600000;o.d.st=0;o.stun=0;rt.emotes.push({type:'heart',x:o.x,y:o.y-fishLen(o)*.4,t:0,life:1.4});logEv(o.d.name+' 吸收電鰻能量，切換發光體色');markDirty();continue;} o.stun = 1.4; o.stunBy = r; o.d.st = Date.now() + 10 * 60e3; hit++; rt.emotes.push({type:'bang', x:o.x, y:o.y - fishLen(o) * .4, t:0, life:1.2}); }
       if (hit) { if (!rt.warnedShock) { rt.warnedShock = true; toast(d.name + '（電鰻）放電了！附近的魚被電得發麻'); } markDirty(); } } }
   if (sp.worms) { r.wormT = (r.wormT == null ? rand(25, 60) : r.wormT) - dt; if (r.wormT <= 0) { r.wormT = rand(70, 140) / (r.fx ? r.fx.coin : 1); if (rt.food.filter(q => q.kind === 'worm').length < 3) rt.food.push({x:clamp(r.x + rand(-8, 8) * U, 10, W - 10), y:r.y - L * .35, t:.6, landed:false, lt:0, wob:rand(6), kind:'worm'}); } }
   if (sp.spit && rt.lightK > .5) { r.spitT = (r.spitT == null ? rand(8, 16) : r.spitT) - dt;
@@ -8348,6 +8351,13 @@ function virusApply(d,k){const V=VIRUSES[k];if(!V||!state.fish.includes(d)||stat
 function renderVirusShop(){sheetBody.append(mk('p','foot','虛構病毒實驗：可能永久失去魚隻。博士在店期間，普通購魚有 12% 機率感染殭屍病毒。'));
  const sel=document.createElement('select');sel.className='trsel';sel.appendChild(new Option('選擇實驗魚',''));for(const d of state.fish.filter(d=>SPECIES[d.sp].kind==='fish'&&!d.zombie))sel.appendChild(new Option(d.name+'・'+SPECIES[d.sp].name,d.id));sheetBody.append(sel);
  for(const [k,V] of Object.entries(VIRUSES)){const row=mk('div','item'),info=mk('div'),b=mk('button','buy',V.price+' 金幣');info.append(mk('h3','',V.name),mk('p','sub','死亡風險 '+Math.round(V.death*100)+'%'));b.disabled=state.coins<V.price;confirmBtn(b,V.price+' 金幣',()=>{const d=state.fish.find(x=>x.id===sel.value);if(!d){toast('請先選擇實驗魚');return;}virusApply(d,k);});row.append(info,b);sheetBody.append(row);}}
+function socialTick(dt){
+ rt.socialT=(rt.socialT||0)-dt;if(rt.socialT>0)return;rt.socialT=12;
+ const pool=rt.fish.filter(r=>!r.d.box&&!r.d.zombie&&!r.d.rage);
+ for(const a of pool){if((a.d.socialUntil||0)>Date.now())continue;
+ const b=pool.find(q=>q!==a&&Math.hypot(a.x-q.x,a.y-q.y)<65*U&&((a.d.sp==='remora'&&/shark|hammerhead|megalodon/.test(q.d.sp))||(a.sp.school&&q.sp.school&&a.d.sp!==q.d.sp&&a.d.pers==='playful'&&q.d.pers==='playful')||(a.d.sp==='moonlantern'&&q.d.sp==='crystalfin')));
+ if(!b)continue;for(const r of [a,b]){r.d.socialUntil=Date.now()+180000;rt.emotes.push({type:'heart',x:r.x,y:r.y-fishLen(r)*.4,t:0,life:1.4});}logEv(a.d.name+' 與 '+b.d.name+' 產生友善互動');markDirty();
+ }}
 function virusTick(dt){rt.virusT=(rt.virusT||0)-dt;if(rt.virusT>0)return;rt.virusT=.2;const pool=rt.fish.filter(r=>r.sp.kind==='fish'&&!r.d.box);for(const r of pool){if(!r.d.zombie&&!r.d.rage)continue;const targets=pool.filter(q=>q!==r&&(r.d.zombie?!q.d.zombie:true));if(!targets.length)continue;let q=targets.reduce((a,b)=>Math.hypot(a.x-r.x,a.y-r.y)<Math.hypot(b.x-r.x,b.y-r.y)?a:b);let dx=q.x-r.x,dy=q.y-r.y,dist=Math.hypot(dx,dy);r.tx=q.x;r.ty=q.y;r.wait=0;if(dist>1){r.vx+=dx/dist*18*U;r.vy+=dy/dist*18*U;}if(dist<Math.max(12*U,(fishLen(r)+fishLen(q))*.22)&&(r.virusBite||0)<Date.now()){r.virusBite=Date.now()+2500;r.eat=.4;q.d.full=Math.max(0,q.d.full-8);if(r.d.zombie){if(Math.random()<.65){q.d.zombie=true;logEv(q.d.name+' 被轉化成殭屍魚');toast(q.d.name+' 被感染了！');}else if(Math.random()<.15){removeCreature(q.d);logEv(q.d.name+' 死於殭屍魚攻擊');}}markDirty();}}}
 function buyCreature(k){
   const sp = SPECIES[k], price = priceOf(k);
@@ -8578,10 +8588,10 @@ function updateFishCard(){
   $('#sHap').style.width = (hap * 100).toFixed(0) + '%'; $('#sHap').style.backgroundColor = col(hap);
   $('#lHap').textContent = hap >= .75 ? '開心' : hap >= .5 ? '還不錯' : hap >= .3 ? '有點悶' : '不開心';
   $('#sGrow').style.width = (g * 100).toFixed(0) + '%'; $('#lGrow').textContent = stageName(d);
-  const chips = $('#fchips'), key = [d.sex, d.m, d.rare, stageName(d), days, d.aw, d.sp].join();
+  const chips = $('#fchips'), key = [d.sex, d.m, d.rare, stageName(d), days, d.aw, d.sp, d.nanoColor, (d.socialUntil||0)>Date.now()].join();
   if (chips.dataset.k !== key) { chips.dataset.k = key; chips.innerHTML = '';
     if (!inv) chips.appendChild(mk('span', 'chip ' + d.sex, d.sex === 'm' ? '♂ 公' : '♀ 母'));
-    chips.appendChild(mk('span', 'chip', S.morphs[d.m]));
+    chips.appendChild(mk('span', 'chip', S.morphs[d.m])); if(d.sp==='nanoshrimp'&&d.nanoColor)chips.appendChild(mk('span','chip','充電色・'+['翠綠','冰藍','紫晶','琥珀','玫紅','金黃'][d.nanoColor]));if((d.socialUntil||0)>Date.now())chips.appendChild(mk('span','chip','友善互動・心情提升'));
     if (d.rare) { const t = mk('span', 'chip', RARES[d.rare].name + '・' + TIERS[RARES[d.rare].tier].name); t.style.color = RARES[d.rare].col; chips.appendChild(t); }
     if (S.mystery) { const t = mk('span', 'chip', '神秘魚種'); t.style.color = TIERS[3].col; chips.appendChild(t); }
     if (d.aw) { const t = mk('span', 'chip', '品評會' + ['', '金獎', '銀獎', '銅獎'][d.aw]); t.style.color = ['', '#f5c451', '#d8e2ea', '#e0a070'][d.aw]; chips.appendChild(t); }
