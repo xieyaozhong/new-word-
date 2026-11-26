@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const swSource = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const updaterSource = fs.readFileSync(path.join(root, 'pwa-updates.js'), 'utf8');
 const scope = 'https://example.test/new-word-/';
-const version = '2026.11.25.1';
+const version = '2026.11.27.1';
 const flush = async () => { for (let i = 0; i < 30; i++) await Promise.resolve(); };
 class Events {
   constructor() { this.listeners = {}; }

@@ -170,10 +170,12 @@ async function runChecks() {
   assert.deepEqual(copy(migrate(copy(migrated))), copy(migrated), 'Migration must be stable across reloads');
   console.log('PASS: older save preserves coins, fish identity, collection and story progress; second migration is stable.');
 
-  const expansionIds = ['celestialdanio','kubotai','espei','silvertip','blackneon','serpae','threadfin','forktail','honeygourami','pygmycory','peacockgoby','hillstream','vampirefan','pompomcrab','malaysiansnail','spixisnail','seedshrimp','asellus'];
-  if (expansionIds.every(key => SPECIES[key])) {
+  const expansionIds = ['celestialdanio','kubotai','espei','silvertip','blackneon','serpae','threadfin','forktail','honeygourami','pygmycory','peacockgoby','hillstream','vampirefan','pompomcrab','malaysiansnail','spixisnail','seedshrimp','asellus','octopus','blacktipshark','tigershark','blueshark','whiteshark','hammerhead','goblinshark','remora'];
+  assert(Object.keys(SPECIES).length >= 217, 'The merged catalog must retain the original 206 species and 11 upstream additions');
+  {
     for (const key of expansionIds) {
       const species = SPECIES[key];
+      assert(species && species.expansion && EXPANSION_SPECIES.includes(key), key + ': missing expansion creature');
       assert(species.kind === 'fish' ? SHOP_FISH.includes(key) : INVS.includes(key), key + ': unavailable from standard shop catalog');
       reset();
       const creature = newCreature(key, {name: '新朋友', m: Math.max(0, species.morphs.length - 1)});
@@ -183,8 +185,49 @@ async function runChecks() {
       assert.equal(loaded.fish[0].m, creature.m, key + ': morph lost on save load');
       assert(loaded.dex[key], key + ': dex lost on save load');
     }
-    console.log('PASS: all 18 expansion creatures are in the shop catalog and survive save/reload with their morph and dex record.');
-  } else console.log('PENDING: expansion species have not all been written yet.');
+    assert.equal(SPECIES.octopus.morphs.length, 12); assert.equal(genesFor('octopus').length, 30);
+    console.log(`PASS: all ${expansionIds.length} expansion creatures are in the shop catalog and survive save/reload with their morph and dex record.`);
+  }
+
+  // Stock is personal, deterministic and shared by every aquarium. Expansion
+  // creatures participate in rotation rather than bypassing the shop gate.
+  reset(); state.pid = 'ABCD-EFGH'; state.chronoRefresh = 0; stockCache = null;
+  const stockBefore = copy(dailyStock()), visitorBefore = currentVisitor(), eventBefore = todayEv();
+  assert.equal(stockBefore.items.length, STOCK_FISH + STOCK_INV);
+  assert.equal(new Set(stockBefore.items).size, stockBefore.items.length);
+  assert.equal(stockBefore.items.filter(k => SPECIES[k].kind === 'fish').length, STOCK_FISH);
+  assert.equal(stockBefore.items.filter(k => SPECIES[k].kind === 'inv').length, STOCK_INV);
+  assert(stockBefore.items.includes(stockBefore.sale)); assert(stockBefore.plants.includes(stockBefore.psale));
+  assert(CORE.every(inShop));
+  state = migrate(copy(state)); stockCache = null; evCache = {k:'',v:''};
+  assert.deepEqual(copy(dailyStock()), stockBefore, 'Reloading must retain personal stock and discounts');
+  assert.deepEqual(copy(currentVisitor()), copy(visitorBefore), 'Reloading must retain the same visitor');
+  assert.equal(todayEv(), eventBefore, 'Reloading must retain the same daily event');
+  const stockSignatures = new Set(), offered = new Set();
+  for (let i = 0; i < 256; i++) {
+    state.pid = 'QA-PLAYER-' + i; stockCache = null;
+    const stock = dailyStock(); stockSignatures.add(stock.items.join(','));
+    for (const k of stock.items) { offered.add(k); assert(inShop(k)); }
+    for (const k of expansionIds) assert.equal(inShop(k), stock.items.includes(k), k + ': expansion stock must rotate');
+  }
+  assert(stockSignatures.size > 1, 'Different players must receive different stock');
+  for (const k of expansionIds) assert(offered.has(k), k + ': never offered across personal stock samples');
+  state.pid = 'ABCD-EFGH'; stockCache = null;
+  W = 800; H = 600; U = DPR = 1; sandTop = 500; initRuntime();
+  const renderShopForStock = renderShop, visitorForStock = currentVisitor;
+  renderShop = () => {}; currentVisitor = () => null;
+  state.coins = 99999; activateShopChrono(); assert.equal(state.coins, 99999); assert.equal(state.chronoRefresh, 0);
+  state.coins = 250000; state.visitRot = {key:'previous',n:2,gone:['lin']}; state.npcConflict = {key:'previous'}; state.firstVisit = {key:'previous',npc:'lin'};
+  const clockBefore = state.created, fishBeforeChrono = copy(state.fish);
+  activateShopChrono(); assert.equal(state.coins, 150000); assert.equal(state.chronoRefresh, 1);
+  assert.equal(state.visitRot, null); assert.equal(state.npcConflict, null); assert.equal(state.firstVisit, null);
+  assert.equal(state.created, clockBefore); assert.deepEqual(copy(state.fish), fishBeforeChrono, 'Shop refresh must not age or mutate fish');
+  const refreshed = copy(dailyStock()); assert.notEqual(refreshed.key, stockBefore.key);
+  state = migrate(copy(state)); stockCache = null; assert.deepEqual(copy(dailyStock()), refreshed, 'Paid refresh must survive save/reload');
+  const unavailable = expansionIds.find(k => !inShop(k)), cashBeforeRejectedBuy = state.coins, countBeforeRejectedBuy = state.fish.length;
+  assert(unavailable); buyCreature(unavailable); assert.equal(state.coins, cashBeforeRejectedBuy); assert.equal(state.fish.length, countBeforeRejectedBuy);
+  renderShop = renderShopForStock; currentVisitor = visitorForStock;
+  console.log('PASS: personal shop stock and events survive reload; all companions rotate; insufficient funds and unstocked purchases are blocked; the 100,000-coin refresh persists without aging fish.');
 
   reset();
   Object.assign(dexFilter, {query:' 孔雀魚 ', kind:'all', discovery:'all'});
@@ -209,7 +252,7 @@ async function runChecks() {
 
   const originalNow = Date.now, originalRandom = Math.random;
   const fixedNow = originalNow(); Date.now = () => fixedNow; Math.random = () => .91;
-  const event = key => { evCache = {k:dayKey(), v:key}; };
+  const event = key => { assert(!key || DAY_EVENTS[key], 'Unknown daily event ' + key); evCache = {k:refreshKey()+'-'+personalSeed(), v:key}; };
   reset(); W = 800; H = 600; U = DPR = 1; sandTop = 500; initRuntime();
   event(''); const dirt = dirtRate(); event('clearwater'); assert(Math.abs(dirtRate() - dirt * .7) < 1e-8);
   state.deco = []; state.museum = {}; event(''); assert.equal(tipAmount({score:100}), 300);
@@ -223,6 +266,61 @@ async function runChecks() {
   assert(Math.abs(survey.coins - ordinary.coins * 1.3) <= 1);
   event(''); Math.random = originalRandom;
   console.log('PASS: new daily events change dirt accumulation, feeding growth, tips, expedition risk and rewards.');
+
+  reset(); state.region = {builtin:'taichung'}; applyRegion(state.region); initRuntime();
+  assert(SITES.moonabyss, 'The new expedition site must be added to the active region');
+  for (const [sp, weight] of SITES.moonabyss.friends) { assert(SPECIES[sp] && WILD.includes(sp)); assert(weight > 0); }
+  for (const k of SITES.moonabyss.decos) assert(DECOS[k] && DECOS[k].wild);
+  const moonTraveler = newCreature('moonlantern', {name:'沉月深淵裡的長名字探險朋友',grow:GROW_MAX,full:90});
+  state.fish = [moonTraveler]; initRuntime(); Math.random = () => .91; event(''); startTrip(moonTraveler,'moonabyss');
+  assert.equal(state.trips.length,1); const moonTrip = copy(state.trips[0]);
+  state = prepareSave(JSON.stringify(state));
+  for (const [key,value] of Object.entries(moonTrip)) if(key!=='d') assert.deepEqual(copy(state.trips[0][key]),value,'Pending expedition field lost: '+key);
+  for (const [key,value] of Object.entries(moonTrip.d)) assert.deepEqual(copy(state.trips[0].d[key]),value,'Traveling creature field lost: '+key);
+  assert.equal(state.trips[0].d.name,moonTraveler.name,'Long fish names must survive migration');
+  Math.random = originalRandom;
+  console.log('PASS: moon-abyss species/decor references and pending expeditions with long fish names survive import.');
+
+  for (const [a,b,,kind] of SOCIAL_RULES) {
+    assert(SPECIES[a] && (b==='*' || SPECIES[b]), 'Social rule references a missing creature');
+    assert(['coin','color','mimic','calm','food','race','rival','clean','soothe'].includes(kind));
+  }
+  function socialPair(a,b) {
+    reset(); state.fish = [a,b].map((sp,i)=>Object.assign(newCreature(sp,{full:40,grow:GROW_MAX,g:{},rare:'',m:0}),{seed:i+1})); initRuntime();
+    for (const r of rt.fish) { r.x=200; r.y=200; r.d.pers='shy'; }
+    rt.socialT=0; return rt.fish;
+  }
+  let pair = socialPair('cory','cherry'); socialTick(1);
+  assert.equal(pair[0].d.full,45); assert(pair.every(r=>r.d.socialCd>fixedNow));
+  rt.socialT=0; socialTick(1); assert.equal(pair[0].d.full,45,'Social cooldown must prevent repeated feeding rewards');
+  pair = socialPair('oto','goldclam'); state.dirt=9; socialTick(1); assert.equal(state.dirt,7);
+  pair = socialPair('octopus','rainbowfish');
+  const partnerColor = [runnerPal(pair[1]).b1,runnerPal(pair[1]).b2].find(c=>typeof c==='string'&&/^#[0-9a-f]{6}$/i.test(c));
+  assert(partnerColor,'The mimic partner must supply a real body palette color'); socialTick(1);
+  assert.equal(pair[0].d.socialColor,partnerColor,'Octopus must sample its interaction partner rather than a random hue');
+  assert(!pair[1].d.socialColor,'The partner must retain its own coloration');
+  const socialSaved = prepareSave(JSON.stringify(state));
+  assert.equal(socialSaved.fish[0].socialColor,partnerColor); assert.equal(socialSaved.fish[0].socialColorUntil,fixedNow+120000);
+  assert.equal(socialSaved.fish[0].socialCd,fixedNow+180000);
+  pair = socialPair('cory','cherry'); pair[1].x=600; socialTick(1); assert.equal(pair[0].d.full,40,'Distant animals must not interact');
+  pair = socialPair('cory','cherry'); pair[1].d.box=1; socialTick(1); assert.equal(pair[0].d.full,40,'Isolated animals must not interact');
+  console.log('PASS: social rules reference valid species; food/cleaning effects, cooldown, distance/isolation guards and partner-sampled octopus colors behave and persist.');
+
+  reset(); initRuntime(); const virusRenderer = renderShop, virusVisitor = currentVisitor; renderShop=()=>{};
+  const experiment = newCreature('guppy',{name:'實驗魚'}); state.fish=[experiment]; initRuntime(); state.coins=10000;
+  currentVisitor=()=>null; virusApply(experiment,'zombie'); assert.equal(state.coins,10000); assert(!experiment.zombie);
+  currentVisitor=()=>({npc:'moreau'}); state.coins=VIRUSES.zombie.price-1; virusApply(experiment,'zombie'); assert(!experiment.zombie); assert.equal(state.coins,VIRUSES.zombie.price-1);
+  state.coins=10000; Math.random=()=>.99; virusApply(experiment,'zombie'); assert(experiment.zombie); assert.equal(state.coins,10000-VIRUSES.zombie.price);
+  virusApply(experiment,'zombie'); assert.equal(state.coins,10000-VIRUSES.zombie.price,'Already infected fish cannot be charged twice');
+  assert(prepareSave(JSON.stringify(state)).fish[0].zombie,'Infection state must survive import');
+  const doomed = newCreature('guppy',{name:'失敗樣本'}); state.fish=[doomed]; initRuntime(); const beforeExperiment=state.coins; Math.random=()=>0;
+  virusApply(doomed,'titan'); assert.equal(state.fish.length,0); assert.equal(state.coins,beforeExperiment-VIRUSES.titan.price);
+  Math.random=originalRandom; renderShop=virusRenderer; currentVisitor=virusVisitor;
+  state.story.moreau={ch:STORY.moreau.ch.length,b:{},n:0,done:1,pick:-1}; state=migrate(copy(state));
+  assert(npcDead('chang')); assert(npcZombie('lin'));
+  state.firstVisit={key:visitWindow().key,npc:'chang'}; assert.equal(currentVisitor(),null,'The completed story must prevent a dead NPC from reappearing');
+  for(let i=0;i<64;i++){const key=refreshKey()+'#'+(i%6);state.chronoRefresh=i;assert.notEqual(pickVisitor(key),'chang');assert.notEqual(pickNext(key,{n:i,gone:[]}),'chang');}
+  console.log('PASS: virus visitor/funds/repeat guards, successful and fatal experiments, infection saves and permanent story visitor changes.');
 
   reset(); W = 800; H = 600; U = DPR = 1; sandTop = 500; initRuntime(); sheetKind = null;
   assert.equal(state.tankRooms.length,1); assert.equal(state.tankRooms[0].data,null);
@@ -296,6 +394,32 @@ async function runChecks() {
   Date.now = originalNow;
   console.log('PASS: high-price tank purchases, cap/funds guards, independent fish/decor/equipment, save/reload, one-time offline settlement, transfers, shared wallet/dex and transient cleanup.');
   console.log('PASS: inactive-tank expeditions block region changes and settle their fish, discovered creature and reward exactly once.');
+
+  reset(); initRuntime(); sheetKind=null; state.coins=50000; assert(buyTank());
+  const predatorHome=state.activeTank, predatorAway=state.tankRooms[1].id;
+  const dominant=newCreature('whiteshark',{name:'支配者',grow:GROW_MAX}), rival=newCreature('tigershark',{name:'對手',grow:GROW_MAX}), subordinate=newCreature('blueshark',{name:'從屬',grow:GROW_MAX});
+  dominant.predHP=0; rival.predHP=25.5; subordinate.predMaster=dominant.id; state.fish=[dominant,rival,subordinate];
+  const duelKey=[dominant.id,rival.id].sort().join('|'); state.predDuels={[duelKey]:{a:dominant.id,b:rival.id,age:12,submit:true}};
+  state=prepareSave(JSON.stringify(state)); initRuntime();
+  assert.equal(state.fish[0].predHP,0,'Zero predator HP must not reset to full on load'); assert.equal(state.fish[1].predHP,25.5);
+  assert.equal(state.fish[2].predMaster,dominant.id); assert.equal(state.predDuels[duelKey].age,12);
+  assert.equal(switchTank(predatorAway),true); assert.deepEqual(Object.keys(state.predDuels),[],'Dueling state must not leak into another aquarium');
+  assert.equal(switchTank(predatorHome),true); assert.equal(state.predDuels[duelKey].age,12); assert.equal(state.fish[1].predHP,25.5);
+  const invalidRelations=copy(state); invalidRelations.fish[0].predMaster=rival.id; invalidRelations.fish[1].predMaster=dominant.id; invalidRelations.fish[2].predMaster='outside-tank';
+  invalidRelations.predDuels.invalid={a:dominant.id,b:'outside-tank',age:Infinity,submit:true};
+  cleanPredatorRelations(invalidRelations);
+  assert(!invalidRelations.fish[2].predMaster); assert(!invalidRelations.predDuels.invalid);
+  for(const fish of invalidRelations.fish){const visited=new Set([fish.id]);let master=fish.predMaster;while(master){assert(!visited.has(master),'Predator hierarchy must be acyclic');visited.add(master);master=invalidRelations.fish.find(f=>f.id===master)?.predMaster;}}
+  const cardForPredators=renderFishCard; renderFishCard=()=>{};
+  assert.equal(transferFish(dominant.id,predatorAway),true); assert.equal(state.fish.find(f=>f.id===dominant.id).predHP,0);
+  const sourcePredators=state.tankRooms.find(r=>r.id===predatorHome).data;
+  assert(!sourcePredators.fish.find(f=>f.id===subordinate.id).predMaster,'Moving a master must release subordinates left in the source tank');
+  assert.equal(Object.keys(sourcePredators.predDuels).length,0,'Moving a dueling fish must remove its source-tank duel');
+  renderFishCard=cardForPredators;
+  reset(); const hunter=newCreature('whiteshark',{grow:GROW_MAX}), symbiont=newCreature('remora',{grow:0}), prey=newCreature('guppy',{grow:0});
+  state.fish=[hunter,symbiont]; assert.equal(preyFor(hunter),null,'Sharks must spare their remora partners');
+  state.fish.push(prey); assert.equal(preyFor(hunter),prey,'Remora protection must not disable ordinary shark predation');
+  console.log('PASS: predator HP/hierarchy/duels survive saves and tank switches; invalid/cyclic relations and cross-tank links are removed; shark-remora protection retains normal hunting.');
 
   // Storage is intentionally absent from the browser stub above. Install a
   // deterministic storage model here to exercise failure and stale-tab paths.

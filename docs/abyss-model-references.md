@@ -50,4 +50,4 @@
 - `abyssPoly`、`abyssEye`、`abyssFan`、`abyssFangs` 提供共用向量構件；`DDRAW` 保持原本 16 個 ID。
 - `megTooth`、`drawMeg`、`drawMegFront`、`drawMosa`、`drawDunk`、`drawGHead` 更新巨獸構造；`GSCENE` 保留原本 8 個 ID 與演出時長。
 - `giantThumb` 的 5 個幻想種縮圖直接使用同一組場景函式，避免縮圖仍顯示舊模型。物種 ID、捕獲費用、研究收益、所有權、互動入口與保存格式不在本次造型修改範圍。
-- 執行 `node scripts/validate-game.cjs`，檢查 16 種深淵和 8 種巨獸的 Canvas 參數、既有 206 物種、304 花色及遊戲存檔回歸。Canvas mock 只能檢查執行與有限數值；畫面排版與實際像素仍需瀏覽器視覺檢查。
+- 執行 `node scripts/validate-game.cjs` 可檢查 16 種深淵生物、8 種巨獸與主缸各種花色的繪圖參數，以及遊戲存檔相容性。可在[巨獸觀測實驗室](https://xieyaozhong.github.io/new-word-/giant-lab.html)直接觀看八種巨獸的動畫。

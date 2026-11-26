@@ -1,9 +1,9 @@
 /* Bump VERSION with APP_BUILD when publishing a new game version. */
-const VERSION = '2026.11.25.1';
+const VERSION = '2026.11.27.1';
 const SCOPE = self.registration.scope;
 const CACHE_PREFIX = 'pocket-aquarium:' + encodeURIComponent(SCOPE) + ':';
 const CACHE = CACHE_PREFIX + VERSION;
-const CORE = ['./', './index.html', './pwa-updates.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon-32.png'];
+const CORE = ['./', './index.html', './pwa-updates.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 const inScope = url => url.origin === self.location.origin && url.href.startsWith(SCOPE);
 
 self.addEventListener('install', event => {
