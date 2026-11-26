@@ -6,6 +6,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const args = process.argv.slice(2), fixtureIndex = args.indexOf('--fixture');
+const fixturePath = fixtureIndex >= 0 ? path.resolve(args[fixtureIndex + 1] || '.qa/transfer-fixture.json') : '';
+const sourceArgument = args.find((value, index) => value !== '--fixture' && (fixtureIndex < 0 || index !== fixtureIndex + 1));
 
 let drawingCalls = 0;
 let drawingLabel = '';
@@ -13,7 +16,7 @@ let strictDrawing = false;
 const drawingWarnings = new Set();
 function canvasContext() {
   const numeric = new Set(['arc', 'arcTo', 'ellipse', 'moveTo', 'lineTo', 'bezierCurveTo', 'quadraticCurveTo', 'translate', 'rotate', 'scale', 'setTransform', 'transform', 'clearRect', 'fillRect', 'strokeRect', 'rect', 'roundRect']);
-  const context = {canvas: null, measureText: text => ({width: String(text).length * 8}), getImageData: (x, y, w, h) => ({data: new Uint8ClampedArray(w * h * 4)})};
+  const context = {canvas: null, getTransform: () => ({a:1,b:0,c:0,d:1,e:0,f:0}), measureText: text => ({width: String(text).length * 8}), getImageData: (x, y, w, h) => ({data: new Uint8ClampedArray(w * h * 4)})};
   for (const name of ['createLinearGradient', 'createRadialGradient', 'createConicGradient']) context[name] = (...args) => {
     assert(args.every(Number.isFinite), `${name}: non-finite gradient coordinates`);
     return {addColorStop: (offset, color) => {
@@ -60,6 +63,7 @@ function element(tagName = 'div') {
 const nodes = new Map();
 const document = {
   querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, element(selector === '#tank' ? 'canvas' : 'div')); return nodes.get(selector); },
+  getElementById(id) { return nodes.get('#' + id) || null; },
   querySelectorAll() { return []; }, createElement: element,
   createElementNS: (ns, tag) => element(tag), createTextNode: text => ({textContent: text}),
   addEventListener() {}, body: element('body'), documentElement: element('html'), activeElement: null,
@@ -78,9 +82,11 @@ const context = vm.createContext({
   fetch() { throw new Error('Validation must not use the network'); },
   testCanvas: () => element('canvas'),
   testDrawingLabel: (label, strict) => { drawingLabel = label; strictDrawing = strict; },
+  fixtureRequested: !!fixturePath,
+  writeFixture: text => { fs.mkdirSync(path.dirname(fixturePath),{recursive:true}); fs.writeFileSync(fixturePath,text,'utf8'); console.log('Created opt-in QA fixture: ' + fixturePath); },
 });
 
-const htmlPath = process.argv[2] ? path.resolve(process.argv[2]) : path.resolve(__dirname, '..', 'index.html');
+const htmlPath = sourceArgument ? path.resolve(sourceArgument) : path.resolve(__dirname, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match => match[1]).filter(script => script.trim());
 assert.equal(scripts.length, 1, 'Expected one inline game script');
@@ -90,12 +96,14 @@ assert(source.includes(boot), 'Game boot call changed; update the test entry poi
 source = source.replace(boot, '// Boot disabled by the validation harness.');
 const end = source.lastIndexOf('})();');
 assert(end > 0, 'Missing game closure');
-source = source.slice(0, end) + '\n(' + runChecks.toString() + ')();\n' + source.slice(end);
+source = source.slice(0, end) + '\nglobalThis.validationDone = (' + runChecks.toString() + ')();\n' + source.slice(end);
 new vm.Script(source, {filename: 'index.html inline game'}).runInContext(context, {timeout: 30000});
-console.log(`Canvas smoke checks exercised ${drawingCalls.toLocaleString('en-US')} drawing calls (layout and pixels require browser QA).`);
-if (drawingWarnings.size) console.log('Existing-renderer diagnostics (outside expansion): ' + [...drawingWarnings].join(', '));
+Promise.resolve(context.validationDone).then(() => {
+  console.log(`Canvas smoke checks exercised ${drawingCalls.toLocaleString('en-US')} drawing calls (layout and pixels require browser QA).`);
+  if (drawingWarnings.size) console.log('Existing-renderer diagnostics (outside expansion): ' + [...drawingWarnings].join(', '));
+}, error => { console.error(error); process.exitCode = 1; });
 
-function runChecks() {
+async function runChecks() {
   const copy = value => JSON.parse(JSON.stringify(value));
   const reset = () => { state = migrate(newState()); state.light = {on: true, until: Date.now() + 3600000}; rt.temp = 25; countCache(); return state; };
   reset();
@@ -119,6 +127,10 @@ function runChecks() {
     assert.equal(palOf(created, 0)._m, 0);
   }
   console.log(`PASS: ${Object.keys(SPECIES).length} species, ${morphs} morphs, palettes, drawing bounds and thumbnail execution.`);
+  for (const key of Object.keys(DSP)) { testDrawingLabel('deep:' + key, true); deepThumb(testCanvas(), key, true); }
+  for (const key of Object.keys(GIANTS)) { testDrawingLabel('giant:' + key, true); giantThumb(testCanvas(), key, true); }
+  testDrawingLabel('', false);
+  console.log(`PASS: ${Object.keys(DSP).length} deep-sea creatures and ${Object.keys(GIANTS).length} giants render without invalid canvas coordinates.`);
 
   for (const [key, npc] of Object.entries(NPCS)) {
     assert(NPC_KEYS.includes(key), key + ': missing from visitor rotation');
@@ -284,4 +296,104 @@ function runChecks() {
   Date.now = originalNow;
   console.log('PASS: high-price tank purchases, cap/funds guards, independent fish/decor/equipment, save/reload, one-time offline settlement, transfers, shared wallet/dex and transient cleanup.');
   console.log('PASS: inactive-tank expeditions block region changes and settle their fish, discovered creature and reward exactly once.');
+
+  // Storage is intentionally absent from the browser stub above. Install a
+  // deterministic storage model here to exercise failure and stale-tab paths.
+  const storage = new Map(); let failStorageKey = '', dropStorageKey = '';
+  localStorage.getItem = key => storage.has(key) ? storage.get(key) : null;
+  localStorage.setItem = (key, value) => { if (key === failStorageKey) throw Error('quota_exceeded'); if (key !== dropStorageKey) storage.set(key, String(value)); };
+  localStorage.removeItem = key => storage.delete(key);
+  const freshSave = () => { storage.clear(); failStorageKey = dropStorageKey = ''; saveSuspended = storageConflict = false; saveError = ''; ownershipReady = false; lastLocalText = ''; docRef = null; writing = writeAgain = false; cloudDone = true; reset(); initRuntime(); assert(claimSaveOwnership()); markDirty(); assert(saveNow()); };
+  freshSave();
+  const firstStored = storage.get(LS_KEY), firstSavedAt = state.savedAt;
+  state.coins += 17; markDirty(); failStorageKey = LS_KEY;
+  assert.equal(saveNow(true),false); assert.equal(dirty,true); assert.equal(state.savedAt,firstSavedAt); assert.equal(storage.get(LS_KEY),firstStored); assert(saveError);
+  failStorageKey = ''; assert(saveNow(true)); assert.equal(dirty,false); assert.equal(JSON.parse(storage.get(LS_KEY)).coins,state.coins);
+  assert.equal(storage.get(SAVE_ROLLING_KEY),firstStored,'Automatic backup must contain the previous successfully persisted snapshot');
+  const currentStored = storage.get(LS_KEY), currentRuntime = state;
+  const imported = copy(state); imported.coins = 9999;
+  failStorageKey = SAVE_BACKUP_KEY;
+  assert.equal(persistSnapshot(imported,currentStored),false); assert.equal(storage.get(LS_KEY),currentStored); assert.equal(state,currentRuntime);
+  failStorageKey = ''; dropStorageKey = LS_KEY;
+  assert.equal(persistSnapshot(imported,currentStored),false,'A silent failed write must fail read-back verification'); assert.equal(storage.get(LS_KEY),currentStored);
+  dropStorageKey = ''; assert(persistSnapshot(imported,currentStored)); assert.equal(state,currentRuntime,'persistSnapshot must not replace live state'); assert.equal(storage.get(SAVE_BACKUP_KEY),currentStored);
+  state.coins += 1; markDirty(); assert(saveNow(true));
+  assert.equal(storage.get(SAVE_BACKUP_KEY),currentStored,'Autosave must preserve the explicit pre-import restore point');
+  const newerTab = copy(imported); newerTab.coins = 45678;
+  storage.set(SAVE_OWNER_KEY,'new-tab-owner'); storage.set(LS_KEY,JSON.stringify(newerTab));
+  onStorageChange({key:SAVE_OWNER_KEY,storageArea:localStorage});
+  assert(saveSuspended && storageConflict); dirty = true;
+  assert.equal(saveNow(true),false); assert.equal(JSON.parse(storage.get(LS_KEY)).coins,45678,'A stale pagehide save must not overwrite the newer tab');
+  let cloudWrites = 0; docRef = {set:async () => { cloudWrites++; }}; await writeCloud(); assert.equal(cloudWrites,0,'A stale tab must not start cloud writes'); docRef = null;
+  console.log('PASS: quota failures and silent writes retain dirty state; backups persist; stale tabs cannot overwrite local or cloud progress.');
+
+  freshSave();
+  const healthy = storage.get(LS_KEY), validBackup = copy(state); validBackup.coins = 4321; validBackup.savedAt += 100;
+  storage.set(SAVE_ROLLING_KEY,JSON.stringify(validBackup)); storage.set(LS_KEY,'{broken json');
+  const recovered = loadLocal(); assert.equal(recovered.coins,4321); assert.equal(storage.get(SAVE_RECOVERY_KEY),'{broken json');
+  storage.set(LS_KEY,'{second broken json'); failStorageKey = SAVE_RECOVERY_KEY;
+  assert(loadLocal()); assert(saveSuspended); assert.equal(saveNow(true),false,'Failed corruption preservation must block automatic overwrites'); assert.equal(storage.get(LS_KEY),'{second broken json');
+  failStorageKey = ''; freshSave(); failStorageKey = SAVE_OWNER_KEY;
+  assert.equal(claimSaveOwnership(),false); assert.equal(saveNow(true),false); assert.doesNotThrow(exportSaveText,'Storage-unavailable play must remain exportable'); failStorageKey = '';
+  console.log('PASS: corrupt saves restore a valid backup while preserving evidence; blocked storage cannot be mistaken for a successful update checkpoint.');
+
+  freshSave();
+  state.coins = 750000; assert(buyTank()); assert(buyTank());
+  const portable = exportSaveText(), exportState = copy(state), capacityBeforePreview = MAXFISH;
+  const prepared = prepareSave(portable);
+  assert.deepEqual(copy(saveSummary(prepared)),copy(saveSummary(exportState)),'Portable saves must preserve all tank and creature counts');
+  assert.deepEqual(copy(state),exportState,'Import preview must not mutate the current game'); assert.equal(MAXFISH,capacityBeforePreview);
+  assert.throws(() => prepareSave('{')); assert.throws(() => prepareSave('{"__proto__":{}}'));
+  const future = copy(exportState); future.v = 99; assert.throws(() => prepareSave(JSON.stringify(future)));
+  const unknown = copy(exportState); unknown.fish[0].sp = 'future-fish'; assert.throws(() => prepareSave(JSON.stringify(unknown)));
+  const overflow = copy(exportState); overflow.fish = Array.from({length:100},()=>copy(exportState.fish[0])); assert.throws(() => prepareSave(JSON.stringify(overflow)),'Import must reject silent creature truncation');
+  const duplicateTank = copy(exportState); duplicateTank.tankRooms[1].id = duplicateTank.tankRooms[0].id; assert.throws(() => prepareSave(JSON.stringify(duplicateTank)));
+  assert.throws(() => prepareSave(portable.replace('"coins":600000','"coins":1e309')),'Non-finite imported money must be rejected');
+  const renderSave = renderSavePanel; renderSavePanel = () => {};
+  inspectImport(portable); assert(pendingImport); assert.equal(state.coins,exportState.coins);
+  inspectImport('{bad'); assert.equal(pendingImport,null); assert.equal(state.coins,exportState.coins);
+  inspectImport(portable); let reloads = 0; location.reload = () => { reloads++; };
+  failStorageKey = LS_KEY; const beforeImportDisk = storage.get(LS_KEY); assert.equal(commitImport(),false); assert.equal(reloads,0); assert.equal(storage.get(LS_KEY),beforeImportDisk); assert.equal(state.coins,exportState.coins);
+  failStorageKey = ''; assert.equal(commitImport(),true); assert.equal(reloads,1); assert(saveSuspended); assert.equal(dirty,false); assert.equal(prepareSave(storage.get(LS_KEY)).coins,exportState.coins); assert.equal(prepareSave(storage.get(SAVE_BACKUP_KEY)).coins,exportState.coins);
+  const afterImportDisk = storage.get(LS_KEY); dirty = true; assert.equal(saveNow(true),false); assert.equal(storage.get(LS_KEY),afterImportDisk,'The pre-reload pagehide must not overwrite the imported snapshot');
+  renderSavePanel = renderSave;
+  console.log('PASS: portable multi-tank previews, malformed/future/unknown/truncated saves, transactional import failures and import reload protection.');
+
+  async function cloudRace(change) {
+    freshSave(); let resolveRemote; const originalState = state, remote = copy(state); remote.coins = 88888; remote.savedAt += 1000;
+    const ref = {get:() => new Promise(resolve => { resolveRemote = resolve; }),set:async () => { cloudWrites++; }};
+    window.claude = {use:async name => name === 'user' ? {id:async () => 'test-user'} : {doc:() => ref}};
+    const pendingCloud = connectCloud();
+    for (let i=0; i<12 && !resolveRemote; i++) await Promise.resolve();
+    assert(resolveRemote,'Cloud test must reach its pending response'); change();
+    resolveRemote({exists:true,data:() => remote}); await pendingCloud;
+    assert.equal(state,originalState,'A stale cloud response must not replace the live state'); assert.notEqual(state.coins,88888); window.claude = undefined; docRef = null;
+  }
+  await cloudRace(() => { cloudEpoch++; });
+  await cloudRace(() => { state.coins += 5; markDirty(); });
+  await cloudRace(() => { storage.set(SAVE_OWNER_KEY,'other-owner'); });
+  freshSave();
+  const unreadableCloud = copy(state); unreadableCloud.v = 99; unreadableCloud.savedAt += 1000; cloudWrites = 0;
+  window.claude = {use:async name => name === 'user' ? {id:async () => 'test-user'} : {doc:() => ({get:async () => ({exists:true,data:() => unreadableCloud}),set:async () => { cloudWrites++; }})}};
+  await connectCloud(); markDirty(); assert(saveNow(true)); await Promise.resolve();
+  assert.equal(docRef,null); assert.equal(cloudWrites,0,'An unsupported cloud save must never be overwritten by local autosave');
+  window.claude = undefined;
+  console.log('PASS: delayed cloud responses cannot overwrite an import generation, intervening gameplay or a new owner tab.');
+  if (fixtureRequested) {
+    state = migrate(newState()); state.region = {builtin:'taichung'}; state.coins = 81337; state.fish[0].name = '轉移測試魚';
+    state.tankRooms[0].name = '轉移測試・原始缸';
+    const schooling = cleanTankData({},state), small = cleanTankData({},state);
+    schooling.fish = ['celestialdanio','kubotai','espei','threadfin'].map((sp,i) => newCreature(sp,{name:'群游夥伴'+(i+1),grow:18}));
+    schooling.deco = [newDeco('rock'),newDeco('vallis')];
+    small.fish = ['vampirefan','pompomcrab','malaysiansnail','spixisnail','seedshrimp','asellus'].map((sp,i) => newCreature(sp,{name:'生態夥伴'+(i+1),grow:18}));
+    state.tankRooms.push({id:'qa-schooling',name:'轉移測試・群游缸',data:schooling},{id:'qa-creatures',name:'轉移測試・小生物缸',data:small});
+    const now = Date.now(), D = deepS(); D.built = true; D.lv = 2; D.rp = 30000; D.rpT = now; D.lights = 1;
+    D.seen = Object.fromEntries(Object.keys(DSP).map(key => [key,1]));
+    D.list = Object.keys(DSP).slice(0,12).map((sp,i) => ({id:'qa-deep-'+i,sp,name:DSP[sp].name,at:now,seed:i+31,full:100}));
+    D.gown = Object.fromEntries(Object.keys(GIANTS).map(key => [key,now])); D.gclue = Object.fromEntries(Object.keys(GIANTS).map(key => [key,3])); D.gseen = Object.fromEntries(Object.keys(GIANTS).map(key => [key,1])); D.gcur = 'kraken';
+    state = migrate(state); applyRegion(state.region); initRuntime(); state.savedAt = now;
+    const fixture = exportSaveText(); const checked = prepareSave(fixture);
+    assert.equal(checked.tankRooms.length,3); assert.equal(checked.coins,81337); assert.equal(checked.deep.list.length,12);
+    writeFixture(fixture);
+  }
 }
