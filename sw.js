@@ -1,5 +1,5 @@
 /* Bump VERSION with APP_BUILD when publishing a new game version. */
-const VERSION = '2026.11.27.2';
+const VERSION = '2026.11.27.3';
 const SCOPE = self.registration.scope;
 const CACHE_PREFIX = 'pocket-aquarium:' + encodeURIComponent(SCOPE) + ':';
 const CACHE = CACHE_PREFIX + VERSION;

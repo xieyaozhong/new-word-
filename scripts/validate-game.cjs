@@ -232,8 +232,8 @@ async function runChecks() {
 
   // Decorations are physical per-tank items; purchased theme unlocks are shared,
   // but each tank keeps its own selected theme. Only ordinary goods rotate.
-  const newDecos = ['tidearch','reedblind','porcelainjar','basaltsteps','bellframe','papernautilus','tilewall','bamboura'];
-  const newThemes = ['tidalforest','icecavern','basaltcoast','lotuspond'];
+  const newDecos = ['tidearch','reedblind','porcelainjar','basaltsteps','bellframe','papernautilus','tilewall','bamboura','crabpot','tiledkiln','divehelmet','seaglassmobile','starglobe','heronfloat','postbox','amphorastand','tidehourglass','shellgramophone'];
+  const newThemes = ['tidalforest','icecavern','basaltcoast','lotuspond','kelpcathedral','twilightpier','moonkarst','seaglasscove','sunkenlibrary'];
   reset(); state.pid='ABCD-EFGH'; state.chronoRefresh=0; stockCache=null;
   const realDate = Date;
   let shopTime = new realDate(2026, 10, 30, 23, 59, 59).getTime();
@@ -305,17 +305,37 @@ async function runChecks() {
   assert(switchTank(decoAway));assert.equal(state.theme,'clear');assert.deepEqual(copy(state.deco),[secondDecoration]);
   const decorationSave=prepareSave(exportSaveText());assert.equal(decorationSave.theme,'clear');assert.deepEqual(copy(decorationSave.deco),[secondDecoration]);
   const savedHome=decorationSave.tankRooms.find(r=>r.id===decoHome).data;assert.equal(savedHome.theme,boughtTheme);assert.deepEqual(copy(savedHome.deco),[firstDecoration]);assert(decorationSave.themes.includes(boughtTheme));
+  // Buy every item through the live shelf. The two batches occupy separate
+  // standard tanks, staying below the real 14-item capacity during import.
+  reset();initRuntime();sheetKind=null;state.pid='ABCD-EFGH';state.chronoRefresh=0;stockCache=null;state.coins=1000000;assert(buyTank());
+  const purchaseRooms=state.tankRooms.map(r=>r.id),expectedDecorRooms=[],drawingDecor=[];
+  for(let group=0;group<2;group++){
+    if(group)assert(switchTank(purchaseRooms[group]));state.deco=[];
+    const decorations=group?newDecos.slice(8):newDecos.slice(0,8),themes=group?newThemes.slice(4):newThemes.slice(0,4);
+    for(const [i,k] of decorations.entries()){
+      shelfFor(k,'decos');const before=state.coins,count=state.deco.length;buyDeco(k);exitMode();
+      assert.equal(state.coins,before-DECOS[k].price,k+': purchase must charge the catalog price');
+      assert.equal(state.deco.length,count+1,k+': offered decoration must be purchased');
+      const placed=state.deco[state.deco.length-1];assert.equal(placed.k,k);Object.assign(placed,{x:.1+i*.8/(decorations.length-1),d:i/decorations.length,flip:!!(i%2)});
+    }
+    assert(state.deco.length<=MAXDECO,'All-new decoration fixture must obey standard tank capacity');
+    for(const k of themes){shelfFor(k,'themes');const before=state.coins;buyTheme(k);assert.equal(state.coins,before-THEMES[k].price,k+': offered theme must be purchased');assert.equal(state.theme,k);assert(state.themes.includes(k));}
+    expectedDecorRooms.push({id:state.activeTank,deco:copy(state.deco),theme:state.theme});drawingDecor.push(...copy(state.deco));
+  }
+  const allNewDecor=prepareSave(exportSaveText());assert.equal(allNewDecor.tankRooms.length,2);assert.deepEqual([...allNewDecor.themes].sort(),[...newThemes].sort());
+  for(const expected of expectedDecorRooms){const room=allNewDecor.tankRooms.find(r=>r.id===expected.id),saved=room.id===allNewDecor.activeTank?allNewDecor:room.data;assert.deepEqual(copy(saved.deco),expected.deco,'All purchased decoration placements must survive import');assert.equal(saved.theme,expected.theme,'Each tank must retain its own selected theme');}
+  assert.equal(drawingDecor.length,18);assert.equal(new Set(drawingDecor.map(d=>d.k)).size,18);
+  state=allNewDecor;initRuntime();
+  for(const expected of expectedDecorRooms){if(state.activeTank!==expected.id)assert(switchTank(expected.id));assert.deepEqual(copy(state.deco),expected.deco,'Imported aquarium must restore all purchased decorations on entry');assert.equal(state.theme,expected.theme);}
   renderShop=decoShopRenderer;
-  reset();state.deco=newDecos.map((k,i)=>Object.assign(newDeco(k),{x:.1+i*.1,d:i/8,flip:!!(i%2)}));state.themes=[...newThemes];state.theme=newThemes[3];initRuntime();
-  const allNewDecor=prepareSave(exportSaveText());assert.deepEqual(copy(allNewDecor.deco),copy(state.deco));assert.deepEqual(allNewDecor.themes,newThemes);assert.equal(allNewDecor.theme,newThemes[3]);
   for(const [width,height,dpr] of [[390,844,1],[844,390,2],[1440,900,1]]){
     W=width;H=height;DPR=dpr;U=clamp(Math.min(W,H*.62)/390,.8,1.45);sandTop=H*.78;
     for(const k of newThemes){testDrawingLabel('theme:'+k,true);state.theme=k;drawThemeIcon(testCanvas().getContext('2d'),k,144,96);buildSand();buildFar();}
     for(const k of newDecos){testDrawingLabel('deco:'+k,true);const thumb=testCanvas();thumb.width=width<500?144:288;thumb.height=width<500?96:192;drawDecoThumb(thumb,k);
-      const dc=state.deco.find(d=>d.k===k);for(const phase of [0,1.7,12]){rt.t=phase;const calls=testDrawingCount();drawDecoShape(testCanvas().getContext('2d'),dc,phase);assert(testDrawingCount()-calls>3,k+': decoration renderer is empty');drawDeco(dc);const box=decoBox(dc);assert(Object.values(box).every(Number.isFinite));}}
+      const dc=drawingDecor.find(d=>d.k===k);for(const phase of [0,1.7,12]){rt.t=phase;const calls=testDrawingCount();drawDecoShape(testCanvas().getContext('2d'),dc,phase);assert(testDrawingCount()-calls>3,k+': decoration renderer is empty');drawDeco(dc);const box=decoBox(dc);assert(Object.values(box).every(Number.isFinite));}}
   }
   testDrawingLabel('',false);W=800;H=600;U=DPR=1;sandTop=500;reset();initRuntime();
-  console.log('PASS: 4-decoration/2-theme shelves are unique, stable, personal and reachable; purchase money/capacity/source/expiry gates, shared theme unlocks, independent tank decor, save/import and 3-viewport rendering.');
+  console.log('PASS: 4-decoration/2-theme shelves are unique, stable, personal and reachable; purchase gates hold; all 18 new decorations and 9 themes are bought, saved/imported in 2 legal-capacity tanks and rendered at 3 viewport sizes.');
 
   reset();
   Object.assign(dexFilter, {query:' 孔雀魚 ', kind:'all', discovery:'all'});
