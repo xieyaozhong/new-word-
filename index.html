@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="application-version" content="2026.11.27.1">
+<meta name="application-version" content="2026.11.27.2">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#04161d">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1277,14 +1277,32 @@ function personalSeed(){ return (state.pid || String(state.created || 'aquarium'
 function refreshKey(){return dayKey()+'~'+(state.chronoRefresh||0);}
 const CHRONO_PRICE=100000;
 function activateShopChrono(){if(state.coins<CHRONO_PRICE)return;state.coins-=CHRONO_PRICE;state.chronoRefresh=(state.chronoRefresh||0)+1;stockCache=null;state.visitRot=null;state.npcConflict=null;state.firstVisit=null;state.seenVisit='';state.evSeen='';rt.hudT=0;rt.evT=1;shopTab='today';bumpCoins();markDirty();saveNow();toast('時空加速器啟動！商店與事件已重新抽取');renderShop();}
-function renderShopChrono(){const card=mk('div','evcard'),btn=mk('button','buy');card.append(mk('h3','','⏳ 時空加速器'),mk('p','sub','立即刷新輪替魚種、小生物、水草、特價、NPC及每日事件。不影響節慶或魚隻成長。'),mk('p','sub','一次性消耗・100,000 金幣'));btn.disabled=state.coins<CHRONO_PRICE;confirmBtn(btn,'啟動・100,000 金幣',activateShopChrono);btn.textContent='啟動・100,000 金幣';card.append(btn);sheetBody.append(card);}
+function renderShopChrono(){const card=mk('div','evcard'),btn=mk('button','buy');card.append(mk('h3','','⏳ 時空加速器'),mk('p','sub','立即刷新輪替魚種、小生物、水草、造景、背景、特價、NPC 及每日事件。不影響節慶或魚隻成長。'),mk('p','sub','一次性消耗・100,000 金幣'));btn.disabled=state.coins<CHRONO_PRICE;confirmBtn(btn,'啟動・100,000 金幣',activateShopChrono);btn.textContent='啟動・100,000 金幣';card.append(btn);sheetBody.append(card);}
+function shuffledStock(pool, random){
+  const result = pool.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+// Deal consecutive batches from a player-specific deck. Reloading repeats the
+// same batch, and every item appears within one pass through its catalog.
+function sceneryBatch(pool, size, round, category){
+  const player = state.pid || state.created || 'aquarium';
+  const deck = shuffledStock(pool, rng(hashStr('scenery-' + category + '-' + player)));
+  return Array.from({length:Math.min(size, deck.length)}, (_, i) => deck[(round * size + i) % deck.length]);
+}
 function dailyStock(){
   const key = refreshKey(), owner = personalSeed(); if (stockCache && stockCache.key === key && stockCache.owner === owner) return stockCache;
   const R = rng(hashStr('stock-' + owner + '-' + key));
-  const shuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = (R() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const shuf = a => shuffledStock(a, R);
   const items = shuf(ROT_FISH).slice(0, STOCK_FISH).sort((a, b) => SPECIES[a].price - SPECIES[b].price).concat(shuf(ROT_INV).slice(0, STOCK_INV).sort((a, b) => SPECIES[a].price - SPECIES[b].price));
   const sale = items[(R() * items.length) | 0], plants = shuf(ROT_PLANT).slice(0, STOCK_PLANT).sort((a, b) => DECOS[a].price - DECOS[b].price);
   stockCache = {key, owner, items, sale, plants, psale:plants[(R() * plants.length) | 0]}; stockCache.pvar = pickVarStock(R);
+  const now = new Date(), round = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000 + (state.chronoRefresh || 0);
+  stockCache.decos = sceneryBatch(ROT_DECO, STOCK_DECO, round, 'deco');
+  stockCache.themes = sceneryBatch(ROT_THEME, STOCK_THEME, round, 'theme');
   return stockCache;
 }
 const priceOf = k => Math.round(SPECIES[k].price * (dailyStock().sale === k ? .8 : 1) * (todayEv() === 'sale' ? .85 : 1));
@@ -1296,6 +1314,14 @@ const DECOS = {
   moonrelic:{name:'沉月方尖碑',price:2200,comfort:20,w:58,h:100,wild:true,desc:'沉沒文明留下的月形符文石碑。'},
   abysscrystal:{name:'深淵星晶簇',price:1600,comfort:16,w:78,h:65,wild:true,desc:'在深海裂縫形成的藍紫色晶體。'},
   pearlcompass:{name:'古代珍珠羅盤',price:3000,comfort:22,w:68,h:48,wild:true,desc:'沉月深淵的古老航海收藏品。'},
+  tidearch:{name:'潮蝕石門',price:680,comfort:16,w:128,h:94,desc:'海潮磨出拱洞的青灰岩，凹面帶著細細白紋與苔色，像一座通向水底的門。'},
+  reedblind:{name:'蘆葦屏',price:360,comfort:12,w:104,h:116,desc:'乾燥蘆葦綁成的造景屏風，金褐色莖節與麻繩交錯，適合佈置田野風魚缸。'},
+  porcelainjar:{name:'青花沉甕',price:920,comfort:18,w:82,h:88,desc:'甕身繪著鈷藍枝葉與浪紋，缺了一角的口沿露出深色內壁，白釉在水裡柔柔發亮。'},
+  basaltsteps:{name:'六角石階',price:760,comfort:16,w:136,h:68,desc:'高低錯落的六角玄武岩柱，深色石面帶著青綠細縫，形成天然的階梯。'},
+  bellframe:{name:'沉鐘架',price:1450,comfort:22,w:108,h:132,desc:'老木架吊著一口長了銅綠的古鐘，鐘舌隨水流輕晃，像沉船留下的記憶。'},
+  papernautilus:{name:'鸚鵡螺化石',price:580,comfort:14,w:90,h:76,desc:'灰褐岩板中嵌著奶油色螺殼化石，螺旋與一格格氣室清楚可見。'},
+  tilewall:{name:'花磚矮牆',price:520,comfort:14,w:138,h:64,desc:'藍綠與赭紅花磚拼成的小矮牆，磨舊的白色邊框很有老街的味道。'},
+  bamboura:{name:'竹筏',price:460,comfort:12,w:136,h:72,desc:'幾根竹子用麻繩綁成的小筏，斜桅上掛著一片舊帆，安靜停在缸底。'},
   marimo: {name:'毬藻',   price:30,  comfort:6,  w:32,  h:30,  desc:'毛茸茸的綠色小球。'},
   rock:   {name:'青龍石', price:60,  comfort:6,  w:84,  h:52,  desc:'水草造景常用的灰色紋路石。'},
   vallis: {name:'苦草',   price:80,  comfort:10, w:76,  h:190, plant:true, desc:'細長的葉子會跟著水流擺動，魚喜歡在附近產卵。'},
@@ -1401,6 +1427,19 @@ const CORE_PLANT = ['elodea','vallis','moss','fern','anubias','hornwort'], STOCK
 const ROT_PLANT = Object.keys(DECOS).filter(k => DECOS[k].plant && !CORE_PLANT.includes(k) && !DECOS[k].npc && !DECOS[k].wild && !DECOS[k].season && !DECOS[k].award);
 const plantInShop = k => CORE_PLANT.includes(k) || dailyStock().plants.includes(k);
 const plantPrice = k => Math.round(DECOS[k].price * (dailyStock().psale === k ? .8 : 1));
+const CORE_DECO = ['marimo','rock','pot','wood'], STOCK_DECO = 4;
+const retailDecos = Object.keys(DECOS).filter(k => {
+  const d = DECOS[k];
+  return !d.plant && !d.wild && !d.npc && !d.award;
+});
+const LIMITED_DECO = retailDecos.filter(k => DECOS[k].season || DECOS[k].fest);
+const ROT_DECO = retailDecos.filter(k => !CORE_DECO.includes(k) && !LIMITED_DECO.includes(k));
+function decoInShop(k){
+  if (CORE_DECO.includes(k) || dailyStock().decos.includes(k)) return true;
+  if (!LIMITED_DECO.includes(k)) return false;
+  const d = DECOS[k];
+  return (!d.season || d.season === season()) && (!d.fest || d.fest === (festival() || {}).k);
+}
 const PACKS = {
   small:{name:'小福袋',  price:200,  box:'#d9534f', rib:'#f5c451', coins:[60,400],  desc:'便宜試手氣，偶爾也會開出稀有魚。',
     table:[['coins',40],['fish',30],['inv',15],['deco',8],['charm',4],['rare',2.4],['mystery',.6]]},
@@ -1436,8 +1475,14 @@ const THEMES = {
   volcano:{name:'火山黑砂', price:2000, w:[['#1a1018','#4a8a92'],['#120a10','#2a5a66'],['#080406','#1a2a32']], sand:['#2e2a2a','#1a1616','#0a0808'], grains:['#3a3434','#1a1616','#5a2a20','#8a3a20'], hill:'rgba(40,10,5,.4)', weed:[50,60,50], glow:'255,90,40', ember:1, desc:'黑色火山砂，砂裡藏著微微發紅的熔岩石。'},
   deep:{name:'深海', price:3000, w:[['#02040e','#0e3a6a'],['#010309','#08264a'],['#000105','#04112a']], sand:['#3a3a44','#26262e','#121218'], grains:['#4a4a55','#2a2a33','#5a5a66','#1a1a22'], hill:'rgba(0,0,0,.45)', weed:[20,40,70], glow:'40,90,160', snow:1, desc:'深不見底的海溝，會飄下白色的海洋雪。'},
   space:{name:'星空', price:5000, w:[['#05020f','#2a1a5a'],['#030108','#1a0e3a'],['#010004','#0a0620']], sand:['#4a3a6a','#2a2040','#140e22'], grains:['#6a5a9a','#3a2a5a','#9a8ac8','#ffffff'], hill:'rgba(20,10,40,.5)', weed:[60,40,120], glow:'150,100,255', stars:1, needAlien:1, desc:'把魚缸變成宇宙。要先養過外星生物才能買。'},
+  tidalforest:{name:'潮間紅樹林', price:3200, scene:'tidalforest', w:[['#102c2b','#98c7a2'],['#0b2428','#4b9290'],['#07191d','#225957']], sand:['#b3a47b','#827858','#4c4e3b'], grains:['#c8ba91','#948764','#6c7658','#d2c59b'], hill:'rgba(27,65,52,.45)', weed:[34,84,65], glow:'125,191,142', leaves:1, desc:'枝根在水中拱成天然廊道，遠處疊著蒼綠樹影；夜裡化為幽深的潮汐森林。'},
+  icecavern:{name:'冰藍洞窟', price:3800, scene:'icecavern', w:[['#142642','#bce9f0'],['#102039','#62b2cf'],['#081528','#2e648b']], sand:['#d5e4e5','#a6c1cc','#6c879e'], grains:['#eaf6f7','#c9e1e8','#9bb7c8','#84a2bd'], hill:'rgba(59,107,145,.4)', weed:[74,126,151], glow:'150,219,245', desc:'透亮冰稜垂在洞頂，兩側冰壁折出藍色光面；銀白細砂在夜色裡泛著冷光。'},
+  basaltcoast:{name:'玄武岩海岸', price:3600, scene:'basaltcoast', w:[['#172535','#accdd1'],['#10212e','#638f9e'],['#0a1521','#304f67']], sand:['#657078','#444c57','#282e3b'], grains:['#78858a','#515b68','#a0a7a2','#353b48'], hill:'rgba(24,40,57,.5)', weed:[37,65,70], glow:'119,162,186', desc:'一束束六角岩柱錯落如階梯，海霧深處還有岩岬；青灰海水襯出冷峻的黑砂海岸。'},
+  lotuspond:{name:'荷塘晨霧', price:3400, scene:'lotuspond', w:[['#1c2b32','#e1dbb5'],['#11272b','#94b9a2'],['#0b1c24','#4b7d78']], sand:['#c8bd91','#a0936c','#6b6a50'], grains:['#ded1a8','#b6aa80','#8d9270','#e8dfbb'], hill:'rgba(53,88,69,.35)', weed:[61,105,78], glow:'191,211,163', desc:'圓荷葉與粉色花影浮在上方，細莖伸向淺砂，薄霧讓池畔蘆葦若隱若現。'},
 };
 const theme = () => THEMES[state.theme] || THEMES.clear;
+const STOCK_THEME = 2, ROT_THEME = Object.keys(THEMES).filter(k => k !== 'clear' && !THEMES[k].needAlien);
+const themeInShop = k => k === 'clear' || !!THEMES[k]?.needAlien || dailyStock().themes.includes(k);
 const OFFLINE_RATE = .12, OFFLINE_CAP_H = 10;
 const HATCH_MS = 4 * 60e3, CD_F = 20 * 60e3, CD_M = 10 * 60e3, PITY = 30;
 const LS_KEY = 'pocket-aquarium-v1';
@@ -1905,6 +1950,7 @@ function migrate(s, skipTanks){
   { const st0 = s.story && typeof s.story === 'object' ? s.story : {}; s.story = {}; for (const k of Object.keys(STORY)) { const q = st0[k]; if (!q) continue; s.story[k] = {ch:clamp(q.ch | 0, 0, STORY[k].ch.length), b:q.b && typeof q.b === 'object' ? q.b : {}, n:Math.max(0, q.n | 0), done:q.done ? 1 : 0, pick:Number.isInteger(q.pick) ? q.pick : -1}; } }
   s.facGift = {cons:s.facGift && s.facGift.cons ? 1 : 0, trade:s.facGift && s.facGift.trade ? 1 : 0, star:s.facGift && s.facGift.star ? 1 : 0}; s.rush = +s.rush || 0; s.festSeen = s.festSeen && typeof s.festSeen === 'object' ? s.festSeen : {}; s.miniDex = s.miniDex && typeof s.miniDex === 'object' ? s.miniDex : {}; s.visitRot = s.visitRot && typeof s.visitRot.key === 'string' && Array.isArray(s.visitRot.gone) ? {key:s.visitRot.key, n:clamp(s.visitRot.n | 0, 0, 50), gone:s.visitRot.gone.filter(k => NPCS[k]).slice(0, 50)} : null; s.miniBest = s.miniBest && typeof s.miniBest === 'object' ? s.miniBest : {};
   s.pid = typeof s.pid === 'string' && /^[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(s.pid) ? s.pid : genPid();
+  s.chronoRefresh = Number.isSafeInteger(s.chronoRefresh) && s.chronoRefresh >= 0 ? s.chronoRefresh : 0;
   s.redeemed = Array.isArray(s.redeemed) ? s.redeemed.filter(x => typeof x === 'string').slice(-300) : [];
   s.sentCodes = Array.isArray(s.sentCodes) ? s.sentCodes.filter(x => x && typeof x.code === 'string').slice(0, 10).map(x => ({code:x.code.slice(0, 4000), at:+x.at || 0, to:cleanStr(x.to, 9), what:cleanStr(x.what, 60)})) : [];
   { const td = s.tradeDone && typeof s.tradeDone === 'object' ? s.tradeDone : {}; s.tradeDone = {}; for (const [k, v] of Object.entries(td)) if (+v > Date.now() - 30 * 864e5) s.tradeDone[k] = +v; } s.fwYear = +s.fwYear || 0;
@@ -2411,8 +2457,76 @@ function buildSand(){
   c.strokeStyle = 'rgba(255,248,225,.45)'; c.lineWidth = 1.4;
   c.beginPath(); for (let x = 0; x <= W + 8; x += 8) { const y = sandY(x) - sandOY; x ? c.lineTo(x, y) : c.moveTo(x, y); } c.stroke();
 }
+/* Draw once into farCv, and reuse the same geometry in the shop thumbnail. */
+function drawThemeScenery(c, T, w, h, floor){
+  if (!T.scene) return;
+  const b = Math.max(1, Math.min(h, floor)), u = Math.min(w / 390, b / 640),
+    poly = (pts, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(pts[0][0] * w, pts[0][1] * b); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0] * w, pts[i][1] * b); c.closePath(); c.fill(); };
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+  if (T.scene === 'tidalforest') {
+    // Distant trunks stay translucent; the two near trees form open root arches.
+    for (let i = 0; i < 7; i++) { const x = w * (.015 + i * .165), bend = Math.sin(i * 2.4) * w * .05;
+      c.strokeStyle = 'rgba(39,88,65,.19)'; c.lineWidth = (9 + i % 3 * 5) * u;
+      c.beginPath(); c.moveTo(x, -b * .04); c.bezierCurveTo(x + bend, b * .24, x - bend, b * .49, x + bend * .3, b * .73); c.stroke();
+      for (const s of [-1, 1]) { c.lineWidth = 4 * u; c.beginPath(); c.moveTo(x + bend * .3, b * .57); c.quadraticCurveTo(x + s * w * .055, b * .75, x + s * w * .1, b); c.stroke(); }
+    }
+    for (const side of [-1, 1]) { c.save(); if (side === 1) { c.translate(w, 0); c.scale(-1, 1); }
+      poly([[-.06,0],[.135,0],[.116,.16],[.14,.37],[.105,.55],[.078,.67],[.045,.5],[.063,.22]], '#456b58');
+      c.strokeStyle = '#456954'; c.lineWidth = 13 * u; c.beginPath(); c.moveTo(w * .104,b * .43); c.bezierCurveTo(w * .16,b * .59,w * .24,b * .63,w * .28,b * .99); c.stroke();
+      c.lineWidth = 8 * u; c.beginPath(); c.moveTo(w * .1,b * .51); c.bezierCurveTo(w * .035,b * .7,w * .035,b * .83,-w * .01,b * 1.02); c.stroke(); c.beginPath(); c.moveTo(w * .17,b * .66); c.quadraticCurveTo(w * .12,b * .84,w * .17,b * 1.02); c.stroke();
+      c.strokeStyle = 'rgba(181,192,135,.35)'; c.lineWidth = 2 * u; c.beginPath(); c.moveTo(w * .1,b * .08); c.quadraticCurveTo(w * .082,b * .29,w * .105,b * .46); c.bezierCurveTo(w * .17,b * .64,w * .23,b * .72,w * .267,b * .96); c.stroke();
+      for (let i = 0; i < 5; i++) { c.fillStyle = i % 2 ? 'rgba(66,103,65,.58)' : 'rgba(110,143,80,.47)'; c.beginPath(); c.ellipse(w * (i * .07 - .025), b * (.018 + (i % 2) * .035), w * .085, b * .045, -.25, 0, TAU); c.fill(); }
+      c.restore();
+    }
+    c.strokeStyle = 'rgba(181,215,165,.16)'; c.lineWidth = 2 * u;
+    for (let i = 0; i < 5; i++) { const y = b * (.72 + i * .045); c.beginPath(); c.moveTo(w * .28,y); c.quadraticCurveTo(w * .53,y - b * .008,w * .75,y); c.stroke(); }
+  } else if (T.scene === 'icecavern') {
+    poly([[0,0],[1,0],[1,.12],[.8,.08],[.65,.15],[.5,.06],[.31,.13],[.12,.07],[0,.18]], 'rgba(80,142,177,.37)');
+    poly([[0,0],[.1,.1],[.16,.33],[.1,.57],[.18,.76],[.12,1],[0,1]], '#548eae');
+    poly([[0,.12],[.1,.1],[.11,.35],[.04,.52],[.1,.69],[0,.82]], 'rgba(179,227,236,.65)');
+    poly([[1,0],[.9,.09],[.86,.27],[.93,.47],[.85,.68],[.88,1],[1,1]], '#4c81a3');
+    poly([[1,.2],[.91,.13],[.9,.36],[.96,.54],[.9,.77],[1,.93]], 'rgba(157,211,229,.65)');
+    for (let i = 0; i < 9; i++) { const x = .035 + i * .116, half = .035 + (i % 3) * .008, tip = .13 + (i * 7 % 5) * .043;
+      poly([[x-half,0],[x+half,0],[x+half*.12,tip]], i % 2 ? '#a7dce7' : '#8fc9dd');
+      poly([[x,0],[x+half,0],[x+half*.12,tip]], 'rgba(220,249,250,.5)');
+    }
+    for (const [x,y,s] of [[.18,.99,.12],[.82,1,.14],[.07,1,.1],[.93,.99,.07]]) {
+      poly([[x-s,y],[x-s*.4,y-.14],[x+s*.2,y-.24],[x+s,y-.02]], 'rgba(114,179,207,.7)');
+      poly([[x-s*.4,y-.14],[x+s*.2,y-.24],[x+s*.25,y]], 'rgba(202,239,244,.65)');
+    }
+    c.strokeStyle = 'rgba(224,250,250,.42)'; c.lineWidth = 1.2 * u;
+    for (const side of [-1,1]) { const x = side < 0 ? .08 : .93; c.beginPath(); c.moveTo(w*x,b*.4); c.lineTo(w*(x-side*.027),b*.49); c.lineTo(w*(x+side*.015),b*.55); c.stroke(); }
+  } else if (T.scene === 'basaltcoast') {
+    poly([[0,.62],[.12,.62],[.12,.52],[.22,.52],[.22,.59],[.33,.59],[.33,.73],[.46,.73],[.46,.84],[.6,.84],[.6,.77],[.73,.77],[.73,.58],[.87,.58],[.87,.49],[1,.49],[1,1],[0,1]], 'rgba(48,72,90,.28)');
+    const column = (x, top, wide, col) => { const d = wide * .33;
+      poly([[x-wide,top+d],[x,top+d*1.9],[x,1.03],[x-wide,1.03]], col);
+      poly([[x,top+d*1.9],[x+wide,top+d],[x+wide,1.03],[x,1.03]], '#334b5a');
+      poly([[x-wide,top+d],[x-wide*.65,top],[x+wide*.35,top-d*.3],[x+wide,top+d],[x,top+d*1.9]], '#738890');
+      c.strokeStyle = 'rgba(18,35,49,.4)'; c.lineWidth = 1.2*u;
+      for (let j=1;j<5;j++) { const y=top+(1-top)*j/5; c.beginPath();c.moveTo((x-wide)*w,y*b);c.lineTo(x*w,(y+d*.9)*b);c.lineTo((x+wide)*w,y*b);c.stroke(); }
+      c.strokeStyle = 'rgba(169,188,187,.24)'; c.beginPath(); c.moveTo(x*w,(top+d*1.9)*b); c.lineTo(x*w,b); c.stroke();
+    };
+    for (const [x,y,s] of [[.02,.47,.055],[.1,.56,.05],[.18,.65,.05],[.265,.82,.038],[.75,.8,.04],[.82,.67,.045],[.9,.53,.05],[.99,.42,.058]]) column(x,y,s,x<.5?'#536a72':'#4a606d');
+    c.strokeStyle='rgba(195,219,216,.2)';c.lineWidth=2*u;for(let i=0;i<4;i++){c.beginPath();c.moveTo(w*.29,b*(.85+i*.027));c.quadraticCurveTo(w*.5,b*(.84+i*.027),w*.69,b*(.85+i*.027));c.stroke();}
+  } else if (T.scene === 'lotuspond') {
+    // Long underwater petioles and notched leaf discs keep the view recognisably a pond.
+    c.strokeStyle='rgba(67,105,79,.2)';c.lineWidth=2*u;
+    for(let i=0;i<18;i++){const x=w*(i<9?i*.026:.79+(i-9)*.026),y=b*(.43+(i*7%9)*.032);c.beginPath();c.moveTo(x,b);c.quadraticCurveTo(x+w*.02,y+b*.15,x-w*.012,y);c.stroke();}
+    const leaves=[[.07,.17,.14,.08],[.28,.1,.105,.055],[.77,.18,.14,.075],[.98,.1,.15,.07],[.1,.44,.095,.052],[.9,.39,.1,.055]];
+    for (let i=0;i<leaves.length;i++){const [x,y,rx,ry]=leaves[i];
+      c.strokeStyle=i<4?'rgba(61,104,71,.5)':'rgba(65,110,77,.65)';c.lineWidth=(i<4?3:4)*u;c.beginPath();c.moveTo(w*(x+.02),b*1.02);c.bezierCurveTo(w*(x-.05),b*.72,w*(x+.04),b*(y+.18),w*x,b*y);c.stroke();
+      c.fillStyle=i%2?'#77a17b':'#5d9477';c.beginPath();c.moveTo(w*x,b*y);c.ellipse(w*x,b*y,w*rx,b*ry,-.08,.23,TAU-.12);c.closePath();c.fill();
+      c.strokeStyle='rgba(193,218,148,.42)';c.lineWidth=Math.max(.55,1.1*u);for(let j=0;j<7;j++){const a=.5+j*.8;c.beginPath();c.moveTo(w*x,b*y);c.lineTo(w*(x+Math.cos(a)*rx*.88),b*(y+Math.sin(a)*ry*.82));c.stroke();}
+    }
+    for(const [x,y,s]of[[.19,.17,1],[.85,.12,.8]]){for(let i=0;i<5;i++){const a=(i-2)*.36;c.save();c.translate(w*x,b*y);c.rotate(a);c.fillStyle=i%2?'#deb1ae':'#f1c8bc';c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(-w*.04*s,-b*.032*s,0,-b*.068*s);c.quadraticCurveTo(w*.04*s,-b*.032*s,0,0);c.fill();c.restore();}c.fillStyle='#e3d29a';c.beginPath();c.ellipse(w*x,b*y,w*.024*s,b*.009*s,0,0,TAU);c.fill();}
+    for(let i=0;i<3;i++){const y=b*(.28+i*.22);c.fillStyle=lg(c,0,y-b*.055,0,y+b*.055,[[0,'rgba(224,235,203,0)'],[.5,'rgba(224,235,203,.17)'],[1,'rgba(224,235,203,0)']]);c.fillRect(0,y-b*.055,w,b*.11);}
+  }
+  c.fillStyle = lg(c,0,b*.74,0,b,[[0,'rgba('+T.glow+',0)'],[1,'rgba('+T.glow+',.14)']]); c.fillRect(0,b*.74,w,b*.26);
+  c.restore();
+}
 function buildFar(){
   const c = canvasFor(farCv, W, H), R = rng(42), TH = theme();
+  if (TH.scene) { drawThemeScenery(c, TH, W, H, sandTop); return; }
   if (TH.stars) { for (let i = 0; i < 90; i++) { c.fillStyle = 'rgba(255,255,255,' + (.25 + R() * .6).toFixed(2) + ')'; dot(c, R() * W, R() * sandTop, (R() < .1 ? 1.4 : .7) * U); }
     for (const [x, y, r, col] of [[.25, .3, 120, '150,80,255'], [.75, .5, 140, '60,160,255']]) { c.fillStyle = rg(c, W * x, H * y, 0, W * x, H * y, r * U, [[0,'rgba(' + col + ',.22)'],[1,'rgba(' + col + ',0)']]); c.fillRect(0, 0, W, H); } }
   if (TH.coral) for (let i = 0; i < 7; i++) { const x = R() * W, h = (40 + R() * 70) * U; c.strokeStyle = 'rgba(255,140,170,.22)'; c.lineWidth = (5 + R() * 4) * U; c.lineCap = 'round'; const br = (x0, y0, a, l, d) => { const x1 = x0 + Math.cos(a) * l, y1 = y0 + Math.sin(a) * l; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); if (d) { br(x1, y1, a - .45, l * .7, d - 1); br(x1, y1, a + .4, l * .7, d - 1); } }; br(x, sandTop + 6 * U, -Math.PI / 2 + (R() - .5) * .3, h * .45, 3); }
@@ -4631,6 +4745,73 @@ function drawDecoShape(c, dc, t){
   c.lineCap = 'round'; c.lineJoin = 'round';
   if (PDRAW[dc.k]) { PDRAW[dc.k](c, g, t, dc); return; }
   switch (dc.k) {
+    case 'tidearch': {
+      c.fillStyle='rgba(6,20,24,.22)';c.beginPath();c.ellipse(0,0,62,4,0,0,TAU);c.fill();
+      c.beginPath();c.moveTo(-61,0);c.lineTo(-58,-35);c.bezierCurveTo(-53,-76,-36,-90,-7,-92);c.bezierCurveTo(27,-94,51,-66,58,-36);c.lineTo(62,0);c.lineTo(31,0);c.lineTo(29,-30);c.bezierCurveTo(26,-58,10,-65,-4,-64);c.bezierCurveTo(-23,-62,-29,-45,-30,-24);c.lineTo(-31,0);c.closePath();
+      c.fillStyle=lg(c,-45,-90,45,0,[[0,'#9ba9a7'],[.42,'#647f80'],[1,'#354c53']]);c.fill();
+      c.save();c.clip();c.strokeStyle='rgba(214,225,211,.4)';c.lineWidth=2;
+      for(let i=0;i<5;i++){c.beginPath();c.moveTo(-68,-15-i*16);c.bezierCurveTo(-28,-4-i*19,5,-31-i*10,65,-19-i*15);c.stroke();}
+      c.strokeStyle='rgba(19,40,47,.44)';c.lineWidth=2.5;c.beginPath();c.moveTo(-27,-91);c.lineTo(-20,-76);c.lineTo(-26,-67);c.moveTo(32,-79);c.lineTo(29,-60);c.lineTo(41,-48);c.stroke();
+      c.fillStyle='rgba(89,119,65,.55)';for(const [x,y,rx,ry] of [[-45,-9,14,6],[47,-18,12,7],[-25,-77,14,5]]){c.beginPath();c.ellipse(x,y,rx,ry,-.2,0,TAU);c.fill();}c.restore();
+      c.strokeStyle='rgba(23,46,49,.7)';c.lineWidth=4;c.beginPath();c.moveTo(-29,-3);c.bezierCurveTo(-30,-51,-21,-65,-4,-65);c.bezierCurveTo(16,-65,30,-48,31,-3);c.stroke();
+      c.fillStyle='#c7c9af';for(const [x,y,r] of [[-50,-29,2.5],[-45,-33,1.8],[44,-45,2.2],[49,-40,1.7]])dot(c,x,y,r);break; }
+    case 'reedblind': {
+      c.fillStyle='rgba(8,25,21,.18)';c.beginPath();c.ellipse(0,0,49,4,0,0,TAU);c.fill();
+      for(let i=0;i<9;i++){const x=-43+i*10.5,top=-91-(i*7%22),sway=Math.sin(t*.45+i)*1.4;
+        c.strokeStyle=i%2?'#917743':'#af955e';c.lineWidth=6;c.beginPath();c.moveTo(x,0);c.quadraticCurveTo(x-2,top*.6,x+sway,top);c.stroke();
+        c.strokeStyle='rgba(225,209,145,.6)';c.lineWidth=1.5;c.beginPath();c.moveTo(x-1.8,-4);c.lineTo(x-2,top+4);c.stroke();
+        for(let y=-18;y>top+7;y-=24){c.strokeStyle='#675d37';c.lineWidth=2;c.beginPath();c.moveTo(x-3,y);c.lineTo(x+3,y-1);c.stroke();}
+        if(i%3===0){c.fillStyle='#bca373';c.beginPath();c.ellipse(x+sway,top+6,3.4,7,.14,0,TAU);c.fill();}}
+      for(const y of [-24,-72]){c.strokeStyle='#6f512f';c.lineWidth=5;c.beginPath();c.moveTo(-49,y);c.lineTo(49,y-3);c.stroke();c.strokeStyle='#d0b47e';c.lineWidth=1.4;for(let i=0;i<9;i++){const x=-43+i*10.5;c.beginPath();c.moveTo(x-3,y-6);c.lineTo(x+3,y+2);c.moveTo(x-3,y+2);c.lineTo(x+3,y-6);c.stroke();}}
+      break; }
+    case 'porcelainjar': {
+      c.fillStyle='rgba(8,23,30,.22)';c.beginPath();c.ellipse(0,0,36,4,0,0,TAU);c.fill();
+      c.beginPath();c.moveTo(-22,-79);c.bezierCurveTo(-20,-62,-40,-65,-38,-35);c.quadraticCurveTo(-36,-7,-24,-2);c.quadraticCurveTo(0,3,24,-2);c.quadraticCurveTo(38,-9,38,-35);c.bezierCurveTo(40,-64,20,-63,22,-79);c.closePath();
+      c.fillStyle=lg(c,-39,-35,39,-35,[[0,'#819ca3'],[.27,'#e2ece2'],[.56,'#f1efdb'],[1,'#829ba7']]);c.fill();c.save();c.clip();
+      c.strokeStyle='#416e8e';c.lineWidth=2.4;for(const y of [-67,-61,-15,-10]){c.beginPath();c.ellipse(0,y,36,5,0,0,TAU);c.stroke();}
+      for(const [x,y,sg] of [[-18,-27,1],[13,-26,-1]]){c.strokeStyle='#305c83';c.lineWidth=1.8;c.beginPath();c.moveTo(x,y);c.bezierCurveTo(x-10*sg,y-13,x+11*sg,y-19,x+3*sg,y-30);c.stroke();c.fillStyle='#3f7194';for(let j=0;j<4;j++){c.beginPath();c.ellipse(x+(j%2?6:-4)*sg,y-7-j*6,5,2.3,(j%2?-.55:.55)*sg,0,TAU);c.fill();}}
+      c.strokeStyle='rgba(75,90,95,.48)';c.lineWidth=.8;c.beginPath();c.moveTo(25,-66);c.lineTo(17,-54);c.lineTo(23,-43);c.lineTo(17,-38);c.stroke();c.restore();
+      c.fillStyle='#b9c8c0';c.beginPath();c.ellipse(0,-79,24,7,0,0,TAU);c.fill();c.fillStyle='#243d4a';c.beginPath();c.ellipse(0,-80,19,4,0,0,TAU);c.fill();
+      c.strokeStyle='#e5ead9';c.lineWidth=2;c.beginPath();c.ellipse(0,-79,23,6,0,.1,Math.PI-.05);c.stroke();c.fillStyle='#748e98';c.beginPath();c.moveTo(7,-85);c.lineTo(14,-79);c.lineTo(19,-83);c.closePath();c.fill();break; }
+    case 'basaltsteps': {
+      c.fillStyle='rgba(7,22,29,.22)';c.beginPath();c.ellipse(0,0,65,4,0,0,TAU);c.fill();
+      for(const [x,y,h] of [[-25,-9,50],[3,-8,57],[31,-7,42],[-49,-1,25],[-20,0,34],[9,0,42],[39,0,23]]){
+        c.fillStyle=lg(c,x-14,y-h,x+14,y,[[0,'#687e82'],[1,'#344b53']]);c.beginPath();c.moveTo(x-14,y-h);c.lineTo(x,y-h+7);c.lineTo(x+14,y-h);c.lineTo(x+14,y);c.lineTo(x,y+2);c.lineTo(x-14,y);c.closePath();c.fill();
+        c.fillStyle='#839497';c.beginPath();c.moveTo(x-14,y-h);c.lineTo(x-7,y-h-6);c.lineTo(x+7,y-h-6);c.lineTo(x+14,y-h);c.lineTo(x,y-h+7);c.closePath();c.fill();
+        c.strokeStyle='rgba(25,44,50,.7)';c.lineWidth=1.2;c.beginPath();c.moveTo(x,y-h+7);c.lineTo(x,y);c.moveTo(x+14,y-h);c.lineTo(x+14,y);c.stroke();
+        c.strokeStyle='rgba(142,162,143,.5)';c.lineWidth=1;c.beginPath();c.moveTo(x-10,y-h+10);c.lineTo(x-9,y-6);c.stroke();}
+      break; }
+    case 'bellframe': {
+      c.fillStyle='rgba(6,19,22,.2)';c.beginPath();c.ellipse(0,0,51,4,0,0,TAU);c.fill();
+      for(const x of [-42,42]){c.fillStyle=lg(c,x-6,0,x+6,0,[[0,'#463f31'],[.5,'#8c7750'],[1,'#4e4536']]);rr(c,x-6,-122,12,123,3);c.fill();c.strokeStyle='#b79b68';c.lineWidth=1.3;c.beginPath();c.moveTo(x-2,-8);c.lineTo(x-1,-116);c.stroke();}
+      c.strokeStyle='#675c43';c.lineWidth=7;for(const d of [-1,1]){c.beginPath();c.moveTo(d*42,-78);c.lineTo(d*18,-119);c.stroke();}
+      c.fillStyle=lg(c,0,-130,0,-116,[[0,'#a18a60'],[1,'#4d4839']]);rr(c,-52,-130,104,14,3);c.fill();
+      c.save();c.translate(0,-113);c.rotate(Math.sin(t*.55)*.035);c.strokeStyle='#565e55';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(0,16);c.stroke();c.beginPath();c.arc(0,19,6,0,TAU);c.stroke();
+      c.beginPath();c.moveTo(-9,22);c.bezierCurveTo(-24,26,-16,57,-31,65);c.lineTo(31,65);c.bezierCurveTo(16,57,24,26,9,22);c.closePath();c.fillStyle=lg(c,-30,0,30,0,[[0,'#426a63'],[.28,'#a58f51'],[.52,'#d0b36b'],[.8,'#72836a'],[1,'#35574f']]);c.fill();
+      c.fillStyle='#263e38';c.beginPath();c.ellipse(0,65,32,7,0,0,TAU);c.fill();c.strokeStyle='#b29e61';c.lineWidth=3;c.stroke();
+      c.strokeStyle='#74633a';c.lineWidth=3;c.beginPath();c.moveTo(0,45);c.lineTo(2,71);c.stroke();c.fillStyle='#a48a4e';dot(c,2,72,4);c.strokeStyle='rgba(239,215,144,.5)';c.lineWidth=1.5;c.beginPath();c.moveTo(-6,28);c.quadraticCurveTo(-11,45,-18,58);c.stroke();c.restore();
+      c.strokeStyle='#c2ab75';c.lineWidth=1.6;for(const x of [-42,42])for(const y of [-124,-120,-116]){c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y+3);c.stroke();}break; }
+    case 'papernautilus': {
+      c.beginPath();c.moveTo(-43,-3);c.lineTo(-41,-46);c.lineTo(-24,-69);c.lineTo(10,-74);c.lineTo(39,-57);c.lineTo(43,-16);c.lineTo(28,0);c.closePath();c.fillStyle=lg(c,-30,-70,24,0,[[0,'#afa48a'],[1,'#5f695f']]);c.fill();
+      c.strokeStyle='rgba(57,65,58,.55)';c.lineWidth=1.5;c.beginPath();c.moveTo(-31,-64);c.lineTo(-22,-47);c.lineTo(-34,-27);c.lineTo(-26,-8);c.moveTo(28,-63);c.lineTo(23,-42);c.lineTo(37,-29);c.stroke();
+      c.fillStyle='#d6ccb1';c.beginPath();c.ellipse(3,-39,30,29,-.15,0,TAU);c.fill();c.strokeStyle='#7b7965';c.lineWidth=1.4;c.stroke();
+      c.strokeStyle='#8b846b';c.lineWidth=2.2;c.beginPath();for(let i=0;i<=84;i++){const a=i/84*Math.PI*4.5,r=28*Math.exp(-a*.17),x=3+Math.cos(a)*r,y=-39+Math.sin(a)*r;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();
+      c.strokeStyle='rgba(116,112,87,.8)';c.lineWidth=1;for(let i=0;i<19;i++){const a=i*.46,r=28*Math.exp(-a*.17),r2=r*.72;c.beginPath();c.moveTo(3+Math.cos(a)*r,-39+Math.sin(a)*r);c.quadraticCurveTo(3+Math.cos(a+.12)*(r+r2)*.5,-39+Math.sin(a+.12)*(r+r2)*.5,3+Math.cos(a+.06)*r2,-39+Math.sin(a+.06)*r2);c.stroke();}
+      c.strokeStyle='rgba(247,237,197,.5)';c.lineWidth=1.5;c.beginPath();c.arc(3,-39,27,3.3,5.8);c.stroke();break; }
+    case 'tilewall': {
+      c.fillStyle='#4b666b';c.fillRect(-67,-54,134,55);c.fillStyle='#c0bca5';c.fillRect(-66,-53,132,52);
+      for(let row=0;row<3;row++)for(let col=0;col<7;col++){const x=-63+col*18,y=-50+row*16;c.fillStyle=(row+col)%2?'#d8d8bc':'#a7c3b6';c.fillRect(x,y,16,14);c.save();c.translate(x+8,y+7);c.fillStyle=(row+col)%3?'#357b83':'#a1644b';for(let p=0;p<4;p++){c.beginPath();c.ellipse(Math.cos(p*Math.PI/2)*3,Math.sin(p*Math.PI/2)*3,3.2,1.6,p*Math.PI/2,0,TAU);c.fill();}c.fillStyle='#e9dec0';dot(c,0,0,1.6);c.restore();}
+      c.fillStyle=lg(c,0,-63,0,-53,[[0,'#afbbb0'],[1,'#5c7a7b']]);c.beginPath();c.moveTo(-68,-54);c.lineTo(-64,-62);c.lineTo(65,-62);c.lineTo(68,-54);c.closePath();c.fill();
+      c.fillStyle='#5a6d62';c.fillRect(-68,-3,136,4);c.strokeStyle='rgba(54,75,66,.62)';c.lineWidth=1.3;c.beginPath();c.moveTo(40,-62);c.lineTo(34,-50);c.lineTo(41,-43);c.lineTo(35,-33);c.stroke();
+      c.fillStyle='rgba(105,124,75,.65)';for(const x of [-58,-51,55,61]){c.beginPath();c.ellipse(x,-5,4,2,0,0,TAU);c.fill();}break; }
+    case 'bamboura': {
+      c.fillStyle='rgba(5,24,24,.2)';c.beginPath();c.ellipse(0,0,65,4,0,0,TAU);c.fill();
+      for(let i=0;i<5;i++){const y=-5-i*5,x=-58+i*2;c.fillStyle=lg(c,0,y-4,0,y+4,[[0,'#bac482'],[.45,'#8da365'],[1,'#4b7053']]);rr(c,x,y-4,116-i*2,8,4);c.fill();c.strokeStyle='#435f42';c.lineWidth=1;for(const bx of [-37,-5,28]){c.beginPath();c.moveTo(bx,y-3);c.lineTo(bx+1,y+3);c.stroke();}c.fillStyle='#d0cb8f';c.beginPath();c.ellipse(x+2,y,3,3.5,0,0,TAU);c.fill();}
+      c.strokeStyle='#d0b67a';c.lineWidth=2;for(const x of [-42,37]){c.beginPath();c.moveTo(x-2,-27);c.lineTo(x+3,-1);c.moveTo(x+2,-27);c.lineTo(x+7,-1);c.stroke();}
+      c.strokeStyle='#685d3d';c.lineWidth=4;c.beginPath();c.moveTo(13,-20);c.lineTo(17,-69);c.stroke();
+      c.fillStyle=lg(c,20,-64,47,-29,[[0,'#d7d1a5'],[1,'#9eaa88']]);c.beginPath();c.moveTo(20,-66);c.quadraticCurveTo(42,-57,54,-35);c.lineTo(20,-29);c.quadraticCurveTo(24,-46,20,-66);c.fill();
+      c.strokeStyle='rgba(101,109,75,.45)';c.lineWidth=1;for(let j=0;j<4;j++){c.beginPath();c.moveTo(23,-36-j*6);c.lineTo(47-j*5,-38-j*6);c.stroke();}
+      c.strokeStyle='#776443';c.lineWidth=2;c.beginPath();c.moveTo(-58,-11);c.lineTo(49,-25);c.stroke();break; }
     case 'moonrelic': {
       c.fillStyle='#23354c'; c.beginPath(); c.moveTo(-25,0);c.lineTo(-18,-77);c.lineTo(0,-98);c.lineTo(18,-77);c.lineTo(25,0);c.closePath();c.fill();
       c.strokeStyle='#6ed8ed';c.lineWidth=2;c.stroke();c.beginPath();c.arc(0,-56,12,.6,5.7);c.stroke();c.beginPath();c.moveTo(0,-38);c.lineTo(0,-12);c.stroke();break;}
@@ -7824,7 +8005,10 @@ function updateHud(dt){
   const newVisit = !!vis && state.seenVisit !== vk;
   shopBtn.classList.toggle('visit', newVisit); shopBtn.classList.toggle('new', !newVisit && state.shopDay !== dayKey());
   const vl = $('#visitLeft'); if (vl && vis) vl.textContent = fmtHMS(vis.end - Date.now());
-  if (sheetKind === 'shop' && (shopTab === 'today' || shopTab === 'plant')) { const rs = $('#restock'); if (rs) { if (dailyStock().key !== rendered.stock) renderShop(); else rs.textContent = fmtHMS(msToMidnight()); } }
+  if (sheetKind === 'shop' && ['today','plant','deco','gear'].includes(shopTab)) {
+    if (dailyStock().key !== rendered.stock) renderShop();
+    else { const rs = $('#restock'); if (rs) rs.textContent = fmtHMS(msToMidnight()); }
+  }
   if (sheetKind === 'fish') updateFishCard();
   if (sheetKind === 'list' && listTab === 'mine' && state.eggs.length) document.querySelectorAll('[data-egg]').forEach(x => { const e = state.eggs.find(y => y.id === x.dataset.egg); if (e) x.textContent = fmtClock(e.at - Date.now()); });
 }
@@ -8148,10 +8332,15 @@ function drawGearIcon(c, k, w, h){
 function drawThemeIcon(c, k, w, h){ const T = THEMES[k]; c.setTransform(1,0,0,1,0,0); c.clearRect(0, 0, w, h);
   c.fillStyle = lg(c, 0, 0, 0, h, [[0,T.w[0][1]],[.6,T.w[1][1]],[1,T.w[2][1]]]); rr(c, 6, 6, w - 12, h - 12, 8); c.fill();
   c.save(); rr(c, 6, 6, w - 12, h - 12, 8); c.clip(); if (T.stars) { c.fillStyle = '#fff'; for (let i = 0; i < 14; i++) dot(c, 10 + (i * 37) % (w - 20), 10 + (i * 23) % (h * .5), 1); }
+  if (T.scene) drawThemeScenery(c, T, w, h, h * .72);
   c.fillStyle = lg(c, 0, h * .72, 0, h, [[0,T.sand[0]],[1,T.sand[2]]]); c.fillRect(0, h * .72, w, h); c.restore(); }
 function upgrade(k){ const U2 = UPG[k], lv = state.up[k] | 0; if (lv >= upMax(k)) return; const price = U2.price[lv]; if (state.coins < price) return;
   state.coins -= price; state.up[k] = lv + 1; applyUpgrades(state.up); bumpCoins(); markDirty(); toast(U2.name + '升級成「' + U2.lv[lv + 1] + '」'); renderShop(); }
-function buyTheme(k){ const T = THEMES[k]; if (!state.themes.includes(k)) { if (T.needAlien && !ALIENS.some(a => state.dex[a])) return; if (state.coins < T.price) return; state.coins -= T.price; state.themes.push(k); bumpCoins(); toast('買了「' + T.name + '」主題'); }
+function buyTheme(k){ const T = THEMES[k]; if (!T || state.theme === k) return;
+  if (k !== 'clear' && !state.themes.includes(k)) {
+    if (!themeInShop(k) || (T.needAlien && !ALIENS.some(a => state.dex[a])) || state.coins < T.price) return;
+    state.coins -= T.price; state.themes.push(k); bumpCoins(); toast('買了「' + T.name + '」背景，所有魚缸都能使用');
+  }
   state.theme = k; buildSand(); buildFar(); markDirty(); renderShop(); }
 function openTankShop(){ shopTab = 'tanks'; openSheet('shop'); }
 function renderTankShop(){
@@ -8170,6 +8359,7 @@ function renderTankShop(){
   }
 }
 function renderGear(){
+  rendered.stock = dailyStock().key;
   renderShopChrono();
   const tanks = mk('div', 'evcard'); tanks.append(mk('h3', '', '想養更多魚？開設獨立魚缸'), mk('p', '', '目前 ' + state.tankRooms.length + ' / ' + MAX_TANKS + ' 缸。' + (state.tankRooms.length >= MAX_TANKS ? '已達開缸上限。' : '下一缸需要 ' + tankPrice().toLocaleString('zh-TW') + ' 金幣。') + '魚、生物與設備各自管理。'));
   const manage = mk('button', 'chipbtn', '管理魚缸與開新缸'); manage.addEventListener('click', openTankShop); tanks.appendChild(manage); sheetBody.appendChild(tanks);
@@ -8183,12 +8373,26 @@ function renderGear(){
     if (k === 'heater' && lv >= 2) info.appendChild(tsetRow());
     if (k === 'box' && lv >= 1) { const seg = mk('div', 'opick'), b2 = mk('button', 'chipbtn' + (state.boxAuto ? ' on' : ''), state.boxAuto ? '寶寶自動放進去：開' : '寶寶自動放進去：關'); b2.addEventListener('click', () => { state.boxAuto = state.boxAuto ? 0 : 1; markDirty(); renderShop(); }); seg.appendChild(b2); info.appendChild(seg); }
     btn.addEventListener('click', () => upgrade(k)); row.append(cnv, info, btn); sheetBody.appendChild(row); }
-  sheetBody.appendChild(mk('h4', 'sec', '魚缸主題'));
-  for (const k of Object.keys(THEMES)) { const T = THEMES[k], own = k === 'clear' || state.themes.includes(k), on = (state.theme || 'clear') === k, lock = T.needAlien && !ALIENS.some(a => state.dex[a]);
-    const row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96; drawThemeIcon(cnv.getContext('2d'), k, 144, 96);
-    const info = mk('div'), h3 = mk('h3', '', T.name); if (on) h3.appendChild(mk('span', 'tag sp', '使用中')); info.append(h3, mk('p', '', T.desc));
-    const btn = mk('button', 'buy'); if (on) { btn.textContent = '使用中'; btn.disabled = true; } else if (own) btn.textContent = '換上'; else if (lock) { btn.textContent = '未解鎖'; btn.disabled = true; } else { btn.innerHTML = coinSvg + T.price.toLocaleString('zh-TW'); btn.disabled = state.coins < T.price; }
-    btn.addEventListener('click', () => buyTheme(k)); row.append(cnv, info, btn); sheetBody.appendChild(row); }
+  renderThemeShop();
+}
+function themeRow(k){
+  const T = THEMES[k], own = k === 'clear' || state.themes.includes(k), on = (state.theme || 'clear') === k, lock = T.needAlien && !ALIENS.some(a => state.dex[a]);
+  const row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96; drawThemeIcon(cnv.getContext('2d'), k, 144, 96);
+  const info = mk('div'), h3 = mk('h3', '', T.name); if (on) h3.appendChild(mk('span', 'tag sp', '使用中')); info.append(h3, mk('p', '', T.desc));
+  const btn = mk('button', 'buy'); if (on) { btn.textContent = '使用中'; btn.disabled = true; } else if (own) btn.textContent = '換上'; else if (lock) { btn.textContent = '未解鎖'; btn.disabled = true; } else { btn.innerHTML = coinSvg + T.price.toLocaleString('zh-TW'); btn.disabled = state.coins < T.price; }
+  btn.setAttribute('aria-label', on ? T.name + '使用中' : own ? '換上' + T.name : lock ? T.name + '尚未解鎖' : '用 ' + T.price + ' 金幣買' + T.name);
+  btn.addEventListener('click', () => buyTheme(k)); row.append(cnv, info, btn); return row;
+}
+function renderThemeShop(){
+  const featured = dailyStock().themes;
+  sheetBody.appendChild(mk('h4', 'sec', '今日魚缸背景'));
+  for (const k of featured) sheetBody.appendChild(themeRow(k));
+  sheetBody.appendChild(mk('h4', 'sec', '我的背景・各缸可自由換上'));
+  const owned = Object.keys(THEMES).filter(k => k === 'clear' || state.themes.includes(k));
+  for (const k of owned) if (!featured.includes(k)) sheetBody.appendChild(themeRow(k));
+  for (const k of Object.keys(THEMES)) if (THEMES[k].needAlien && !state.themes.includes(k)) {
+    sheetBody.append(mk('h4', 'sec', '特殊背景'), themeRow(k));
+  }
 }
 function buyFeeder(n, price){ if (state.coins < price) return; state.coins -= price; state.items.feeder += n; bumpCoins(); toast('買了 ' + n + ' 隻活餌魚，庫存 ' + feederStock() + ' 隻'); markDirty(); renderShop(); }
 const TOOL_DEF = [
@@ -8281,11 +8485,15 @@ function renderShop(){
   sheetBody.appendChild(wallet);
   if (shopTab === 'tanks') { renderTankShop(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'today') { renderShopChrono(); rendered.stock = dailyStock().key; const rs = mk('div', 'restock'), b = mk('b', '', fmtHMS(msToMidnight())); b.id = 'restock';
-    rs.append('新舊夥伴一起輪替，今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs); }
+    rs.append('新舊夥伴一起輪替，今天進了這 ' + dailyStock().items.length + ' 種，其中一種打 8 折。午夜會換一批，還有 ', b, '。'); sheetBody.appendChild(rs);
+    const stock = dailyStock(), picks = mk('div','evcard'), show = mk('button','chipbtn','逛今日造景');
+    picks.append(mk('h3','','今日造景'), mk('p','',stock.decos.map(k => DECOS[k].name).join('、')), mk('p','sub','魚缸背景・' + stock.themes.map(k => THEMES[k].name).join('、')), show);
+    show.addEventListener('click', () => { shopTab = 'deco'; sheetBody.scrollTop = 0; renderShop(); }); sheetBody.appendChild(picks); }
   if (shopTab === 'visit') { renderVisit(visitor); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'trade') { renderTrade(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'gear') { renderGear(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'plant') { renderPlantShop(); sheetBody.scrollTop = keep; return; }
+  if (shopTab === 'deco') { renderDecoShop(); sheetBody.scrollTop = keep; return; }
   if (shopTab === 'inv') { sheetBody.appendChild(feederRow(5, 30, '', () => buyFeeder(5, 30), false)); sheetBody.appendChild(itemRow('med1', 120, '現在有 ' + state.items.med + ' 瓶', buyMed, false)); }
   if (shopTab === 'pack') {
     for (const [k, pk] of Object.entries(PACKS)) {
@@ -8299,33 +8507,26 @@ function renderShop(){
     const p = mk('p', 'foot'); p.textContent = '神秘魚種只能從禮包抽到：' + MYSTERY.map(k => SPECIES[k].name).join('、') + '。禮包裡的魚不受每日進貨限制。不管抽哪一種禮包，連續 ' + PITY + ' 次沒抽到神秘魚種，下一次一定會中。繁殖秘方會在下一窩寶寶自動使用。'; sheetBody.appendChild(p);
     sheetBody.scrollTop = keep; return;
   }
-  const keys = shopTab === 'today' ? seasonSp().concat(dailyStock().items) : shopTab === 'fish' ? SHOP_FISH.filter(k => CORE.includes(k)) : shopTab === 'inv' ? INVS.filter(k => CORE.includes(k)) : Object.keys(DECOS).filter(k => !DECOS[k].award && !DECOS[k].wild && !DECOS[k].npc && !DECOS[k].plant && (!DECOS[k].fest || (festival() || {}).k === DECOS[k].fest) && (!DECOS[k].season || DECOS[k].season === season()));
+  const keys = shopTab === 'today' ? seasonSp().concat(dailyStock().items) : (shopTab === 'fish' ? SHOP_FISH : INVS).filter(k => CORE.includes(k));
   for (const k of keys) {
-    const it = shopTab === 'deco' ? DECOS[k] : SPECIES[k];
+    const it = SPECIES[k];
     const row = mk('div', 'item'), cnv = document.createElement('canvas'); cnv.className = 'thumb'; cnv.width = 144; cnv.height = 96;
     const info = mk('div'), h3 = mk('h3', '', it.name);
     let reason = '', sub = '';
-    if (shopTab === 'deco') {
-      const s = mk('span', 'tag', '舒適 +' + it.comfort); h3.appendChild(s); if (it.fest) h3.appendChild(mk('span', 'tag sale', '節日限定')); if (it.season) h3.appendChild(mk('span', 'tag sale', SEASONS[it.season].full + '限定')); if (it.plant) h3.appendChild(mk('span', 'tag', SPREAD.includes(k) ? '會長大・會繁殖' : '會長大')); if (it.eats) h3.appendChild(mk('span', 'tag sale', '會吃魚')); else if (it.plank) h3.appendChild(mk('span', 'tag sp', '浮游生物')); else if (NGLOW[k]) h3.appendChild(mk('span', 'tag sp', '夜光'));
-      if (state.deco.length >= MAXDECO) reason = '放不下了';
-      const owned = state.deco.filter(d => d.k === k).length; sub = owned ? '已擺 ' + owned + ' 個' : '';
-      drawDecoThumb(cnv, k);
-    } else {
-      if (dailyStock().sale === k) h3.appendChild(mk('span', 'tag sale', '今日 8 折'));
-      if (it.season) h3.appendChild(mk('span', 'tag sale', SEASONS[it.season].full + '限定'));
-      for (const tg of it.tags) h3.appendChild(mk('span', 'tag', tg));
-      const owned = countSp(k);
-      if (it.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) reason = it.kind === 'inv' ? '小生物滿了' : '魚缸滿了';
-      else if (it.limit && owned >= it.limit) reason = '已經有了';
-      sub = (it.school ? '群游魚，建議 6 隻以上・' : '') + (HERB[k] ? '會啃食水草・' : '') + (dailyStock().sale === k ? '原價 ' + it.price + '・' : '') + (owned ? '缸裡有 ' + owned + ' 隻・' : '') + '約每 ' + it.interval + ' 秒掉 ' + it.value + ' 金幣' + (it.morphs.length > 1 ? '・' + it.morphs.length + ' 種花色隨機' : '');
-      drawFishThumb(cnv, k, palette(k, 11, 0), 0);
-    }
+    if (dailyStock().sale === k) h3.appendChild(mk('span', 'tag sale', '今日 8 折'));
+    if (it.season) h3.appendChild(mk('span', 'tag sale', SEASONS[it.season].full + '限定'));
+    for (const tg of it.tags) h3.appendChild(mk('span', 'tag', tg));
+    const owned = countSp(k);
+    if (it.kind === 'inv' ? invCount() >= capI() : fishCount() >= capF()) reason = it.kind === 'inv' ? '小生物滿了' : '魚缸滿了';
+    else if (it.limit && owned >= it.limit) reason = '已經有了';
+    sub = (it.school ? '群游魚，建議 6 隻以上・' : '') + (HERB[k] ? '會啃食水草・' : '') + (dailyStock().sale === k ? '原價 ' + it.price + '・' : '') + (owned ? '缸裡有 ' + owned + ' 隻・' : '') + '約每 ' + it.interval + ' 秒掉 ' + it.value + ' 金幣' + (it.morphs.length > 1 ? '・' + it.morphs.length + ' 種花色隨機' : '');
+    drawFishThumb(cnv, k, palette(k, 11, 0), 0);
     info.append(h3, mk('p', '', it.desc)); if (sub) info.appendChild(mk('p', 'sub', sub));
-    if (shopTab !== 'deco' && genesFor(k).length) info.appendChild(mk('p', 'sub', '可能帶有的基因：' + genesFor(k).map(geneNameAll).join('、')));
+    if (genesFor(k).length) info.appendChild(mk('p', 'sub', '可能帶有的基因：' + genesFor(k).map(geneNameAll).join('、')));
     const btn = mk('button', 'buy');
     if (reason) { btn.textContent = reason; btn.disabled = true; }
-    else { const price = shopTab === 'deco' ? it.price : priceOf(k); btn.innerHTML = coinSvg + price.toLocaleString('zh-TW'); btn.disabled = state.coins < price; btn.setAttribute('aria-label', '用 ' + price + ' 金幣買' + it.name); }
-    btn.addEventListener('click', () => shopTab === 'deco' ? buyDeco(k) : buyCreature(k));
+    else { const price = priceOf(k); btn.innerHTML = coinSvg + price.toLocaleString('zh-TW'); btn.disabled = state.coins < price; btn.setAttribute('aria-label', '用 ' + price + ' 金幣買' + it.name); }
+    btn.addEventListener('click', () => buyCreature(k));
     row.append(cnv, info, btn); sheetBody.appendChild(row);
   }
   if (shopTab === 'today' && dailyStock().plants.length) { sheetBody.appendChild(mk('h4', 'sec', '今日水草')); for (const k of dailyStock().plants) sheetBody.appendChild(plantRow(k)); }
@@ -8440,8 +8641,44 @@ function renderPlantShop(){ const ps = plantStats(), S = dailyStock(); rendered.
   for (const k of S.plants) sheetBody.appendChild(plantRow(k));
   { const vr = varPlantRow(S.pvar); if (vr) { sheetBody.appendChild(mk('h4', 'sec', '今日變異株・每天限購一株')); sheetBody.appendChild(vr); } }
   sheetBody.appendChild(mk('p', 'foot', '常駐款天天都有；另外 ' + ROT_PLANT.length + ' 種每天輪流進 ' + STOCK_PLANT + ' 種，其中一種打 8 折。標「需要高亮燈／水草燈」的品種，LED 燈具不夠亮會慢慢衰弱，夠亮時有些還會冒出氧氣泡。')); }
+function decoRow(k){
+  const d = DECOS[k], row = mk('div','item'), canvas = document.createElement('canvas');
+  canvas.className = 'thumb'; canvas.width = 144; canvas.height = 96; drawDecoThumb(canvas, k);
+  const info = mk('div'), name = mk('h3','',d.name), owned = state.deco.filter(item => item.k === k).length;
+  name.appendChild(mk('span','tag','舒適 +' + d.comfort));
+  if (d.fest) name.appendChild(mk('span','tag sale','節日限定'));
+  if (d.season) name.appendChild(mk('span','tag sale',SEASONS[d.season].full + '限定'));
+  if (NGLOW[k]) name.appendChild(mk('span','tag sp','夜光'));
+  info.append(name, mk('p','',d.desc));
+  if (owned) info.appendChild(mk('p','sub','已擺 ' + owned + ' 個'));
+  const button = mk('button','buy'), full = state.deco.length >= MAXDECO;
+  if (full) button.textContent = '放不下了';
+  else {
+    button.innerHTML = coinSvg + d.price.toLocaleString('zh-TW');
+    button.setAttribute('aria-label','用 ' + d.price + ' 金幣買' + d.name);
+  }
+  button.disabled = full || state.coins < d.price;
+  button.addEventListener('click', () => buyDeco(k));
+  row.append(canvas, info, button); return row;
+}
+function renderDecoShop(){
+  const stock = dailyStock(), clock = mk('b','',fmtHMS(msToMidnight())), restock = mk('div','restock');
+  rendered.stock = stock.key; clock.id = 'restock';
+  restock.append('每期輪賣 ' + STOCK_DECO + ' 件擺設、' + STOCK_THEME + ' 款背景。距午夜換貨還有 ', clock, '。');
+  sheetBody.append(restock, mk('h4','sec','今日造景擺設'));
+  for (const k of stock.decos) sheetBody.appendChild(decoRow(k));
+  renderThemeShop();
+  const limited = LIMITED_DECO.filter(decoInShop);
+  if (limited.length) sheetBody.appendChild(mk('h4','sec','期間限定造景'));
+  for (const k of limited) sheetBody.appendChild(decoRow(k));
+  sheetBody.appendChild(mk('h4','sec','常駐造景'));
+  for (const k of CORE_DECO) sheetBody.appendChild(decoRow(k));
+}
 function buyDeco(k){
-  const D = DECOS[k], price = D.plant ? plantPrice(k) : D.price; if ((D.plant && !plantInShop(k)) || state.coins < price || state.deco.length >= MAXDECO) return;
+  const D = DECOS[k];
+  if (!D || !(D.plant ? plantInShop(k) : decoInShop(k)) || state.deco.length >= MAXDECO) return;
+  const price = D.plant ? plantPrice(k) : D.price;
+  if (state.coins < price) return;
   state.coins -= price; const dc = newDeco(k); state.deco.push(dc); markDirty(); closeSheet(); enterMode('edit', dc);
   toast('拖曳「' + D.name + '」放到喜歡的位置');
   if (D.plant && Math.random() < .12 && invCount() < capI()) setTimeout(() => { const d = newCreature('nymph', {grow:GROW_MAX}); addCreature(d); toast('水草裡藏了一隻水蠆跟著進缸了！牠會吃小蝦，大約一天後會羽化飛走'); }, 2600);
@@ -8948,7 +9185,7 @@ function showWelcome(a){
 }
 
 /* ---------- Portable saves: inspect first, back up locally, then replace atomically ---------- */
-const APP_BUILD = '2026.11.27.1', SAVE_MAX_BYTES = 4 * 1024 * 1024;
+const APP_BUILD = '2026.11.27.2', SAVE_MAX_BYTES = 4 * 1024 * 1024;
 let pendingImport = null, readingSave = false, saveDraft = '', saveMessage = '';
 function saveSummary(s){
   const rooms = Array.isArray(s.tankRooms) && s.tankRooms.length ? s.tankRooms : [{id:s.activeTank, name:'第一缸'}];

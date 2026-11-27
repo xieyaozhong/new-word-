@@ -82,6 +82,7 @@ const context = vm.createContext({
   fetch() { throw new Error('Validation must not use the network'); },
   testCanvas: () => element('canvas'),
   testDrawingLabel: (label, strict) => { drawingLabel = label; strictDrawing = strict; },
+  testDrawingCount: () => drawingCalls,
   fixtureRequested: !!fixturePath,
   writeFixture: text => { fs.mkdirSync(path.dirname(fixturePath),{recursive:true}); fs.writeFileSync(fixturePath,text,'utf8'); console.log('Created opt-in QA fixture: ' + fixturePath); },
 });
@@ -228,6 +229,93 @@ async function runChecks() {
   assert(unavailable); buyCreature(unavailable); assert.equal(state.coins, cashBeforeRejectedBuy); assert.equal(state.fish.length, countBeforeRejectedBuy);
   renderShop = renderShopForStock; currentVisitor = visitorForStock;
   console.log('PASS: personal shop stock and events survive reload; all companions rotate; insufficient funds and unstocked purchases are blocked; the 100,000-coin refresh persists without aging fish.');
+
+  // Decorations are physical per-tank items; purchased theme unlocks are shared,
+  // but each tank keeps its own selected theme. Only ordinary goods rotate.
+  const newDecos = ['tidearch','reedblind','porcelainjar','basaltsteps','bellframe','papernautilus','tilewall','bamboura'];
+  const newThemes = ['tidalforest','icecavern','basaltcoast','lotuspond'];
+  reset(); state.pid='ABCD-EFGH'; state.chronoRefresh=0; stockCache=null;
+  const realDate = Date;
+  let shopTime = new realDate(2026, 10, 30, 23, 59, 59).getTime();
+  try {
+    globalThis.Date = class extends realDate {
+      constructor(...args) { super(...(args.length ? args : [shopTime])); }
+      static now() { return shopTime; }
+    };
+    const beforeMidnight = dailyStock();
+    shopTime += 1000;
+    const afterMidnight = dailyStock();
+    assert.notEqual(beforeMidnight.key, afterMidnight.key);
+    assert(afterMidnight.decos.every(k => !beforeMidnight.decos.includes(k)), 'Midnight replaces all four decoration slots');
+    assert(afterMidnight.themes.every(k => !beforeMidnight.themes.includes(k)), 'Midnight replaces both theme slots');
+    assert(decoInShop('xmas'), 'Seasonal goods remain available during their festival');
+  } finally { globalThis.Date = realDate; stockCache = null; }
+  assert.equal(STOCK_DECO,4); assert.equal(STOCK_THEME,2);
+  assert.deepEqual([...CORE_DECO].sort(),['marimo','rock','pot','wood'].sort());
+  for(const k of newDecos) assert(DECOS[k] && ROT_DECO.includes(k),k+': missing new decoration in rotation');
+  for(const k of newThemes) assert(THEMES[k] && ROT_THEME.includes(k),k+': missing new theme in rotation');
+  assert(!ROT_THEME.includes('clear') && !ROT_THEME.includes('space'),'Default and alien themes must not consume ordinary rotation slots');
+  for(const k of ROT_DECO){const d=DECOS[k];assert(d && !d.plant && !d.award && !d.wild && !d.npc && !d.fest && !d.season && !CORE_DECO.includes(k),k+': source-restricted decoration leaked into rotation');}
+  const decoOffers=new Set(),themeOffers=new Set(),decoSchedules=new Set(),themeSchedules=new Set();
+  for(let i=0;i<256;i++){
+    state.chronoRefresh=i; stockCache=null; const stock=dailyStock();
+    assert.equal(stock.decos.length,4); assert.equal(new Set(stock.decos).size,4);
+    assert.equal(stock.themes.length,2); assert.equal(new Set(stock.themes).size,2);
+    assert(CORE_DECO.every(decoInShop)); assert(themeInShop('clear'));
+    for(const k of stock.decos){assert(ROT_DECO.includes(k));assert(decoInShop(k));decoOffers.add(k);}
+    for(const k of stock.themes){assert(ROT_THEME.includes(k));assert(themeInShop(k));themeOffers.add(k);}
+    for(const k of ROT_DECO)assert.equal(decoInShop(k),stock.decos.includes(k),k+': decoration availability differs from its shelf');
+    for(const k of ROT_THEME)assert.equal(themeInShop(k),stock.themes.includes(k),k+': theme availability differs from its shelf');
+    decoSchedules.add(stock.decos.join(','));themeSchedules.add(stock.themes.join(','));
+  }
+  assert(decoSchedules.size>1 && themeSchedules.size>1,'Chrono refresh must rotate both decoration and theme shelves');
+  for(const k of ROT_DECO)assert(decoOffers.has(k),k+': unreachable decoration across refresh samples');
+  for(const k of ROT_THEME)assert(themeOffers.has(k),k+': unreachable theme across refresh samples');
+  const stableDecorStock=copy(dailyStock());state=migrate(copy(state));stockCache=null;
+  assert.deepEqual(copy(dailyStock()),stableDecorStock,'Decoration/theme shelves must survive a reload');
+  state.pid='JKLM-NPQR';stockCache=null;
+  assert.notEqual(JSON.stringify([dailyStock().decos,dailyStock().themes]),JSON.stringify([stableDecorStock.decos,stableDecorStock.themes]),'Decoration/theme rotation must use the player seed');
+  const shelfFor=(key,field,wanted=true)=>{for(let i=0;i<512;i++){stockCache=null;if(dailyStock()[field].includes(key)===wanted)return;state.chronoRefresh=(state.chronoRefresh||0)+1;}assert.fail('Unable to find '+(wanted?'offered':'expired')+' shelf for '+key);};
+  initRuntime();sheetKind=null; const decoShopRenderer=renderShop;renderShop=()=>{};
+  const decorationKey=newDecos[0];shelfFor(decorationKey,'decos');state.deco=[];state.coins=DECOS[decorationKey].price-1;
+  buyDeco(decorationKey);assert.equal(state.deco.length,0);assert.equal(state.coins,DECOS[decorationKey].price-1,'Unaffordable decoration must not spend money');
+  state.coins=DECOS[decorationKey].price;state.deco=Array.from({length:MAXDECO},()=>newDeco('rock'));
+  buyDeco(decorationKey);assert.equal(state.deco.length,MAXDECO);assert.equal(state.coins,DECOS[decorationKey].price,'Full tank must not be charged for decoration');
+  state.deco=[];buyDeco(decorationKey);assert.equal(state.coins,0);assert.equal(state.deco.length,1);assert.equal(state.deco[0].k,decorationKey);exitMode();
+  const firstDecoration=copy(state.deco[0]);state.coins=100000;shelfFor(decorationKey,'decos',false);
+  buyDeco(decorationKey);assert.equal(state.coins,100000);assert.equal(state.deco.length,1,'A stale purchase action must reject decoration that left the shelf');
+  for(const [k,d] of Object.entries(DECOS))if(d.wild||d.award||d.npc){assert(!decoInShop(k),k+': restricted decoration exposed in ordinary shop');buyDeco(k);assert.equal(state.coins,100000);assert.equal(state.deco.length,1,k+': restricted decoration bought through ordinary shop');}
+  assert(!decoInShop('unknown-decoration'));assert.doesNotThrow(()=>buyDeco('unknown-decoration'));assert.equal(state.coins,100000);
+  const boughtTheme=newThemes[0];shelfFor(boughtTheme,'themes');state.coins=THEMES[boughtTheme].price-1;const previousTheme=state.theme;
+  buyTheme(boughtTheme);assert.equal(state.theme,previousTheme);assert(!state.themes.includes(boughtTheme));assert.equal(state.coins,THEMES[boughtTheme].price-1);
+  state.coins=THEMES[boughtTheme].price;buyTheme(boughtTheme);assert.equal(state.coins,0);assert.equal(state.theme,boughtTheme);assert.equal(state.themes.filter(k=>k===boughtTheme).length,1);
+  buyTheme('clear');assert.equal(state.theme,'clear');assert.equal(state.coins,0);
+  shelfFor(boughtTheme,'themes',false);buyTheme(boughtTheme);assert.equal(state.theme,boughtTheme);assert.equal(state.coins,0,'An owned theme remains free to select after leaving the shelf');assert.equal(state.themes.filter(k=>k===boughtTheme).length,1);
+  const expiredTheme=newThemes[1];shelfFor(expiredTheme,'themes');shelfFor(expiredTheme,'themes',false);state.coins=100000;
+  buyTheme(expiredTheme);assert(!state.themes.includes(expiredTheme));assert.equal(state.theme,boughtTheme);assert.equal(state.coins,100000,'A stale purchase must reject an unowned expired theme');
+  buyTheme('space');assert(!state.themes.includes('space'));assert.equal(state.coins,100000,'Alien theme must retain its collection gate');
+  state.dex[ALIENS[0]]={m:[0],r:[],t:[]};buyTheme('space');assert(state.themes.includes('space'));assert.equal(state.coins,100000-THEMES.space.price);
+  buyTheme(boughtTheme);assert.equal(state.theme,boughtTheme);assert(!themeInShop('unknown-theme'));assert.doesNotThrow(()=>buyTheme('unknown-theme'));
+  const walletBeforeTank=state.coins;assert(buyTank());assert.equal(state.coins,walletBeforeTank-50000);
+  const decoHome=state.activeTank,decoAway=state.tankRooms[1].id;assert(switchTank(decoAway));
+  assert.equal(state.deco.length,0,'Bought decorations must stay in the source aquarium');assert.equal(state.theme,'clear');assert(state.themes.includes(boughtTheme));
+  const sharedThemeWallet=state.coins;buyTheme(boughtTheme);assert.equal(state.theme,boughtTheme);assert.equal(state.coins,sharedThemeWallet,'Unlocked themes must be usable across aquariums without repurchase');
+  buyTheme('clear');shelfFor(newDecos[1],'decos');buyDeco(newDecos[1]);exitMode();const secondDecoration=copy(state.deco[0]);
+  assert(switchTank(decoHome));assert.equal(state.theme,boughtTheme);assert.deepEqual(copy(state.deco),[firstDecoration]);
+  assert(switchTank(decoAway));assert.equal(state.theme,'clear');assert.deepEqual(copy(state.deco),[secondDecoration]);
+  const decorationSave=prepareSave(exportSaveText());assert.equal(decorationSave.theme,'clear');assert.deepEqual(copy(decorationSave.deco),[secondDecoration]);
+  const savedHome=decorationSave.tankRooms.find(r=>r.id===decoHome).data;assert.equal(savedHome.theme,boughtTheme);assert.deepEqual(copy(savedHome.deco),[firstDecoration]);assert(decorationSave.themes.includes(boughtTheme));
+  renderShop=decoShopRenderer;
+  reset();state.deco=newDecos.map((k,i)=>Object.assign(newDeco(k),{x:.1+i*.1,d:i/8,flip:!!(i%2)}));state.themes=[...newThemes];state.theme=newThemes[3];initRuntime();
+  const allNewDecor=prepareSave(exportSaveText());assert.deepEqual(copy(allNewDecor.deco),copy(state.deco));assert.deepEqual(allNewDecor.themes,newThemes);assert.equal(allNewDecor.theme,newThemes[3]);
+  for(const [width,height,dpr] of [[390,844,1],[844,390,2],[1440,900,1]]){
+    W=width;H=height;DPR=dpr;U=clamp(Math.min(W,H*.62)/390,.8,1.45);sandTop=H*.78;
+    for(const k of newThemes){testDrawingLabel('theme:'+k,true);state.theme=k;drawThemeIcon(testCanvas().getContext('2d'),k,144,96);buildSand();buildFar();}
+    for(const k of newDecos){testDrawingLabel('deco:'+k,true);const thumb=testCanvas();thumb.width=width<500?144:288;thumb.height=width<500?96:192;drawDecoThumb(thumb,k);
+      const dc=state.deco.find(d=>d.k===k);for(const phase of [0,1.7,12]){rt.t=phase;const calls=testDrawingCount();drawDecoShape(testCanvas().getContext('2d'),dc,phase);assert(testDrawingCount()-calls>3,k+': decoration renderer is empty');drawDeco(dc);const box=decoBox(dc);assert(Object.values(box).every(Number.isFinite));}}
+  }
+  testDrawingLabel('',false);W=800;H=600;U=DPR=1;sandTop=500;reset();initRuntime();
+  console.log('PASS: 4-decoration/2-theme shelves are unique, stable, personal and reachable; purchase money/capacity/source/expiry gates, shared theme unlocks, independent tank decor, save/import and 3-viewport rendering.');
 
   reset();
   Object.assign(dexFilter, {query:' 孔雀魚 ', kind:'all', discovery:'all'});
